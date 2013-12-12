@@ -2,11 +2,11 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
-import de.grovie.exception.GvExceptionEngineNoEventListener;
+import de.grovie.engine.renderer.AWTGL.GvRendererAWTGL;
 
 public class GvSandbox {
 
-	public static void main(String[] args) throws GvExceptionEngineNoEventListener
+	public static void main(String[] args)
 	{
 		//start splash screen
 		
@@ -15,18 +15,14 @@ public class GvSandbox {
 		//create GroViE vis. engine
 		GvEngine gvEngine = GvEngine.getInstance(); //uses embedded db by default
 		
-		//tell GroViE the classes to use for the opengl rendering, etc.
-		GvGLEventListener gvGLListener = new GvGLEventListener();
-		gvEngine.setEventListener(gvGLListener);
+		//create renderer to use
+		GvRendererAWTGL gvRenderer = new GvRendererAWTGL(gvEngine);
 		
 		//start the visualization engine
 		if(gvEngine.getMode() == GvEngineMode.EMBEDDED)
 		{
-			gvEngine.start("C:\\Users\\yong\\db"); //TODO: replace with path obtained from pop up dialog
+			gvEngine.start("C:\\Users\\yong\\db", gvRenderer); //TODO: replace with path obtained from pop up dialog
 		}
-		
-		//create and run rendering thread
-		new GvWindow(gvEngine);
 		
 		//obtain graph db from engine. 
 		//if multi thread, create worker threads. give threads reference to db.

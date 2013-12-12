@@ -2,7 +2,7 @@ package de.grovie.engine;
 
 import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
-import de.grovie.exception.GvExceptionEngineNoEventListener;
+import de.grovie.engine.renderer.GvRenderer;
 
 /**
  * This class is the main class representing the visualization engine.
@@ -33,8 +33,6 @@ public class GvEngine {
 	private GvDb lDb;		//graph database
 	private GvData lData;	//scene graph
 	
-	private GvEventListener lEventListener;//rendering callback class
-
 	private GvEngine()
 	{
 		lMode = GvEngineMode.EMBEDDED;
@@ -68,11 +66,9 @@ public class GvEngine {
 	 * Starts and initializes entire visualization engine.
 	 * @throws GvExceptionEngineNoEventListener 
 	 */
-	public void start(String dbPathAbs) throws GvExceptionEngineNoEventListener
+	public void start(String dbPathAbs, GvRenderer renderer)
 	{
-		if(lEventListener == null)
-			throw new GvExceptionEngineNoEventListener("GrovieExceptionEngine missing rendering event listener.");
-		lEventListener.setData(lData);
+		renderer.start();
 	}
 	
 	/**
@@ -81,23 +77,5 @@ public class GvEngine {
 	public void stop()
 	{
 		
-	}
-	
-	/**
-	 * Sets the instance of the implemented rendering callback class
-	 * @param listener
-	 */
-	public void setEventListener(GvEventListener listener)
-	{
-		lEventListener = listener;
-	}
-	
-	/**
-	 * Returns the instance of the implemented rendering callback class
-	 * @return event listener
-	 */
-	public GvEventListener getEventListener()
-	{
-		return lEventListener;
 	}
 }
