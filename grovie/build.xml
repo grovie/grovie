@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<!-- change default target in the next line based on operating system -->
+<project name="grovie" default="main.mac" basedir=".">
+
+	<!-- Sets variables which can later be used. -->
+	<!-- The value of a property is accessed via ${} -->
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="docs.dir" location="docs" />
+	<property name="lib.dir" location="lib" />
+
+	<!-- classpath win32 -->
+	<path id="build.classpath.win32">
+		<fileset dir="${lib.dir}">
+			<include name="neo4j-1.9.5/win/*.jar" />
+			<include name="jogl-2.1/win32/*.jar" />
+			<include name="blueprints-2.4.0/*.jar" />
+			<include name="commons-collections-3.2.1/*.jar" />
+			<include name="commons-configuration-1.10/*.jar" />
+			<include name="commons-lang3-3.1/*.jar" />
+			<include name="commons-logging-1.1.3/*.jar" />
+		</fileset>
+	</path>
+	<!-- classpath win64 -->
+	<path id="build.classpath.win64">
+		<fileset dir="${lib.dir}">
+			<include name="neo4j-1.9.5/win/*.jar" />
+			<include name="jogl-2.1/win64/*.jar" />
+			<include name="blueprints-2.4.0/*.jar" />
+			<include name="commons-collections-3.2.1/*.jar" />
+			<include name="commons-configuration-1.10/*.jar" />
+			<include name="commons-lang3-3.1/*.jar" />
+			<include name="commons-logging-1.1.3/*.jar" />
+		</fileset>
+	</path>
+	<!-- classpath mac -->
+	<path id="build.classpath.mac">
+		<fileset dir="${lib.dir}">
+			<include name="neo4j-1.9.5/unix/*.jar" />
+			<include name="jogl-2.1/mac/*.jar" />
+			<include name="blueprints-2.4.0/*.jar" />
+			<include name="commons-collections-3.2.1/*.jar" />
+			<include name="commons-configuration-1.10/*.jar" />
+			<include name="commons-lang3-3.1/*.jar" />
+			<include name="commons-logging-1.1.3/*.jar" />
+		</fileset>
+	</path>
+	<!-- classpath linux32 -->
+	<path id="build.classpath.linux32">
+		<fileset dir="${lib.dir}">
+			<include name="neo4j-1.9.5/unix/*.jar" />
+			<include name="jogl-2.1/linux32/*.jar" />
+			<include name="blueprints-2.4.0/*.jar" />
+			<include name="commons-collections-3.2.1/*.jar" />
+			<include name="commons-configuration-1.10/*.jar" />
+			<include name="commons-lang3-3.1/*.jar" />
+			<include name="commons-logging-1.1.3/*.jar" />
+		</fileset>
+	</path>
+	<!-- classpath linux64 -->
+	<path id="build.classpath.linux64">
+		<fileset dir="${lib.dir}">
+			<include name="neo4j-1.9.5/unix/*.jar" />
+			<include name="jogl-2.1/linux64/*.jar" />
+			<include name="blueprints-2.4.0/*.jar" />
+			<include name="commons-collections-3.2.1/*.jar" />
+			<include name="commons-configuration-1.10/*.jar" />
+			<include name="commons-lang3-3.1/*.jar" />
+			<include name="commons-logging-1.1.3/*.jar" />
+		</fileset>
+	</path>
+
+
+	<!-- Deletes the existing build, docs and dist directory-->
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${docs.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<!-- Creates the build, docs and dist directory-->
+
+	<target name="makedir">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${docs.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<!-- Compiles the java code -->
+	<!-- Compile win32 -->
+	<target name="compile.win32" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath.win32">
+		</javac>
+	</target>
+	<!-- Compile win64 -->
+	<target name="compile.win64" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath.win64">
+		</javac>
+	</target>
+	<!-- Compile mac -->
+	<target name="compile.mac" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath.mac">
+		</javac>
+	</target>
+	<!-- Compile linux32 -->
+	<target name="compile.linux32" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath.linux32">
+		</javac>
+	</target>
+	<!-- Compile linux64 -->
+	<target name="compile.linux64" depends="clean, makedir">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath.linux64">
+		</javac>
+	</target>
+
+	<!-- Creates Javadoc -->
+	<!-- Creates Javadoc win32-->
+	<target name="docs.win32" depends="compile.win32">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**" />
+			</fileset>
+		</javadoc>
+	</target>
+	<!-- Creates Javadoc win64-->
+	<target name="docs.win64" depends="compile.win64">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**" />
+			</fileset>
+		</javadoc>
+	</target>
+	<!-- Creates Javadoc mac-->
+	<target name="docs.mac" depends="compile.mac">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**" />
+			</fileset>
+		</javadoc>
+	</target>
+	<!-- Creates Javadoc linux32-->
+	<target name="docs.linux32" depends="compile.linux32">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**" />
+			</fileset>
+		</javadoc>
+	</target>
+	<!-- Creates Javadoc linux64-->
+	<target name="docs.linux64" depends="compile.linux64">
+		<javadoc packagenames="src" sourcepath="${src.dir}" destdir="${docs.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**" />
+			</fileset>
+		</javadoc>
+	</target>
+
+	<!-- deployable file -->
+	<!-- deployable file win32 -->
+	<target name="jar.win32" depends="compile.win32">
+		<jar destfile="${dist.dir}\grovie-1.0.0-win32.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.grogra.grovie.test.TestArchitect" />
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="neo4j-1.9.5/win/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="jogl-2.1/win32/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="blueprints-2.4.0/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-collections-3.2.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-configuration-1.10/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-lang3-3.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-logging-1.1.3/*.jar" />
+		</jar>
+	</target>
+	<!-- deployable file win64 -->
+	<target name="jar.win64" depends="compile.win64">
+		<jar destfile="${dist.dir}\grovie-1.0.0-win64.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.grogra.grovie.test.TestArchitect" />
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="neo4j-1.9.5/win/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="jogl-2.1/win64/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="blueprints-2.4.0/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-collections-3.2.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-configuration-1.10/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-lang3-3.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-logging-1.1.3/*.jar" />
+		</jar>
+	</target>
+	<!-- deployable file mac -->
+	<target name="jar.mac" depends="compile.mac">
+		<jar destfile="${dist.dir}\grovie-1.0.0-mac.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.grogra.grovie.test.TestArchitect" />
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="neo4j-1.9.5/unix/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="jogl-2.1/mac/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="blueprints-2.4.0/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-collections-3.2.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-configuration-1.10/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-lang3-3.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-logging-1.1.3/*.jar" />
+		</jar>
+	</target>
+	<!-- deployable file linux32 -->
+	<target name="jar.linux32" depends="compile.linux32">
+		<jar destfile="${dist.dir}\grovie-1.0.0-linux32.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.grogra.grovie.test.TestArchitect" />
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="neo4j-1.9.5/unix/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="jogl-2.1/linux32/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="blueprints-2.4.0/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-collections-3.2.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-configuration-1.10/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-lang3-3.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-logging-1.1.3/*.jar" />
+		</jar>
+	</target>
+	<!-- deployable file linux64 -->
+	<target name="jar.linux64" depends="compile.linux64">
+		<jar destfile="${dist.dir}\grovie-1.0.0-linux64.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="de.grogra.grovie.test.TestArchitect" />
+			</manifest>
+			<zipgroupfileset dir="${lib.dir}" includes="neo4j-1.9.5/unix/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="jogl-2.1/linux64/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="blueprints-2.4.0/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-collections-3.2.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-configuration-1.10/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-lang3-3.1/*.jar" />
+			<zipgroupfileset dir="${lib.dir}" includes="commons-logging-1.1.3/*.jar" />
+		</jar>
+	</target>
+
+	<!-- native files -->
+	<!-- native files win32 -->
+	<target name="native.win32">
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}/jogl-2.1/win32">
+				<include name="*.dll"/>
+			</fileset>
+		</copy>
+	</target>
+	<!-- native files win64 -->
+	<target name="native.win64">
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}/jogl-2.1/win64">
+				<include name="*.dll"/>
+			</fileset>
+		</copy>
+	</target>
+	<!-- native files mac -->
+	<target name="native.mac">
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}/jogl-2.1/mac">
+				<include name="*.jnilib"/>
+			</fileset>
+		</copy>
+	</target>
+	<!-- native files linux32 -->
+	<target name="native.linux32">
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}/jogl-2.1/linux32">
+				<include name="*.so"/>
+			</fileset>
+		</copy>
+	</target>
+	<!-- native files linux64 -->
+	<target name="native.linux64">
+		<copy todir="${dist.dir}">
+			<fileset dir="${lib.dir}/jogl-2.1/linux64">
+				<include name="*.so"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="main.win32" depends="compile.win32, jar.win32, native.win32">
+		<description>Main target win32</description>
+	</target>
+	<target name="main.win64" depends="compile.win64, jar.win64, native.win64">
+		<description>Main target win64</description>
+	</target>
+	<target name="main.mac" depends="compile.mac, jar.mac, native.mac">
+		<description>Main target mac</description>
+	</target>
+	<target name="main.linux32" depends="compile.linux32, jar.linux32, native.linux32">
+		<description>Main target linux32</description>
+	</target>
+	<target name="main.linux64" depends="compile.linux64, jar.linux64, native.linux64">
+		<description>Main target linux64</description>
+	</target>
+</project>
