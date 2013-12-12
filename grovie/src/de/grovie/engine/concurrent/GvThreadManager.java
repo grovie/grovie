@@ -5,35 +5,42 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This class provides a service to execute thread-level parallel tasks.
+ * This is the base class that executes thread-level parallel tasks.
  * It contains a pool of a fixed number of worker threads (using Java's ExecutorService)
  * The class is intended to maximize CPU throughput for preparing renderer resources 
  * (such as textures, VBO, etc.) so that the rendering thread/GPU become aware of scene
  * updates in a shorter time. 
+ * 
  * @author yong
  *
  */
-public class GvService{
+public class GvThreadManager {
 
 	private ExecutorService lThreadPool; //java's thread pool implementation
 	
-	public GvService(int numThreads)
+	GvMessageQueue qLoad = new GvMessageQueue();
+	GvMessageQueue qRequest = new GvMessageQueue();
+	GvMessageQueue qDone = new GvMessageQueue();
+	
+	/**
+	 * Constructor and thread pool initiation
+	 * @param numThreads
+	 */
+	public GvThreadManager(int numThreads)
 	{
 		lThreadPool = Executors.newFixedThreadPool(numThreads);
-
 	}
 	
 	/**
-	 * Post a message/job to this service for execution as soon as a worker thread is available
-	 * @param message
+	 * Starts this thread manager
 	 */
-	public synchronized void post(GvMessage message)
+	public void start()
 	{
-		lThreadPool.execute(message);
+		
 	}
-
+	
 	/**
-	 * Shuts down this service
+	 * Shuts down this thread manager
 	 */
 	public void shutdownAndAwaitTermination() {
 		// Disable new tasks from being submitted

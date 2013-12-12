@@ -6,23 +6,13 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import com.tinkerpop.blueprints.Edge;
-import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.TransactionalGraph;
-import com.tinkerpop.blueprints.Vertex;
-
-import de.grovie.db.GvDb;
-
-public class TestDB2 implements Runnable{
+public class TestDB implements Runnable{
 
 	Thread t;
 	
-	GvDb graphDb;
-	Graph graph;
-	TransactionalGraph graphTrans;
-	
+	GraphDatabaseService graphDb;
+
 	/*private final Object lock = new Object();
 	private volatile boolean suspend = false , stopped = false;*/
 
@@ -31,11 +21,10 @@ public class TestDB2 implements Runnable{
 		CONTAINED_IN, KNOWS
 	}
 
-	public TestDB2(GvDb db)
+	public TestDB(GraphDatabaseService db)
 	{
 		graphDb = db;
-		graph = db.getGraph();
-		graphTrans = (TransactionalGraph)graph;
+
 		// Create a new, second thread
 		t = new Thread(this, "NeoTest DB Thread");
 		System.out.println("NeoTest DB thread: " + t);
@@ -95,35 +84,50 @@ public class TestDB2 implements Runnable{
 
 	private synchronized void testAccess2Internal()
 	{
-		Vertex firstNode;
-		Vertex secondNode;
-		Edge e;
+		Node firstNode;
+		Node secondNode;
+		Relationship relationship;
 		
 		//create nodes and print data
-		//Transaction tx = graphDb.beginTx();
+		Transaction tx = graphDb.beginTx();
+		try
+		{
 
-			firstNode = graph.addVertex(null);
+			firstNode = graphDb.createNode();
 			firstNode.setProperty( "message", "Hello 2, " );
-			secondNode = graph.addVertex(null);
+			secondNode = graphDb.createNode();
 			secondNode.setProperty( "message", "World!" );
 
-			e = graph.addEdge(null, firstNode, secondNode, "knows");
-			e.setProperty( "message", "brave Neo4j " );
+			relationship = firstNode.createRelationshipTo( secondNode, RelTypes.KNOWS );
+			relationship.setProperty( "message", "brave Neo4j " );
 
-			graphTrans.commit();
+			tx.success();
 
 			System.out.print( firstNode.getProperty( "message" ) );
-			System.out.print( e.getProperty( "message" ) );
+			System.out.print( relationship.getProperty( "message" ) );
 			System.out.print( secondNode.getProperty( "message" ) );
 			System.out.println();
-	
-	
-			graph.removeEdge(e);
-			graph.removeVertex(firstNode);
-			graph.removeVertex(secondNode);
+		}
+		finally
+		{
+			tx.finish();
+		}
 
-			graphTrans.commit();
-		
+		//delete nodes
+		tx = graphDb.beginTx();
+		try
+		{
+
+			firstNode.getSingleRelationship( RelTypes.KNOWS, Direction.OUTGOING ).delete();
+			firstNode.delete();
+			secondNode.delete();
+
+			tx.success();
+		}
+		finally
+		{
+			tx.finish();
+		}
 	}
 
 	/*

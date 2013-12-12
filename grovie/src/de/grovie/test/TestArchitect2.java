@@ -13,19 +13,13 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
-import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 
-import de.grogra.grovie.test.TestDB.RelTypes;
 import de.grovie.db.GvDb;
 import de.grovie.exception.GvExceptionDbUnrecognizedImpl;
 
@@ -102,6 +96,7 @@ public class TestArchitect2 {
 		graphTrans = (TransactionalGraph)graph;
 	}
 
+	/*
 	private static void registerShutdownHook( final GraphDatabaseService graphDb )
 	{
 		// Registers a shutdown hook for the Neo4j instance so that it
@@ -115,7 +110,7 @@ public class TestArchitect2 {
 				graphDb.shutdown();
 			}
 		} );
-	}
+	}*/
 
 	private static void testDB()
 	{

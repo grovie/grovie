@@ -2,6 +2,8 @@ package de.grovie.engine.concurrent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.grovie.test.engine.concurrent.TestMessageRequest;
+
 public class GvMessageQueue {
 
 	private LinkedBlockingQueue<GvMessage> lQueue;
@@ -11,10 +13,27 @@ public class GvMessageQueue {
 		lQueue = new LinkedBlockingQueue<GvMessage>();
 	}
 	
-	public synchronized void post(GvMessage message)
+	public synchronized void put(GvMessage message) throws InterruptedException
 	{
-		lQueue.add(message);
+		lQueue.put(message);
 	}
 	
+	public synchronized GvMessage take() throws InterruptedException
+	{
+		return lQueue.take();
+	}
 	
+	public synchronized GvMessage poll()
+	{
+		return lQueue.poll();
+	}
+
+	public void offer(GvMessage message) {
+		lQueue.offer(message);
+	}
+	
+	public int size()
+	{
+		return lQueue.size();
+	}
 }
