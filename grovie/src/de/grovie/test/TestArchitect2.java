@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.grogra.grovie.test;
+package de.grovie.test;
 
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;

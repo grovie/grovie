@@ -1,4 +1,4 @@
-package de.grogra.grovie.test;
+package de.grovie.test;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;

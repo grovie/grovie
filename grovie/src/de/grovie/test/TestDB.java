@@ -1,4 +1,4 @@
-package de.grogra.grovie.test;
+package de.grovie.test;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;

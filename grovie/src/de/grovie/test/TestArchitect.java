@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.grogra.grovie.test;
+package de.grovie.test;
 
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
@@ -20,7 +20,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-import de.grogra.grovie.test.TestDB.RelTypes;
+import de.grovie.test.TestDB.RelTypes;
 
 
 

@@ -3,8 +3,8 @@ package de.grovie.sandbox;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
-import de.grogra.grovie.test.OneTriangleAWT;
 import de.grovie.engine.GvEventListener;
+import de.grovie.test.OneTriangleAWT;
 
 public class GvGLEventListener extends GvEventListener implements GLEventListener {
 
