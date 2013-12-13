@@ -50,18 +50,18 @@ public class TestRenderer {
 	public static float vertices[]; //vertices
 	public static float normals[]; 	//normals
 	public static int indices[] = { //vertex indices
-		0,1,3,
-		1,2,3,
-		3,2,7,
-		7,2,6,
+		0,1,2,
+		2,3,0,
+		3,2,6,
+		6,7,3,
 		7,6,5,
-		7,5,4,
+		5,4,7,
 		4,5,1,
-		0,5,1,
+		1,0,4,
 		5,6,2,
-		6,2,1,
+		2,1,5,
 		7,4,0,
-		4,0,3
+		0,3,7
 	};
 	public static String[] shaderV = {
 		"void main()"+
@@ -124,14 +124,39 @@ public class TestRenderer {
 			}
 		}
 
-		normals = new float[n.length * n[0].length];
-		for(int i=0; i< n.length ; ++i)
-		{
-			for(int j=0; j< n[0].length; ++j)
-			{
-				normals[(n[0].length*i)+j] = n[i][j];
-			}
-		}
+		normals = new float[v.length * v[0].length];
+		double magnitude = Math.sqrt(3.0);
+		normals[0]=(float) (-1.0/magnitude);
+		normals[1]=(float) (-1.0/magnitude);
+		normals[2]=(float) ( 1.0/magnitude);
+		
+		normals[3]=(float) (-1.0/magnitude);
+		normals[4]=(float) (-1.0/magnitude);
+		normals[5]=(float) (-1.0/magnitude);
+		
+		normals[6]=(float) (-1.0/magnitude);
+		normals[7]=(float) ( 1.0/magnitude);
+		normals[8]=(float) ( 1.0/magnitude);
+		
+		normals[9]=(float) (-1.0/magnitude);
+		normals[10]=(float)( 1.0/magnitude);
+		normals[11]=(float)(-1.0/magnitude);
+		
+		normals[12]=(float) ( 1.0/magnitude);
+		normals[13]=(float) (-1.0/magnitude);
+		normals[14]=(float) ( 1.0/magnitude);
+		
+		normals[15]=(float) ( 1.0/magnitude);
+		normals[16]=(float) (-1.0/magnitude);
+		normals[17]=(float) (-1.0/magnitude);
+		
+		normals[18]=(float) ( 1.0/magnitude);
+		normals[19]=(float) ( 1.0/magnitude);
+		normals[20]=(float) ( 1.0/magnitude);
+		
+		normals[21]=(float) (1.0/magnitude);
+		normals[22]=(float)( 1.0/magnitude);
+		normals[23]=(float)(-1.0/magnitude);
 
 		System.out.println("vertices for VBO");
 		printArray(vertices);
