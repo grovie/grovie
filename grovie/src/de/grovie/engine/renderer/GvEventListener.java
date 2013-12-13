@@ -1,8 +1,9 @@
 package de.grovie.engine.renderer;
 
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLEventListener;
 
-public abstract class GvEventListener {
+public abstract class GvEventListener implements GLEventListener{
 
 	public abstract void reshape(GLAutoDrawable gl, int x, int y, int width, int height);
 	public abstract void init(GLAutoDrawable gl);

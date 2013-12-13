@@ -1,7 +1,11 @@
-package de.grovie.engine.renderer;
+package de.grovie.engine.renderer.renderstate;
 
 /**
- * This class represents a group of render states. 
+ * This class represents a group of render states.
+ * In OpenGL, these states are global. In GroViE, these states
+ * are not global and are passed into each draw call. The states
+ * are, however, grouped and managed by the engine.
+ * 
  * @author yong
  *
  */

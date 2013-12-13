@@ -1,4 +1,4 @@
-package de.grovie.engine.renderer;
+package de.grovie.engine.renderer.renderstate;
 
 public class GvDepthTest {
 
