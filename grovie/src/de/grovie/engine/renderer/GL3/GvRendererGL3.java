@@ -8,8 +8,12 @@ import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
 public class GvRendererGL3 extends GvRenderer{
 
-	public GvRendererGL3(GvEngine engine, GvWindowSystem windowSystem, String windowTitle) {
-		super(engine,windowSystem,windowTitle);
+	public GvRendererGL3(
+			GvWindowSystem windowSystem, 
+			String windowTitle, 
+			int windowWidth, 
+			int windowHeight) {
+		super(windowSystem,windowTitle,windowWidth,windowHeight);
 	}
 
 	@Override

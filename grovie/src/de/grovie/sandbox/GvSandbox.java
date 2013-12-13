@@ -7,6 +7,9 @@ import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 
 public class GvSandbox {
 
+	public static final int kWindowWidth = 640;
+	public static final int kWindowHeight = 480;
+	
 	public static void main(String[] args)
 	{
 		//start splash screen
@@ -20,7 +23,11 @@ public class GvSandbox {
 		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
 		
 		//create renderer to use
-		GvRendererGL3 gvRenderer = new GvRendererGL3(engine,windowSystem,"GroViE Sandbox");
+		GvRendererGL3 gvRenderer = new GvRendererGL3(
+				windowSystem,
+				"GroViE Sandbox",
+				kWindowWidth,
+				kWindowHeight);
 		
 		//start the visualization engine
 		if(engine.getMode() == GvEngineMode.EMBEDDED)

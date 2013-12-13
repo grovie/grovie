@@ -5,25 +5,36 @@ import javax.media.opengl.GLEventListener;
 
 import de.grovie.engine.renderer.GvEventListener;
 import de.grovie.test.OneTriangleAWT;
+import de.grovie.test.engine.renderer.TestRenderer;
 
 public class GvEventListenerGL3  extends GvEventListener {
 
 	@Override
-	public void display(GLAutoDrawable arg0) {
-		OneTriangleAWT.render( arg0.getGL().getGL2(), arg0.getWidth(), arg0.getHeight() );
+	public void display(GLAutoDrawable glAutoDrawable) {
+//		OneTriangleAWT.render( glAutoDrawable.getGL().getGL2(), 
+//				glAutoDrawable.getWidth(), 
+//				glAutoDrawable.getHeight() );
+		TestRenderer.render( glAutoDrawable.getGL().getGL2(), 
+				glAutoDrawable.getWidth(), 
+				glAutoDrawable.getHeight() );
 	}
 	
 	@Override
-	public void init(GLAutoDrawable arg0) {
+	public void init(GLAutoDrawable glAutoDrawable) {
 	}
 
 	@Override
-	public void reshape(GLAutoDrawable arg0, int x, int y, int width, int height) {
-		OneTriangleAWT.setup( arg0.getGL().getGL2(), width, height );
+	public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width, int height) {
+//		OneTriangleAWT.setup( glAutoDrawable.getGL().getGL2(),
+//				width,
+//				height );
+		TestRenderer.setup( glAutoDrawable.getGL().getGL2(),
+				width,
+				height );
 	}
 
 	@Override
-	public void dispose(GLAutoDrawable gl) {
+	public void dispose(GLAutoDrawable glAutoDrawable) {
 		// TODO Auto-generated method stub
 		
 	}

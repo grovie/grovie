@@ -2,24 +2,32 @@ package de.grovie.engine.renderer;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.renderer.device.GvDevice;
+import de.grovie.engine.renderer.device.GvGraphicsWindow;
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
 public abstract class GvRenderer implements Runnable {
 
 	Thread lThread;
 	
-	GvEngine lEngine;
 	GvWindowSystem lWindowSystem;
 	String lWindowTitle;
+	int lWindowWidth;
+	int lWindowHeight;
 	
 	GvDevice lDevice;
 	GvEventListener lEventListener;
+	GvGraphicsWindow lGraphicsWindow;
 	
-	public GvRenderer(GvEngine engine, GvWindowSystem windowSystem, String windowTitle)
+	public GvRenderer(
+			GvWindowSystem windowSystem, 
+			String windowTitle, 
+			int windowWidth, 
+			int windowHeight)
 	{
-		lEngine = engine;
 		lWindowSystem = windowSystem;
 		lWindowTitle = windowTitle;
+		lWindowWidth = windowWidth;
+		lWindowHeight = windowHeight;
 		lThread = new Thread(this, "GroViE Renderer");
 	}
 	
@@ -32,7 +40,11 @@ public abstract class GvRenderer implements Runnable {
 	public void run() {
 		lDevice = createDevice();
 		lEventListener = createEventListener();
-		lDevice.createWindow(640, 480, lEventListener,lWindowSystem,lWindowTitle);
+		lGraphicsWindow = lDevice.createWindow(lWindowWidth, 
+				lWindowHeight, 
+				lEventListener,
+				lWindowSystem,
+				lWindowTitle);
 	}
 	
 	public abstract GvDevice createDevice();
