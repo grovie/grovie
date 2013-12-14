@@ -25,6 +25,13 @@ public class TestRenderer {
 	 */
 	static float light_diffuse[] = {1.0f, 0.0f, 0.0f, 1.0f};  /* Red diffuse light. */
 	static float light_position[] = {1.0f, 1.0f, 1.0f, 0.0f};  /* Infinite light location. */
+	
+	/**
+	 * Camera parameters
+	 */
+	static float cameraPosition[] = {0,0,5.0f};
+	static float cameraUp[] = {0,1,0};
+	static float cameraCenter[] = {0,0,0};
 
 	/**
 	 * Variables for standard drawing
@@ -52,26 +59,68 @@ public class TestRenderer {
 	public static float normals[]; 	//normals
 	public static int indices[];	//vertex indices
 	public static String[] shaderV = {
-		"varying vec3 normal;"+
+		"uniform vec3 cameraPos;"+ //camera position world space
+		"uniform vec4 globalAmb;"+ //global ambient
+		"uniform vec3 lightDir;"+ //directional light position - also the direction vector (normlized) from vertices to light position
+		"uniform vec4 lightAmb;"+ //directional light ambient
+		"uniform vec4 lightDif;"+ //directional light diffuse
+		"uniform vec4 lightSpe;"+ //directional light specular
+		"uniform vec4 materialAmb;"+ //material ambient
+		"uniform vec4 materialDif;"+ //material diffuse
+		"uniform vec4 materialSpe;"+ //material specular
+		"uniform float materialShi;"+ //material shininess
+		"vec3 normal;"+ // world space normal for this vertex shader
+		"vec3 halfVector;"+ // half-vector for Blinn-Phong
+		"vec4 diffuseColor;"+
+		"vec4 ambientColor;"+
+		"vec4 ambientColorGlobal;"+
+		"vec4 specularColor;"+
+		"float NdotL;"+ //angle between world space normal and light direction
+		"float NdotHV;"+ //cos angle between half vector and normal
 		"void main()"+
 		"{"+
-		"    normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;"+
-		//"    normal = gl_Normal;"+
-		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+
+//		"    //convert normal from model space to world space"+
+//		"    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);"+
+		"    normal = normalize(gl_NormalMatrix * gl_Normal);"+ //same as line above but optimized
+//		""+
+//		"    //compute cos of angle between normal and light direction (world space)"+
+//		"    //that is the dot product of the two vectors. clamp result to [0,1]."+
+		"    NdotL = max(dot(normal,lightDir), 0.0);"+
+//		""+
+//		"    //result diffuse color from material diffuse and light diffuse colors"+
+		"    diffuseColor = materialDif * lightDif;"+
+//		""+
+//		"    //result ambient color from material ambient and light ambient colors"+
+		"    ambientColor = materialAmb * lightAmb;"+
+//		""+
+//		"    //result global ambient color from material ambient and global ambient color"+
+		"    ambientColorGlobal = materialAmb * globalAmb;"+
+//		""+
+//		"    //half vector for specular term"+
+		"    halfVector = lightDir + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
+//		""+
+//      "    //computer specular term - blinn-phong"+
+		"    if(NdotL > 0.0)"+
+		"    {"+
+		"        NdotHV = max(dot(normal,halfVector),0.0);"+
+		"        specularColor = materialSpe * lightSpe * pow(NdotHV,materialShi);"+
+		"    }"+
+		"    else {"+
+		"        specularColor= vec4(0,0,0,0);"+
+		"    }"+
+//		""+
+//		"    //diffuse term + ambient term + global ambient + specular term"+
+		"    gl_FrontColor = NdotL * diffuseColor + ambientColor + ambientColorGlobal + specularColor;"+
+//		""+
+//		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+ //convert position from model to projected space
+		"	 gl_Position = ftransform();"+ //same as line above but optimized
 		"}"
 	};
 
 	public static String[] shaderF = {
-		"varying vec3 normal;"+
-		"uniform vec3 lightDir;"+
 		"void main()"+
 		"{"+
-		"    vec3 norm = normalize(normal);"+
-		"    float intensity = dot(lightDir,norm);"+
-		"	 gl_FragColor = vec4(0.4,0.4,0.8,1.0) * intensity;"+
-		//"	 gl_FragColor = vec4(norm.x,norm.y,norm.z,1.0);"+
-		//"	 gl_FragColor = vec4(0.4,0.4,0.8,1.0);"+
-		//"	 gl_FragColor = vec4(intensity,intensity,intensity,1.0);"+
+		"	 gl_FragColor = gl_Color;"+
 		"}"
 	};
 	public static int shaderVId;
@@ -345,6 +394,32 @@ public class TestRenderer {
 		//1. lightDir - world space - directional light - direction from vertex to light source
 		int idLightDir = gl2.glGetUniformLocation(shaderProgramId,"lightDir");
 		gl2.glUniform3f(idLightDir,0.5773502f,0.5773502f,0.5773502f);
+		
+		//2. light ambient,diffuse,specular
+		int idLightAmbi = gl2.glGetUniformLocation(shaderProgramId,"lightAmb");
+		int idLightDiff = gl2.glGetUniformLocation(shaderProgramId,"lightDif");
+		int idLightSpec = gl2.glGetUniformLocation(shaderProgramId,"lightSpe");
+		gl2.glUniform4f(idLightAmbi,0.1f,0.1f,0.1f,1.0f);
+		gl2.glUniform4f(idLightDiff,1.0f,1.0f,1.0f,1.0f);
+		gl2.glUniform4f(idLightSpec,1.0f,1.0f,1.0f,1.0f);
+		
+		//3. material ambient,diffuse,specular,shininess
+		int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
+		int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
+		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
+		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
+		gl2.glUniform4f(idMaterialAmbi,1.0f,0.0f,0.0f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,1.0f,0.0f,0.0f,1.0f);
+		gl2.glUniform4f(idMaterialSpec,1.0f,0.0f,0.0f,1.0f);
+		gl2.glUniform1f(idMaterialShin, 0.5f);
+		
+		//4. global ambient
+		int idGlobalAmbi = gl2.glGetUniformLocation(shaderProgramId,"globalAmbi");
+		gl2.glUniform4f(idGlobalAmbi,0.1f,0.1f,0.1f,1.0f);
+		
+		//5. camera position
+		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
+		gl2.glUniform3f(idCameraPos,cameraPosition[0],cameraPosition[1],cameraPosition[2]);
 	}
 
 	private static void initVBOs(GL2 gl2) {
@@ -413,9 +488,9 @@ public class TestRenderer {
 				/* aspect ratio */ 1.0,
 				/* Z near */ 1.0, /* Z far */ 10.0);
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
-		glu.gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,5) */
-				0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-				0.0, 1.0, 0.);      /* up is in positive Y direction */
+		glu.gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],  /* eye is at (0,0,5) */
+				cameraCenter[0], cameraCenter[1], cameraCenter[2],      /* center is at (0,0,0) */
+				cameraUp[0], cameraUp[1], cameraUp[2]);      /* up is in positive Y direction */
 
 		/* Adjust cube position to be asthetic angle. */
 		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
