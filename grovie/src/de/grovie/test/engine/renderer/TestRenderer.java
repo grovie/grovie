@@ -1,5 +1,6 @@
 package de.grovie.test.engine.renderer;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -49,32 +50,29 @@ public class TestRenderer {
 	public static int[] iboId; //index array object id
 	public static float vertices[]; //vertices
 	public static float normals[]; 	//normals
-	public static int indices[] = { //vertex indices
-		0,1,2,
-		2,3,0,
-		3,2,6,
-		6,7,3,
-		7,6,5,
-		5,4,7,
-		4,5,1,
-		1,0,4,
-		5,6,2,
-		2,1,5,
-		7,4,0,
-		0,3,7
-	};
+	public static int indices[];	//vertex indices
 	public static String[] shaderV = {
+		"varying vec3 normal;"+
 		"void main()"+
-				"{"+
-				"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+
-				"}"
+		"{"+
+		"    normal = (gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz;"+
+		//"    normal = gl_Normal;"+
+		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+
+		"}"
 	};
 
-	public static String[] shaderF = { 
+	public static String[] shaderF = {
+		"varying vec3 normal;"+
+		"uniform vec3 lightDir;"+
 		"void main()"+
-				"{"+
-				"	gl_FragColor = vec4(0.4,0.4,0.8,1.0);"+
-				"}"
+		"{"+
+		"    vec3 norm = normalize(normal);"+
+		"    float intensity = dot(lightDir,norm);"+
+		"	 gl_FragColor = vec4(0.4,0.4,0.8,1.0) * intensity;"+
+		//"	 gl_FragColor = vec4(norm.x,norm.y,norm.z,1.0);"+
+		//"	 gl_FragColor = vec4(0.4,0.4,0.8,1.0);"+
+		//"	 gl_FragColor = vec4(intensity,intensity,intensity,1.0);"+
+		"}"
 	};
 	public static int shaderVId;
 	public static int shaderFId;
@@ -115,53 +113,201 @@ public class TestRenderer {
 		v[0][2] = v[3][2] = v[4][2] = v[7][2] = 1;
 		v[1][2] = v[2][2] = v[5][2] = v[6][2] = -1;
 
-		vertices = new float[v.length * v[0].length];
-		for(int i=0; i< v.length ; ++i)
+		vertices = new float[72];
+		normals = new float[72];
+		indices = new int[36];
+
+		//init normals
+		float norm[] = {0,0,0};
+		for (int i=0; i< 6; ++i)
 		{
-			for(int j=0; j< v[0].length; ++j)
+			if(i==0){
+				norm[0] = -1.0f;
+				norm[1] =  0.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==1){
+				norm[0] =  0.0f;
+				norm[1] =  1.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==2){
+				norm[0] =  1.0f;
+				norm[1] =  0.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==3){
+				norm[0] =  0.0f;
+				norm[1] = -1.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==4){
+				norm[0] =  0.0f;
+				norm[1] =  0.0f;
+				norm[2] = -1.0f;
+			}
+			if(i==5){
+				norm[0] =  0.0f;
+				norm[1] =  0.0f;
+				norm[2] =  1.0f;
+			}
+			for(int j=0; j<4; ++j)
 			{
-				vertices[(v[0].length*i)+j] = v[i][j];
+				for(int k=0; k<3; ++k)
+				{
+					normals[(i*4*3)+(j*3)+k] = norm[k];
+				}
 			}
 		}
+		
+		//vertex 0 - face 1
+		vertices[0] = -1.0f;
+		vertices[1] = -1.0f;
+		vertices[2] =  1.0f;
+		//vertex 1 - face 1
+		vertices[3] = -1.0f;
+		vertices[4] = -1.0f;
+		vertices[5] = -1.0f;
+		//vertex 2 - face 1
+		vertices[6] = -1.0f;
+		vertices[7] =  1.0f;
+		vertices[8] = -1.0f;
+		//vertex 3 - face 1
+		vertices[9] = -1.0f;
+		vertices[10] =  1.0f;
+		vertices[11] =  1.0f;
+		
+		//vertex 4 - face 2
+		vertices[12] = -1.0f;
+		vertices[13] =  1.0f;
+		vertices[14] =  1.0f;
+		//vertex 5 - face 2
+		vertices[15] = -1.0f;
+		vertices[16] =  1.0f;
+		vertices[17] = -1.0f;
+		//vertex 6 - face 2
+		vertices[18] =  1.0f;
+		vertices[19] =  1.0f;
+		vertices[20] = -1.0f;
+		//vertex 7 - face 2
+		vertices[21] =  1.0f;
+		vertices[22] =  1.0f;
+		vertices[23] =  1.0f;
+		
+		//vertex 8 - face 3
+		vertices[24] =  1.0f;
+		vertices[25] =  1.0f;
+		vertices[26] =  1.0f;
+		//vertex 9 - face 3
+		vertices[27] =  1.0f;
+		vertices[28] =  1.0f;
+		vertices[29] = -1.0f;
+		//vertex 10 - face 3
+		vertices[30] =  1.0f;
+		vertices[31] = -1.0f;
+		vertices[32] = -1.0f;
+		//vertex 11 - face 3
+		vertices[33] =  1.0f;
+		vertices[34] = -1.0f;
+		vertices[35] =  1.0f;
+		
+		//vertex 12 - face 4
+		vertices[36] =  1.0f;
+		vertices[37] = -1.0f;
+		vertices[38] =  1.0f;
+		//vertex 13 - face 4
+		vertices[39] =  1.0f;
+		vertices[40] = -1.0f;
+		vertices[41] = -1.0f;
+		//vertex 14 - face 4
+		vertices[42] = -1.0f;
+		vertices[43] = -1.0f;
+		vertices[44] = -1.0f;
+		//vertex 15 - face 4
+		vertices[45] = -1.0f;
+		vertices[46] = -1.0f;
+		vertices[47] =  1.0f;
+		
+		//vertex 16 - face 5
+		vertices[48] =  1.0f;
+		vertices[49] = -1.0f;
+		vertices[50] = -1.0f;
+		//vertex 17 - face 5
+		vertices[51] =  1.0f;
+		vertices[52] =  1.0f;
+		vertices[53] = -1.0f;
+		//vertex 18 - face 5
+		vertices[54] = -1.0f;
+		vertices[55] =  1.0f;
+		vertices[56] = -1.0f;
+		//vertex 19 - face 5
+		vertices[57] = -1.0f;
+		vertices[58] = -1.0f;
+		vertices[59] = -1.0f;
+		
+		//vertex 20 - face 6
+		vertices[60] =  1.0f;
+		vertices[61] =  1.0f;
+		vertices[62] =  1.0f;
+		//vertex 21 - face 6
+		vertices[63] =  1.0f;
+		vertices[64] = -1.0f;
+		vertices[65] =  1.0f;
+		//vertex 22 - face 6
+		vertices[66] = -1.0f;
+		vertices[67] = -1.0f;
+		vertices[68] =  1.0f;
+		//vertex 23 - face 6
+		vertices[69] = -1.0f;
+		vertices[70] =  1.0f;
+		vertices[71] =  1.0f;
+		
+		indices[0]=0;
+		indices[1]=1;
+		indices[2]=2;
+		indices[3]=2;
+		indices[4]=3;
+		indices[5]=0;
+		
+		indices[6]=4;
+		indices[7]=5;
+		indices[8]=6;
+		indices[9]=6;
+		indices[10]=7;
+		indices[11]=4;
+		
+		indices[12]=8;
+		indices[13]=9;
+		indices[14]=10;
+		indices[15]=10;
+		indices[16]=11;
+		indices[17]=8;
+		
+		indices[18]=12;
+		indices[19]=13;
+		indices[20]=14;
+		indices[21]=14;
+		indices[22]=15;
+		indices[23]=12;
+		
+		indices[24]=16;
+		indices[25]=17;
+		indices[26]=18;
+		indices[27]=18;
+		indices[28]=19;
+		indices[29]=16;
+		
+		indices[30]=20;
+		indices[31]=21;
+		indices[32]=22;
+		indices[33]=22;
+		indices[34]=23;
+		indices[35]=20;
 
-		normals = new float[v.length * v[0].length];
-		double magnitude = Math.sqrt(3.0);
-		normals[0]=(float) (-1.0/magnitude);
-		normals[1]=(float) (-1.0/magnitude);
-		normals[2]=(float) ( 1.0/magnitude);
-		
-		normals[3]=(float) (-1.0/magnitude);
-		normals[4]=(float) (-1.0/magnitude);
-		normals[5]=(float) (-1.0/magnitude);
-		
-		normals[6]=(float) (-1.0/magnitude);
-		normals[7]=(float) ( 1.0/magnitude);
-		normals[8]=(float) ( 1.0/magnitude);
-		
-		normals[9]=(float) (-1.0/magnitude);
-		normals[10]=(float)( 1.0/magnitude);
-		normals[11]=(float)(-1.0/magnitude);
-		
-		normals[12]=(float) ( 1.0/magnitude);
-		normals[13]=(float) (-1.0/magnitude);
-		normals[14]=(float) ( 1.0/magnitude);
-		
-		normals[15]=(float) ( 1.0/magnitude);
-		normals[16]=(float) (-1.0/magnitude);
-		normals[17]=(float) (-1.0/magnitude);
-		
-		normals[18]=(float) ( 1.0/magnitude);
-		normals[19]=(float) ( 1.0/magnitude);
-		normals[20]=(float) ( 1.0/magnitude);
-		
-		normals[21]=(float) (1.0/magnitude);
-		normals[22]=(float)( 1.0/magnitude);
-		normals[23]=(float)(-1.0/magnitude);
-
-		System.out.println("vertices for VBO");
-		printArray(vertices);
-		System.out.println("normals for VBO");
-		printArray(normals);
+		//		System.out.println("vertices for VBO");
+		//		printArray(vertices);
+		//		System.out.println("normals for VBO");
+		//		printArray(normals);
 	}
 
 
@@ -186,6 +332,19 @@ public class TestRenderer {
 		gl2.glLinkProgram(shaderProgramId);
 		gl2.glValidateProgram(shaderProgramId);
 		gl2.glUseProgram(shaderProgramId); 
+
+		//set values of variables in shader program
+		initShaderVariables(gl2);
+		
+		printLog(gl2,shaderVId);
+		printLog(gl2,shaderFId);
+		printLog(gl2,shaderProgramId);
+	}
+
+	private static void initShaderVariables(GL2 gl2) {
+		//1. lightDir - world space - directional light - direction from vertex to light source
+		int idLightDir = gl2.glGetUniformLocation(shaderProgramId,"lightDir");
+		gl2.glUniform3f(idLightDir,0.5773502f,0.5773502f,0.5773502f);
 	}
 
 	private static void initVBOs(GL2 gl2) {
@@ -235,10 +394,11 @@ public class TestRenderer {
 	private static void initGL(GL2 gl2)
 	{
 		/* Enable a single OpenGL light. */
-		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse,0);
-		gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position,0);
-		gl2.glEnable(GL2.GL_LIGHT0);
-		gl2.glEnable(GL2.GL_LIGHTING);
+		//gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse,0);
+		//gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position,0);
+		//gl2.glEnable(GL2.GL_LIGHT0);
+		//gl2.glEnable(GL2.GL_LIGHTING);
+		gl2.glDisable(GL2.GL_LIGHTING);
 
 		/* Use depth buffering for hidden surface elimination. */
 		gl2.glEnable(GL2.GL_DEPTH_TEST);
@@ -302,6 +462,7 @@ public class TestRenderer {
 
 		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY); 
 		gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
 		gl2.glNormalPointer(GL2.GL_FLOAT, 0, vertices.length*4);
 
 		gl2.glDrawElements(
@@ -312,6 +473,7 @@ public class TestRenderer {
 				);
 
 		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY); 
+		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY); 
 	}
 
 	private static void printArray(float[] arr)
@@ -319,6 +481,34 @@ public class TestRenderer {
 		for(int i=0; i<arr.length; ++i)
 		{
 			System.out.println(arr[i]);
+		}
+	}
+	
+	static void printLog(GL2 gl2, int obj)
+	{
+		int maxLen[] = new int[1];
+		IntBuffer maxLength = IntBuffer.wrap(maxLen);
+	 
+		if(gl2.glIsShader(obj))
+			gl2.glGetShaderiv(obj,GL2.GL_INFO_LOG_LENGTH,maxLength);
+		else
+			gl2.glGetProgramiv(obj,GL2.GL_INFO_LOG_LENGTH,maxLength);
+	 
+		int len = maxLen[0];
+		byte infoLog[] = new byte[len];
+		ByteBuffer infoLogBuffer = ByteBuffer.wrap(infoLog);
+		
+		int infoLen[] = new int[1];
+		IntBuffer infoLength = IntBuffer.wrap(infoLen);
+		
+		if (gl2.glIsShader(obj))
+			gl2.glGetShaderInfoLog(obj, maxLen[0], infoLength, infoLogBuffer);
+		else
+			gl2.glGetProgramInfoLog(obj, maxLen[0], infoLength, infoLogBuffer);
+	 
+		if (infoLen[0] > 0)
+		{
+			System.out.println(new String(infoLog));
 		}
 	}
 }
