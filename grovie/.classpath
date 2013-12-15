@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/blueprints-2.4.0/blueprints-core-2.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/blueprints-2.4.0/blueprints-neo4j-graph-2.4.0.jar"/>
+	<classpathentry kind="lib" path="lib/blueprints-2.4.0/blueprints-neo4jbatch-graph-2.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.1/commons-collections-3.2.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.1/commons-collections-3.2.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.1/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.1/commons-collections-testframework-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-configuration-1.10/commons-configuration-1.10-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-configuration-1.10/commons-configuration-1.10-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-configuration-1.10/commons-configuration-1.10-test-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-configuration-1.10/commons-configuration-1.10-tests.jar"/>
+	<classpathentry kind="lib" path="lib/commons-configuration-1.10/commons-configuration-1.10.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1/commons-lang3-3.1-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1/commons-lang3-3.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1/commons-lang3-3.1-tests.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang3-3.1/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-1.1.3-javadoc.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-1.1.3-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-1.1.3-test-sources.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-1.1.3-tests.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-adapters-1.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-api-1.1.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.3/commons-logging-tests.jar"/>
+	<classpathentry kind="lib" path="lib/jogl-2.1/mac/gluegen-rt.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="grovie/lib/jogl-2.1/mac"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jogl-2.1/mac/jogl-all.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="grovie/lib/jogl-2.1/mac"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/concurrentlinkedhashmap-lru-1.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/geronimo-jta_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/lucene-core-3.6.2.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-cypher-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-graph-algo-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-graph-matching-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-jmx-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-kernel-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-lucene-index-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-shell-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/neo4j-udc-1.9.5.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/org.apache.servicemix.bundles.jline-0.9.94_1.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/scala-library-2.10.0.jar"/>
+	<classpathentry kind="lib" path="lib/neo4j-1.9.5/unix/server-api-1.9.5.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
