@@ -1,16 +1,14 @@
 package de.grovie.engine.renderer.device;
 
-import de.grovie.engine.renderer.GvEventListener;
+import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
 
 public abstract class GvDevice {
 
-	public abstract GvGraphicsWindow createWindow(int width, 
-			int height, 
-			GvEventListener eventListener,
+	public abstract GvGraphicsWindow createWindow(
 			GvWindowSystem windowSystem,
-			String windowTitle);
+			GvRenderer renderer);
 	
 	public abstract GvShaderProgram createShaderProgram(String vertexShaderSource, 
 			String geometryShaderSource,

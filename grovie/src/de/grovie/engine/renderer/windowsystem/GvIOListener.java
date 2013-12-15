@@ -1,48 +1,39 @@
 package de.grovie.engine.renderer.windowsystem;
 
+import de.grovie.engine.renderer.GvRenderer;
+import de.grovie.engine.renderer.GvRendererStateMachine;
+
 
 /**
- * This class manages input from i/o devices - mouse, keyboard, etc.
- * It provides i/o functionality in response to events from i/o devices, 
- * independent from the implementing windowing system.
+ * This class manages input from i/o devices 
+ * e.g. mouse, keyboard through the windowing system
  * 
  * @author yong
  *
  */
 public class GvIOListener {
 
-	//i/o handler states
-	public static int STATE_IDLE = 1;
-	public static int STATE_CAMERA_ROTATION = 2;
-	public static int STATE_CAMERA_TRANSLATION = 3;
-	
 	//mouse event constants
 	public static int MOUSE_BUTTON_LEFT = 1;
 	public static int MOUSE_BUTTON_MIDDLE = 2;
 	public static int MOUSE_BUTTON_RIGHT = 3;
 	
-	// reference to the drawing canvas
-	GvCanvas lCanvas;
-	
-	// io listener is a state machine. 
-	// At one moment in time, it is operating/resting in a single state.
-	// E.g., camera rotation, etc.
-	private int lState;	
+	// reference to the renderer
+	GvRenderer lRenderer;
 	
 	/**
 	 * Default constructor
 	 */
 	public GvIOListener()
 	{
-		lState = STATE_IDLE; //handler begins in idling state
 	}
 
-	public GvCanvas getCanvas() {
-		return lCanvas;
+	public GvRenderer getRenderer() {
+		return lRenderer;
 	}
 
-	public void setCanvas(GvCanvas canvas) {
-		this.lCanvas = canvas;
+	public void setRenderer(GvRenderer renderer) {
+		this.lRenderer = renderer;
 	}
 	
 	/**
@@ -52,12 +43,14 @@ public class GvIOListener {
 	 * @param y
 	 */
 	public void mousePressedGv(int button, int x, int y) {
-		if(lState != STATE_IDLE)
-			return;
 		
 		if(button == MOUSE_BUTTON_RIGHT)
 		{
-			lState = STATE_CAMERA_ROTATION;
+			GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
+			stateMachine.setState(
+					GvRendererStateMachine.RendererState.CAMERA_ROTATION
+				);
+			stateMachine.cameraRotationBegin();
 		}
 	}
 	
@@ -69,10 +62,17 @@ public class GvIOListener {
 	 */
 	public void mouseReleasedGv(int button, int x, int y)
 	{
-		if((lState == STATE_CAMERA_ROTATION) && (button == MOUSE_BUTTON_RIGHT))
+		if(button == MOUSE_BUTTON_RIGHT)
 		{
-			lState = STATE_IDLE;
+			GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
+			stateMachine.cameraRotationEnd();
+			stateMachine.setState(
+					GvRendererStateMachine.RendererState.IDLE
+				);
+			//System.out.println("mouse release: (" + x + ", " + y +")"); //FOR DEBUG
 		}
+		
+		
 	}
 	
 	/**
@@ -80,11 +80,13 @@ public class GvIOListener {
 	 * @param x
 	 * @param y
 	 */
-	public void mouseDraggedGv(int x, int y)
+	public void mouseDraggedGv(int button, int x, int y)
 	{
-		if(lState == STATE_CAMERA_ROTATION)
+		if(button == MOUSE_BUTTON_RIGHT)
 		{
-			
+			GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
+			stateMachine.cameraRotate();
+			//System.out.println("mouse dragged: (" + x + ", " + y +")"); //FOR DEBUG
 		}
 	}
 }

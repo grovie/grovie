@@ -1,6 +1,6 @@
 package de.grovie.engine.renderer.GL3;
 
-import de.grovie.engine.renderer.GvEventListener;
+import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.device.GvDevice;
 import de.grovie.engine.renderer.device.GvGraphicsWindow;
 import de.grovie.engine.renderer.device.GvShaderProgram;
@@ -10,13 +10,11 @@ import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 public class GvDeviceGL3 extends GvDevice{
 
 	@Override
-	public GvGraphicsWindow  createWindow(int width, 
-			int height, 
-			GvEventListener eventListener,
+	public GvGraphicsWindow  createWindow(
 			GvWindowSystem windowSystem,
-			String windowTitle) {
+			GvRenderer renderer) {
 		
-		GvWindowSystem winSys = windowSystem.getInstance(width, height, windowTitle, eventListener);
+		GvWindowSystem winSys = windowSystem.getInstance(renderer);
 		
 		return new GvGraphicsWindowGL3(winSys);
 	}

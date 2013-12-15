@@ -27,11 +27,11 @@ public class TestRenderer {
 	static float light_position[] = {1.0f, 1.0f, 1.0f, 0.0f};  /* Infinite light location. */
 	
 	/**
-	 * Camera parameters
+	 * Initial Camera settings
 	 */
 	static float cameraPosition[] = {0,0,5.0f};
 	static float cameraUp[] = {0,1,0};
-	static float cameraCenter[] = {0,0,0};
+	static float cameraCenter[] = {0,0,-1.0f};
 
 	/**
 	 * Variables for standard drawing

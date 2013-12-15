@@ -8,15 +8,12 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
 import de.grovie.engine.renderer.GvEventListener;
+import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
 public class GvWindowSystemAWT extends GvWindowSystem {
 	
-	public GvWindowSystem getInstance(int width, 
-			int height, 
-			String windowTitle,
-			GvEventListener eventListener
-			) {
+	public GvWindowSystem getInstance(GvRenderer renderer) {
 		
 		GLProfile glprofile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glprofile );
@@ -24,12 +21,12 @@ public class GvWindowSystemAWT extends GvWindowSystem {
 		lIOListener = new GvIOListenerAWT();		//create listener for keyboard/mouse events
 		
 		lCanvas = new GvCanvasAWT( glcapabilities );
-		lCanvas.setEventListener(eventListener);	//set opengl callback listener
+		lCanvas.setEventListener(renderer.getEventListener());	//set opengl callback listener
 		lCanvas.setIOListener(lIOListener);			//set listener for keyboard/mouse events
 		
-		lIOListener.setCanvas(lCanvas);				//give io listener reference to canvas (for redrawing)
+		lIOListener.setRenderer(renderer);				//give io listener reference to canvas (for redrawing)
 		
-		lWindow = new GvWindowAWT( windowTitle );
+		lWindow = new GvWindowAWT( renderer.getWindowTitle() );
 		lWindow.setCanvas( lCanvas );
 		final GvWindowAWT lWindowAWT = (GvWindowAWT)lWindow;
 		lWindowAWT.addWindowListener( new WindowAdapter() {
@@ -40,7 +37,7 @@ public class GvWindowSystemAWT extends GvWindowSystem {
 			}
 		});
 
-		lWindowAWT.setSize( width, height );
+		lWindowAWT.setSize( renderer.getWindowWidth(), renderer.getWindowHeight() );
 		lWindowAWT.setVisible( true );
 		
 		return this;

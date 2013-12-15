@@ -1,6 +1,6 @@
 package de.grovie.engine.renderer.windowsystem;
 
-import de.grovie.engine.renderer.GvEventListener;
+import de.grovie.engine.renderer.GvRenderer;
 
 public abstract class GvWindowSystem {
 	
@@ -9,10 +9,7 @@ public abstract class GvWindowSystem {
 	
 	protected GvIOListener lIOListener;
 	
-	public abstract GvWindowSystem getInstance(int width, 
-			int height, 
-			String windowTitle,
-			GvEventListener eventListener);
+	public abstract GvWindowSystem getInstance(GvRenderer renderer);
 	
 	public GvCanvas getCanvas() {
 		return lCanvas;

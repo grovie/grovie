@@ -43,7 +43,7 @@ public class GvIOListenerAWT extends GvIOListener implements
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		mouseDraggedGv(e.getX(), e.getY());
+		mouseDraggedGv(e.getButton(), e.getX(), e.getY());
 	}
 
 	@Override
