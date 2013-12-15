@@ -21,8 +21,13 @@ public class GvWindowSystemAWT extends GvWindowSystem {
 		GLProfile glprofile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glprofile );
 		
+		lIOListener = new GvIOListenerAWT();		//create listener for keyboard/mouse events
+		
 		lCanvas = new GvCanvasAWT( glcapabilities );
-		lCanvas.setEventListener(eventListener);
+		lCanvas.setEventListener(eventListener);	//set opengl callback listener
+		lCanvas.setIOListener(lIOListener);			//set listener for keyboard/mouse events
+		
+		lIOListener.setCanvas(lCanvas);				//give io listener reference to canvas (for redrawing)
 		
 		lWindow = new GvWindowAWT( windowTitle );
 		lWindow.setCanvas( lCanvas );

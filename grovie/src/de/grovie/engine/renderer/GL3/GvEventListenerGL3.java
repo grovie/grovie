@@ -1,10 +1,8 @@
 package de.grovie.engine.renderer.GL3;
 
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 
 import de.grovie.engine.renderer.GvEventListener;
-import de.grovie.test.OneTriangleAWT;
 import de.grovie.test.engine.renderer.TestRenderer;
 
 public class GvEventListenerGL3  extends GvEventListener {

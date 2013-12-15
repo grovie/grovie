@@ -5,4 +5,6 @@ import javax.media.opengl.GLEventListener;
 public interface GvCanvas {
 
 	public void setEventListener(GLEventListener listener);
+	public void setIOListener(GvIOListener IOListener);
+	public void redraw();
 }

@@ -7,6 +7,8 @@ public abstract class GvWindowSystem {
 	protected GvCanvas lCanvas;
 	protected GvWindow lWindow;
 	
+	protected GvIOListener lIOListener;
+	
 	public abstract GvWindowSystem getInstance(int width, 
 			int height, 
 			String windowTitle,
@@ -27,4 +29,30 @@ public abstract class GvWindowSystem {
 	public void setWindow(GvWindow window) {
 		this.lWindow = window;
 	}
+
+	public GvCanvas getlCanvas() {
+		return lCanvas;
+	}
+
+	public void setlCanvas(GvCanvas lCanvas) {
+		this.lCanvas = lCanvas;
+	}
+
+	public GvWindow getlWindow() {
+		return lWindow;
+	}
+
+	public void setlWindow(GvWindow lWindow) {
+		this.lWindow = lWindow;
+	}
+
+	public GvIOListener getIOListener() {
+		return lIOListener;
+	}
+
+	public void setIOListener(GvIOListener IOListener) {
+		this.lIOListener = IOListener;
+	}
+
+	
 }

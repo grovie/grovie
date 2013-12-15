@@ -1,14 +1,5 @@
 package de.grovie.engine.renderer.GL3;
 
-import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
-
 import de.grovie.engine.renderer.GvEventListener;
 import de.grovie.engine.renderer.device.GvDevice;
 import de.grovie.engine.renderer.device.GvGraphicsWindow;

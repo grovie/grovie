@@ -1,7 +1,5 @@
 package de.grovie.engine.renderer.device;
 
-import javax.media.opengl.GLEventListener;
-
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
 /**
@@ -17,5 +15,10 @@ public class GvGraphicsWindow {
 	public GvGraphicsWindow(GvWindowSystem windowSystem)
 	{
 		lWindowSystem = windowSystem;
+	}
+	
+	public GvWindowSystem getWindowSystem()
+	{
+		return lWindowSystem;
 	}
 }

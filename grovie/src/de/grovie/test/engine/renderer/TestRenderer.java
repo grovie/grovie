@@ -483,11 +483,12 @@ public class TestRenderer {
 
 		/* Setup the view of the cube. */
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
-
+		gl2.glLoadIdentity();
 		glu.gluPerspective( /* field of view in degree */ 40.0,
 				/* aspect ratio */ 1.0,
 				/* Z near */ 1.0, /* Z far */ 10.0);
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
+		gl2.glLoadIdentity();
 		glu.gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],  /* eye is at (0,0,5) */
 				cameraCenter[0], cameraCenter[1], cameraCenter[2],      /* center is at (0,0,0) */
 				cameraUp[0], cameraUp[1], cameraUp[2]);      /* up is in positive Y direction */
