@@ -9,7 +9,9 @@ import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.GL3.GvRendererGL3;
+import de.grovie.engine.renderer.device.GvCamera;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 
 public class TestRenderer {
@@ -32,6 +34,7 @@ public class TestRenderer {
 	static float cameraPosition[] = {0,0,5.0f};
 	static float cameraUp[] = {0,1,0};
 	static float cameraCenter[] = {0,0,-1.0f};
+	static GvCamera cameraInstance = new GvCamera();
 
 	/**
 	 * Variables for standard drawing
@@ -487,20 +490,28 @@ public class TestRenderer {
 		glu.gluPerspective( /* field of view in degree */ 40.0,
 				/* aspect ratio */ 1.0,
 				/* Z near */ 1.0, /* Z far */ 10.0);
+		
+	}
+
+	public static void render( GL2 gl2, int width, int height , GvRenderer renderer) {
+		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+		
+		//set camera
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
-		glu.gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2],  /* eye is at (0,0,5) */
-				cameraCenter[0], cameraCenter[1], cameraCenter[2],      /* center is at (0,0,0) */
-				cameraUp[0], cameraUp[1], cameraUp[2]);      /* up is in positive Y direction */
+		renderer.getRendererStateMachine().getCamera(cameraInstance);
+		glu.gluLookAt(cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2],  /* eye is at (0,0,5) */
+				cameraInstance.lPosition[0]+cameraInstance.lView[0],
+				cameraInstance.lPosition[1]+cameraInstance.lView[1],      /* center is at (0,0,0) */
+				cameraInstance.lPosition[2]+cameraInstance.lView[2],
+				cameraInstance.lUp[0], cameraInstance.lUp[1],cameraInstance.lUp[2]);      /* up is in positive Y direction */
 
-		/* Adjust cube position to be asthetic angle. */
+		// Adjust cube position to be asthetic angle.
 		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
 		gl2.glRotatef(60.0f, 1.0f, 0.0f, 0.0f);
 		gl2.glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
-	}
-
-	public static void render( GL2 gl2, int width, int height ) {
-		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+		
+		//draw objects
 		//drawBoxStandard(gl2);
 		drawBoxVBO(gl2);
 	}

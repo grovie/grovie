@@ -22,6 +22,6 @@ public class GvRendererGL3 extends GvRenderer{
 
 	@Override
 	public GvEventListener createEventListener() {
-		return new GvEventListenerGL3();
+		return new GvEventListenerGL3(this);
 	}
 }

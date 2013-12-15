@@ -76,6 +76,11 @@ public abstract class GvRenderer implements Runnable {
 		return lWindowHeight;
 	}
 	
+	public void redraw()
+	{
+		lGraphicsWindow.getWindowSystem().getCanvas().redraw();
+	}
+	
 	public abstract GvDevice createDevice();
 	public abstract GvEventListener createEventListener();
 }

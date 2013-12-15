@@ -1,44 +1,71 @@
 package de.grovie.engine.renderer.device;
 
+import org.apache.commons.math3.complex.Quaternion;
+
 public class GvCamera {
 
 	public float lPosition[];
 	public float lUp[];
-	public float lCenter[];
-	
-	//temporary storage of orientation for use during interface with i/o devices, e.g. mouse events.
-//	public float lPositionTemp[];
-//	public float lUpTemp[];
-//	public float lCenterTemp[];
-	
+	public float lView[];
+
 	public GvCamera()
 	{
 		lPosition = new float[]{0,0,5.0f};
 		lUp = new float[]{0,1,0};
-		lCenter = new float[]{0,0,-1.0f};
-		
-//		lPositionTemp = new float[3];
-//		lUpTemp = new float[3];
-//		lCenterTemp = new float[3];
+		lView = new float[]{0,0,-1.0f};
+	}
+
+	public void setView(float x, float y, float z)
+	{
+		lView[0] = x;
+		lView[1] = y;
+		lView[2] = z;
 	}
 	
-	public void rotateBegin()
+	/**
+	 * Rotates camera view direction vector by angle along specified axis
+	 * @param view
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return Quaternion with rotated camera view direction
+	 */
+	public static Quaternion rotateCameraView(float[] view, double angle, double x, double y, double z)
 	{
-//		lPositionTemp[0] = lPosition[0];
-//		lPositionTemp[1] = lPosition[1];
-//		lPositionTemp[2] = lPosition[2];
-//		
-//		lUpTemp[0] = lUp[0];
-//		lUpTemp[1] = lUp[1];
-//		lUpTemp[2] = lUp[2];
-//		
-//		lCenterTemp[0] = lCenter[0];
-//		lCenterTemp[1] = lCenter[1];
-//		lCenterTemp[2] = lCenter[2];
+		Quaternion temp, quat_view, result;
+
+		double temp_vector_com = Math.sin(angle/2.0);
+		temp = new Quaternion(Math.cos(angle/2.0),
+				x * temp_vector_com,
+				y * temp_vector_com,
+				z * temp_vector_com
+				);
+
+		quat_view = new Quaternion(0, view[0], view[1], view[2]);
+
+		result = Quaternion.multiply(Quaternion.multiply(temp, quat_view), temp.getConjugate());
+
+		return result;
 	}
-	
-	public void rotateEnd()
+
+	/**
+	 * Rotates camera view direction vector by angle along specified axis
+	 * @param view
+	 * @param angle
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return Quaternion with rotated camera view direction
+	 */
+	public static Quaternion rotateCameraView(double[] view, double angle, double x, double y, double z)
 	{
+		float[] floatArray = new float[view.length];
+		for (int i = 0 ; i < view.length; i++)
+		{
+		    floatArray[i] = (float) view[i];
+		}
 		
+		return rotateCameraView(floatArray, angle, x, y, z);
 	}
 }
