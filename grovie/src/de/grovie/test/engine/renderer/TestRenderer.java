@@ -78,6 +78,7 @@ public class TestRenderer {
 		"vec4 ambientColor;"+
 		"vec4 ambientColorGlobal;"+
 		"vec4 specularColor;"+
+		"vec3 lightDirWorld;"+
 		"float NdotL;"+ //angle between world space normal and light direction
 		"float NdotHV;"+ //cos angle between half vector and normal
 		"void main()"+
@@ -85,10 +86,12 @@ public class TestRenderer {
 //		"    //convert normal from model space to world space"+
 //		"    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);"+
 		"    normal = normalize(gl_NormalMatrix * gl_Normal);"+ //same as line above but optimized
+		"    lightDirWorld = normalize(gl_NormalMatrix * vec4(lightDir,0.0).xyz);"+ //should pre-compute this
+//        "    normal = gl_Normal;"+
 //		""+
 //		"    //compute cos of angle between normal and light direction (world space)"+
 //		"    //that is the dot product of the two vectors. clamp result to [0,1]."+
-		"    NdotL = max(dot(normal,lightDir), 0.0);"+
+		"    NdotL = max(dot(normal,lightDirWorld), 0.0);"+
 //		""+
 //		"    //result diffuse color from material diffuse and light diffuse colors"+
 		"    diffuseColor = materialDif * lightDif;"+
@@ -100,7 +103,7 @@ public class TestRenderer {
 		"    ambientColorGlobal = materialAmb * globalAmb;"+
 //		""+
 //		"    //half vector for specular term"+
-		"    halfVector = lightDir + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
+		"    halfVector = lightDirWorld + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
 //		""+
 //      "    //computer specular term - blinn-phong"+
 		"    if(NdotL > 0.0)"+
@@ -149,8 +152,11 @@ public class TestRenderer {
 	}
 
 	public static void setup( GL2 gl2, int width, int height ) {
+		
+	}
+	
+	public static void init( GL2 gl2) {
 		initGL(gl2);
-
 		initShaders(gl2);
 		initVBOs(gl2);
 	}
@@ -411,9 +417,9 @@ public class TestRenderer {
 		int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
 		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
 		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
-		gl2.glUniform4f(idMaterialAmbi,1.0f,0.0f,0.0f,1.0f);
-		gl2.glUniform4f(idMaterialDiff,1.0f,0.0f,0.0f,1.0f);
-		gl2.glUniform4f(idMaterialSpec,1.0f,0.0f,0.0f,1.0f);
+		gl2.glUniform4f(idMaterialAmbi,0.1f,0.0f,0.0f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,0.6f,0.0f,0.0f,1.0f);
+		gl2.glUniform4f(idMaterialSpec,0.3f,0.0f,0.0f,1.0f);
 		gl2.glUniform1f(idMaterialShin, 0.5f);
 		
 		//4. global ambient
@@ -487,9 +493,9 @@ public class TestRenderer {
 		/* Setup the view of the cube. */
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
-		glu.gluPerspective( /* field of view in degree */ 40.0,
+		glu.gluPerspective( /* field of view in degree */ 60.0,
 				/* aspect ratio */ 1.0,
-				/* Z near */ 1.0, /* Z far */ 10.0);
+				/* Z near */ 0.1, /* Z far */ 100.0);
 		
 	}
 
@@ -506,6 +512,10 @@ public class TestRenderer {
 				cameraInstance.lPosition[2]+cameraInstance.lView[2],
 				cameraInstance.lUp[0], cameraInstance.lUp[1],cameraInstance.lUp[2]);      /* up is in positive Y direction */
 
+		gl2.glUseProgram(shaderProgramId); 
+		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
+		gl2.glUniform3f(idCameraPos,cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2]);
+		
 		// Adjust cube position to be asthetic angle.
 		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
 		gl2.glRotatef(60.0f, 1.0f, 0.0f, 0.0f);

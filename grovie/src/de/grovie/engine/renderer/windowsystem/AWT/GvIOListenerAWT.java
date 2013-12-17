@@ -37,13 +37,12 @@ public class GvIOListenerAWT extends GvIOListener implements
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		// TODO Auto-generated method stub
-		
+		mouseWheelMovedGv(e.getWheelRotation());
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		mouseDraggedGv(e.getButton(), e.getX(), e.getY());
+		mouseDraggedGv(e.getX(), e.getY());
 	}
 
 	@Override

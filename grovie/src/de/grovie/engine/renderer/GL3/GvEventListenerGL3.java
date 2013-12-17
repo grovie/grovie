@@ -26,6 +26,7 @@ public class GvEventListenerGL3  extends GvEventListener {
 	
 	@Override
 	public void init(GLAutoDrawable glAutoDrawable) {
+		TestRenderer.init(glAutoDrawable.getGL().getGL2());
 	}
 
 	@Override

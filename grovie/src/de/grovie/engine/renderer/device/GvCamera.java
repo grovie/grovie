@@ -22,6 +22,20 @@ public class GvCamera {
 		lView[2] = z;
 	}
 	
+	public void setPosition(float x, float y, float z)
+	{
+		lPosition[0] = x;
+		lPosition[1] = y;
+		lPosition[2] = z;
+	}
+	
+	public void setUp(float x, float y, float z)
+	{
+		lUp[0] = x;
+		lUp[1] = y;
+		lUp[2] = z;
+	}
+	
 	/**
 	 * Rotates camera view direction vector by angle along specified axis
 	 * @param view

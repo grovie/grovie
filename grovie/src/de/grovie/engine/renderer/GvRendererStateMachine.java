@@ -14,7 +14,8 @@ public class GvRendererStateMachine {
 	{
 		IDLE,
 		CAMERA_ROTATION,
-		CAMERA_TRANSLATION
+		CAMERA_TRANSLATION,
+		CAMERA_MOVE_FORTH_BACK;
 	}
 	
 	/** Renderer state is a state machine. 
@@ -56,10 +57,23 @@ public class GvRendererStateMachine {
 				lState = RendererState.IDLE;
 				return true;
 			}
-			else
-				return false;
 		}
-		
+		else if(lState == RendererState.CAMERA_TRANSLATION)
+		{
+			if(state == RendererState.IDLE)
+			{
+				lState = RendererState.IDLE;
+				return true;
+			}
+		}
+		else if(lState == RendererState.CAMERA_MOVE_FORTH_BACK)
+		{
+			if(state == RendererState.IDLE)
+			{
+				lState = RendererState.IDLE;
+				return true;
+			}
+		}
 		return false;
 	}
 	
@@ -68,11 +82,29 @@ public class GvRendererStateMachine {
 		return lState;
 	}
 	
-	public void cameraRotate(float viewX, float viewY, float viewZ)
+	public void cameraSetView(float x, float y, float z)
 	{
 		if(lState == RendererState.CAMERA_ROTATION)
 		{
-			lCamera.setView(viewX, viewY, viewZ);
+			lCamera.setView(x, y, z);
+		}
+	}
+	
+	public void cameraSetPosition(float x, float y, float z)
+	{
+		if((lState == RendererState.CAMERA_TRANSLATION)||
+			(lState == RendererState.CAMERA_MOVE_FORTH_BACK)
+				)
+		{
+			lCamera.setPosition(x, y, z);
+		}
+	}
+	
+	public void cameraSetUp(float x, float y, float z)
+	{
+		if(lState == RendererState.CAMERA_ROTATION)
+		{
+			lCamera.setUp(x, y, z);
 		}
 	}
 	
