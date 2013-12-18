@@ -162,20 +162,21 @@ public class GvIOListener {
 					lCameraTemp.lUp, //original up vector 
 					angleY, 		//rotation angle
 					axisHorizontal.getX(), axisHorizontal.getY(), axisHorizontal.getZ()); //horizontal rotation axis
-
-
+			
 			//rotation along vertical axis (looking left or right)
-			cameraUpTemp = cameraUpTemp.normalize();
-			double[] cameraUpNewArray = cameraUpTemp.getVectorPart();
-
 			Quaternion cameraViewNew = GvCamera.rotateCameraView(
 					cameraViewTemp.getVectorPart(),
 					angleX,
-					//0, 1, 0);
-					cameraUpNewArray[0], cameraUpNewArray[1], cameraUpNewArray[2]);
+					0, 1, 0);
 			cameraViewNew = cameraViewNew.normalize();	
 			double[] cameraViewNewArray = cameraViewNew.getVectorPart();
-
+			
+			Quaternion cameraUpNew = GvCamera.rotateCameraView(
+					cameraUpTemp.getVectorPart(),
+					angleX,
+					0, 1, 0);
+			cameraUpNew = cameraUpNew.normalize();
+			double[] cameraUpNewArray = cameraUpNew.getVectorPart();
 
 			//set new camera view vector
 			stateMachine.cameraSetView((float)cameraViewNewArray[0],
@@ -185,6 +186,9 @@ public class GvIOListener {
 			stateMachine.cameraSetUp((float)cameraUpNewArray[0],
 					(float)cameraUpNewArray[1],
 					(float)cameraUpNewArray[2]);
+			
+			this.rememberMouseLocation(x,y); //remember mouse press location
+			this.rememberCameraOrientation(); //remember camera orientation
 
 			//redraw to visualize rotation
 			lRenderer.redraw();

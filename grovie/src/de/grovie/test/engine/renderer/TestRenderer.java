@@ -29,7 +29,7 @@ public class TestRenderer {
 	 */
 	static float light_diffuse[] = {1.0f, 0.0f, 0.0f, 1.0f};  /* Red diffuse light. */
 	static float light_position[] = {1.0f, 1.0f, 1.0f, 0.0f};  /* Infinite light location. */
-	
+
 	/**
 	 * Initial Camera settings
 	 */
@@ -65,71 +65,71 @@ public class TestRenderer {
 	public static int indices[];	//vertex indices
 	public static String[] shaderV = {
 		"uniform vec3 cameraPos;"+ //camera position world space
-		"uniform vec4 globalAmb;"+ //global ambient
-		"uniform vec3 lightDir;"+ //directional light position - also the direction vector (normlized) from vertices to light position
-		"uniform vec4 lightAmb;"+ //directional light ambient
-		"uniform vec4 lightDif;"+ //directional light diffuse
-		"uniform vec4 lightSpe;"+ //directional light specular
-		"uniform vec4 materialAmb;"+ //material ambient
-		"uniform vec4 materialDif;"+ //material diffuse
-		"uniform vec4 materialSpe;"+ //material specular
-		"uniform float materialShi;"+ //material shininess
-		"vec3 normal;"+ // world space normal for this vertex shader
-		"vec3 halfVector;"+ // half-vector for Blinn-Phong
-		"vec4 diffuseColor;"+
-		"vec4 ambientColor;"+
-		"vec4 ambientColorGlobal;"+
-		"vec4 specularColor;"+
-		"vec3 lightDirWorld;"+
-		"float NdotL;"+ //angle between world space normal and light direction
-		"float NdotHV;"+ //cos angle between half vector and normal
-		"void main()"+
-		"{"+
-//		"    //convert normal from model space to world space"+
-//		"    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);"+
-		"    normal = normalize(gl_NormalMatrix * gl_Normal);"+ //same as line above but optimized
-		"    lightDirWorld = normalize(gl_NormalMatrix * vec4(lightDir,0.0).xyz);"+ //should pre-compute this
-//        "    normal = gl_Normal;"+
-//		""+
-//		"    //compute cos of angle between normal and light direction (world space)"+
-//		"    //that is the dot product of the two vectors. clamp result to [0,1]."+
-		"    NdotL = max(dot(normal,lightDirWorld), 0.0);"+
-//		""+
-//		"    //result diffuse color from material diffuse and light diffuse colors"+
-		"    diffuseColor = materialDif * lightDif;"+
-//		""+
-//		"    //result ambient color from material ambient and light ambient colors"+
-		"    ambientColor = materialAmb * lightAmb;"+
-//		""+
-//		"    //result global ambient color from material ambient and global ambient color"+
-		"    ambientColorGlobal = materialAmb * globalAmb;"+
-//		""+
-//		"    //half vector for specular term"+
-		"    halfVector = lightDirWorld + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
-//		""+
-//      "    //computer specular term - blinn-phong"+
-		"    if(NdotL > 0.0)"+
-		"    {"+
-		"        NdotHV = max(dot(normal,halfVector),0.0);"+
-		"        specularColor = materialSpe * lightSpe * pow(NdotHV,materialShi);"+
-		"    }"+
-		"    else {"+
-		"        specularColor= vec4(0,0,0,0);"+
-		"    }"+
-//		""+
-//		"    //diffuse term + ambient term + global ambient + specular term"+
-		"    gl_FrontColor = NdotL * diffuseColor + ambientColor + ambientColorGlobal + specularColor;"+
-//		""+
-//		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+ //convert position from model to projected space
-		"	 gl_Position = ftransform();"+ //same as line above but optimized
-		"}"
+				"uniform vec4 globalAmb;"+ //global ambient
+				"uniform vec3 lightDir;"+ //directional light position - also the direction vector (normlized) from vertices to light position
+				"uniform vec4 lightAmb;"+ //directional light ambient
+				"uniform vec4 lightDif;"+ //directional light diffuse
+				"uniform vec4 lightSpe;"+ //directional light specular
+				"uniform vec4 materialAmb;"+ //material ambient
+				"uniform vec4 materialDif;"+ //material diffuse
+				"uniform vec4 materialSpe;"+ //material specular
+				"uniform float materialShi;"+ //material shininess
+				"vec3 normal;"+ // world space normal for this vertex shader
+				"vec3 halfVector;"+ // half-vector for Blinn-Phong
+				"vec4 diffuseColor;"+
+				"vec4 ambientColor;"+
+				"vec4 ambientColorGlobal;"+
+				"vec4 specularColor;"+
+				"vec3 lightDirWorld;"+
+				"float NdotL;"+ //angle between world space normal and light direction
+				"float NdotHV;"+ //cos angle between half vector and normal
+				"void main()"+
+				"{"+
+				//		"    //convert normal from model space to world space"+
+				//		"    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);"+
+				"    normal = normalize(gl_NormalMatrix * gl_Normal);"+ //same as line above but optimized
+				"    lightDirWorld = normalize(gl_NormalMatrix * vec4(lightDir,0.0).xyz);"+ //should pre-compute this
+				//        "    normal = gl_Normal;"+
+				//		""+
+				//		"    //compute cos of angle between normal and light direction (world space)"+
+				//		"    //that is the dot product of the two vectors. clamp result to [0,1]."+
+				"    NdotL = max(dot(normal,lightDirWorld), 0.0);"+
+				//		""+
+				//		"    //result diffuse color from material diffuse and light diffuse colors"+
+				"    diffuseColor = materialDif * lightDif;"+
+				//		""+
+				//		"    //result ambient color from material ambient and light ambient colors"+
+				"    ambientColor = materialAmb * lightAmb;"+
+				//		""+
+				//		"    //result global ambient color from material ambient and global ambient color"+
+				"    ambientColorGlobal = materialAmb * globalAmb;"+
+				//		""+
+				//		"    //half vector for specular term"+
+				"    halfVector = lightDirWorld + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
+				//		""+
+				//      "    //computer specular term - blinn-phong"+
+				"    if(NdotL > 0.0)"+
+				"    {"+
+				"        NdotHV = max(dot(normal,halfVector),0.0);"+
+				"        specularColor = materialSpe * lightSpe * pow(NdotHV,materialShi);"+
+				"    }"+
+				"    else {"+
+				"        specularColor= vec4(0,0,0,0);"+
+				"    }"+
+				//		""+
+				//		"    //diffuse term + ambient term + global ambient + specular term"+
+				"    gl_FrontColor = NdotL * diffuseColor + ambientColor + ambientColorGlobal + specularColor;"+
+				//		""+
+				//		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+ //convert position from model to projected space
+				"	 gl_Position = ftransform();"+ //same as line above but optimized
+				"}"
 	};
 
 	public static String[] shaderF = {
 		"void main()"+
-		"{"+
-		"	 gl_FragColor = gl_Color;"+
-		"}"
+				"{"+
+				"	 gl_FragColor = gl_Color;"+
+				"}"
 	};
 	public static int shaderVId;
 	public static int shaderFId;
@@ -152,7 +152,7 @@ public class TestRenderer {
 
 		//test drawing cube
 		//initVertexData();
-		
+
 		//test draw obj file
 		initObj();
 	}
@@ -161,16 +161,16 @@ public class TestRenderer {
 		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
-		
+
 		indices = geom.getIndices();
 		vertices = geom.getVertices();
 		normals = geom.getNormals();
 	}
 
 	public static void setup( GL2 gl2, int width, int height ) {
-		
+
 	}
-	
+
 	public static void init( GL2 gl2) {
 		initGL(gl2);
 		initShaders(gl2);
@@ -233,7 +233,7 @@ public class TestRenderer {
 				}
 			}
 		}
-		
+
 		//vertex 0 - face 1
 		vertices[0] = -1.0f;
 		vertices[1] = -1.0f;
@@ -250,7 +250,7 @@ public class TestRenderer {
 		vertices[9] = -1.0f;
 		vertices[10] =  1.0f;
 		vertices[11] =  1.0f;
-		
+
 		//vertex 4 - face 2
 		vertices[12] = -1.0f;
 		vertices[13] =  1.0f;
@@ -267,7 +267,7 @@ public class TestRenderer {
 		vertices[21] =  1.0f;
 		vertices[22] =  1.0f;
 		vertices[23] =  1.0f;
-		
+
 		//vertex 8 - face 3
 		vertices[24] =  1.0f;
 		vertices[25] =  1.0f;
@@ -284,7 +284,7 @@ public class TestRenderer {
 		vertices[33] =  1.0f;
 		vertices[34] = -1.0f;
 		vertices[35] =  1.0f;
-		
+
 		//vertex 12 - face 4
 		vertices[36] =  1.0f;
 		vertices[37] = -1.0f;
@@ -301,7 +301,7 @@ public class TestRenderer {
 		vertices[45] = -1.0f;
 		vertices[46] = -1.0f;
 		vertices[47] =  1.0f;
-		
+
 		//vertex 16 - face 5
 		vertices[48] =  1.0f;
 		vertices[49] = -1.0f;
@@ -318,7 +318,7 @@ public class TestRenderer {
 		vertices[57] = -1.0f;
 		vertices[58] = -1.0f;
 		vertices[59] = -1.0f;
-		
+
 		//vertex 20 - face 6
 		vertices[60] =  1.0f;
 		vertices[61] =  1.0f;
@@ -335,42 +335,42 @@ public class TestRenderer {
 		vertices[69] = -1.0f;
 		vertices[70] =  1.0f;
 		vertices[71] =  1.0f;
-		
+
 		indices[0]=0;
 		indices[1]=1;
 		indices[2]=2;
 		indices[3]=2;
 		indices[4]=3;
 		indices[5]=0;
-		
+
 		indices[6]=4;
 		indices[7]=5;
 		indices[8]=6;
 		indices[9]=6;
 		indices[10]=7;
 		indices[11]=4;
-		
+
 		indices[12]=8;
 		indices[13]=9;
 		indices[14]=10;
 		indices[15]=10;
 		indices[16]=11;
 		indices[17]=8;
-		
+
 		indices[18]=12;
 		indices[19]=13;
 		indices[20]=14;
 		indices[21]=14;
 		indices[22]=15;
 		indices[23]=12;
-		
+
 		indices[24]=16;
 		indices[25]=17;
 		indices[26]=18;
 		indices[27]=18;
 		indices[28]=19;
 		indices[29]=16;
-		
+
 		indices[30]=20;
 		indices[31]=21;
 		indices[32]=22;
@@ -409,7 +409,7 @@ public class TestRenderer {
 
 		//set values of variables in shader program
 		initShaderVariables(gl2);
-		
+
 		printLog(gl2,shaderVId);
 		printLog(gl2,shaderFId);
 		printLog(gl2,shaderProgramId);
@@ -419,7 +419,7 @@ public class TestRenderer {
 		//1. lightDir - world space - directional light - direction from vertex to light source
 		int idLightDir = gl2.glGetUniformLocation(shaderProgramId,"lightDir");
 		gl2.glUniform3f(idLightDir,0.5773502f,0.5773502f,0.5773502f);
-		
+
 		//2. light ambient,diffuse,specular
 		int idLightAmbi = gl2.glGetUniformLocation(shaderProgramId,"lightAmb");
 		int idLightDiff = gl2.glGetUniformLocation(shaderProgramId,"lightDif");
@@ -427,7 +427,7 @@ public class TestRenderer {
 		gl2.glUniform4f(idLightAmbi,0.1f,0.1f,0.1f,1.0f);
 		gl2.glUniform4f(idLightDiff,1.0f,1.0f,1.0f,1.0f);
 		gl2.glUniform4f(idLightSpec,1.0f,1.0f,1.0f,1.0f);
-		
+
 		//3. material ambient,diffuse,specular,shininess
 		int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
 		int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
@@ -437,11 +437,11 @@ public class TestRenderer {
 		gl2.glUniform4f(idMaterialDiff,0.6f,0.0f,0.0f,1.0f);
 		gl2.glUniform4f(idMaterialSpec,0.3f,0.0f,0.0f,1.0f);
 		gl2.glUniform1f(idMaterialShin, 0.5f);
-		
+
 		//4. global ambient
 		int idGlobalAmbi = gl2.glGetUniformLocation(shaderProgramId,"globalAmbi");
 		gl2.glUniform4f(idGlobalAmbi,0.1f,0.1f,0.1f,1.0f);
-		
+
 		//5. camera position
 		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
 		gl2.glUniform3f(idCameraPos,cameraPosition[0],cameraPosition[1],cameraPosition[2]);
@@ -512,12 +512,12 @@ public class TestRenderer {
 		glu.gluPerspective( /* field of view in degree */ 60.0,
 				/* aspect ratio */ 1.0,
 				/* Z near */ 0.1, /* Z far */ 100.0);
-		
+
 	}
 
 	public static void render( GL2 gl2, int width, int height , GvRenderer renderer) {
 		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-		
+
 		//set camera
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
@@ -531,19 +531,22 @@ public class TestRenderer {
 		gl2.glUseProgram(shaderProgramId); 
 		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
 		gl2.glUniform3f(idCameraPos,cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2]);
-		
-		// Adjust cube position to be asthetic angle.
-		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
-		gl2.glRotatef(60.0f, 1.0f, 0.0f, 0.0f);
-		gl2.glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
-		
+
+
+
 		//draw objects
 		//drawBoxStandard(gl2);
-		drawBoxVBO(gl2);
+		//drawBoxVBO(gl2);
+		drawObjVBO(gl2);
 	}
 
 	private static void	drawBoxStandard(GL2 gl2)
 	{
+		// Adjust cube position to be asthetic angle.
+		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
+		gl2.glRotatef(60.0f, 1.0f, 0.0f, 0.0f);
+		gl2.glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
+
 		int i;
 
 		for (i = 0; i < 6; i++) {
@@ -566,6 +569,35 @@ public class TestRenderer {
 	}
 
 	private static void drawBoxVBO(GL2 gl2)
+	{
+		// Adjust cube position to be asthetic angle.
+		gl2.glTranslatef(0.0f, 0.0f, -1.0f);
+		gl2.glRotatef(60.0f, 1.0f, 0.0f, 0.0f);
+		gl2.glRotatef(-20.0f, 0.0f, 0.0f, 1.0f);
+
+		//bind vertex and normal buffer
+		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboId[0]);
+		//bind index buffer
+		gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, iboId[0]);
+
+
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY); 
+		gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
+		gl2.glNormalPointer(GL2.GL_FLOAT, 0, vertices.length*4);
+
+		gl2.glDrawElements(
+				GL2.GL_TRIANGLES,      // mode
+				indices.length,    // count
+				GL2.GL_UNSIGNED_INT,   // type
+				0           // element array buffer offset
+				);
+
+		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY); 
+		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY); 
+	}
+
+	private static void drawObjVBO(GL2 gl2)
 	{
 		//bind vertex and normal buffer
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboId[0]);
@@ -596,7 +628,7 @@ public class TestRenderer {
 			System.out.println(arr[i]);
 		}
 	}
-	
+
 	private static void printArray(int[] arr)
 	{
 		for(int i=0; i<arr.length; ++i)
@@ -604,30 +636,30 @@ public class TestRenderer {
 			System.out.println(arr[i]);
 		}
 	}
-	
-	
+
+
 	static void printLog(GL2 gl2, int obj)
 	{
 		int maxLen[] = new int[1];
 		IntBuffer maxLength = IntBuffer.wrap(maxLen);
-	 
+
 		if(gl2.glIsShader(obj))
 			gl2.glGetShaderiv(obj,GL2.GL_INFO_LOG_LENGTH,maxLength);
 		else
 			gl2.glGetProgramiv(obj,GL2.GL_INFO_LOG_LENGTH,maxLength);
-	 
+
 		int len = maxLen[0];
 		byte infoLog[] = new byte[len];
 		ByteBuffer infoLogBuffer = ByteBuffer.wrap(infoLog);
-		
+
 		int infoLen[] = new int[1];
 		IntBuffer infoLength = IntBuffer.wrap(infoLen);
-		
+
 		if (gl2.glIsShader(obj))
 			gl2.glGetShaderInfoLog(obj, maxLen[0], infoLength, infoLogBuffer);
 		else
 			gl2.glGetProgramInfoLog(obj, maxLen[0], infoLength, infoLogBuffer);
-	 
+
 		if (infoLen[0] > 0)
 		{
 			System.out.println(new String(infoLog));

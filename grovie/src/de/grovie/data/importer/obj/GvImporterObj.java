@@ -73,8 +73,10 @@ public class GvImporterObj {
 			geom.setNormalValue(counter, n.getZ()); counter++;
 		}
 		
-		//count number of faces
+		//count number of faces/indices
 		geom.initIndices(countIndices(wvObj));
+		
+		//copy indices/faces
 		counter = 0;
 		for(int i=0; i< groups.size(); ++i)
 		{
@@ -88,8 +90,6 @@ public class GvImporterObj {
 				{
 					for(int k=0; k<face.vertIndices.length; ++k)
 					{
-						if(counter ==0)
-							System.out.println("first index: " + face.vertIndices[k]);
 						geom.setIndexValue(counter, face.vertIndices[k]);
 						counter++;
 					}
