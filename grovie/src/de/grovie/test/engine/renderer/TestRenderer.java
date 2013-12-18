@@ -148,25 +148,29 @@ public class TestRenderer {
 				640,
 				480);
 
-		gvRenderer.start();
-
 		//test drawing cube
 		//initVertexData();
 
 		//test draw obj file
 		initObj();
+
+		gvRenderer.start();
+
 	}
 
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 
 		indices = geom.getIndices();
 		vertices = geom.getVertices();
 		normals = geom.getNormals();
+		System.out.println("Polygon count: " + indices.length/3);
 	}
 
 	public static void setup( GL2 gl2, int width, int height ) {
@@ -436,8 +440,8 @@ public class TestRenderer {
 		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
 		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
 		gl2.glUniform4f(idMaterialAmbi,0.05f,0.05f,0.05f,1.0f);
-		gl2.glUniform4f(idMaterialDiff,0.5f,0.5f,0.5f,1.0f);
-		gl2.glUniform4f(idMaterialSpec,0.7f,0.7f,0.7f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,0.0f,0.9f,0.1f,1.0f);
+		gl2.glUniform4f(idMaterialSpec,0.2f,0.2f,0.2f,1.0f);
 		gl2.glUniform1f(idMaterialShin, 0.078125f);
 
 		//4. global ambient
@@ -598,12 +602,12 @@ public class TestRenderer {
 		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY); 
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY); 
 	}
-	
+
 	private static void drawObjStandard(GL2 gl2)
 	{
 		for(int i=0; i<indices.length; ++i)
 		{
-			
+
 		}
 	}
 

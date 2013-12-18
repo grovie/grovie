@@ -39,7 +39,7 @@ public class GvImporterObj {
 		
 		return true;
 	}
-
+	
 	/**
 	 * Converts WavefrontObject type to GroViE's GvGeometry type
 	 * @param wvObj
@@ -49,35 +49,16 @@ public class GvImporterObj {
 	{
 		ArrayList<Vertex> vertices = wvObj.getVertices();
 		ArrayList<Vertex> normals = wvObj.getNormals();
+		
+		int indicesCount = countIndices(wvObj);
+		geom.initIndices(indicesCount);
+		geom.initVertices(indicesCount * 3);
+		geom.initNormals(indicesCount * 3);
+		
+		int counter = 0;
+		
 		ArrayList<Group> groups = wvObj.getGroups();
 		
-		//copy vertex coords
-		int counter = 0;
-		geom.initVertices(vertices.size() * 3);
-		for(int i=0; i<vertices.size(); ++i)
-		{
-			Vertex v = vertices.get(i);
-			geom.setVertexValue(counter, v.getX()); counter++;
-			geom.setVertexValue(counter, v.getY()); counter++;
-			geom.setVertexValue(counter, v.getZ()); counter++;
-		}
-		
-		//copy normal coods
-		counter = 0;
-		geom.initNormals(normals.size() * 3);
-		for(int i=0; i<normals.size(); ++i)
-		{
-			Vertex n = normals.get(i);
-			geom.setNormalValue(counter, n.getX()); counter++;
-			geom.setNormalValue(counter, n.getY()); counter++;
-			geom.setNormalValue(counter, n.getZ()); counter++;
-		}
-		
-		//count number of faces/indices
-		geom.initIndices(countIndices(wvObj));
-		
-		//copy indices/faces
-		counter = 0;
 		for(int i=0; i< groups.size(); ++i)
 		{
 			Group g = groups.get(i);
@@ -90,16 +71,22 @@ public class GvImporterObj {
 				{
 					for(int k=0; k<face.vertIndices.length; ++k)
 					{
-						geom.setIndexValue(counter, face.vertIndices[k]);
+						geom.setIndexValue(counter, counter);			//set index
+						Vertex v = vertices.get(face.vertIndices[k]);	//set vertex coords
+						geom.setVertexValue((counter*3), v.getX());
+						geom.setVertexValue((counter*3)+1, v.getY());
+						geom.setVertexValue((counter*3)+2, v.getZ());
+						Vertex n = normals.get(face.normIndices[k]);	//set normal coords
+						geom.setNormalValue((counter*3), n.getX());
+						geom.setNormalValue((counter*3)+1, n.getY());
+						geom.setNormalValue((counter*3)+2, n.getZ());
 						counter++;
 					}
-					
-					//face.
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Counts the number of indices in WavefrontObject instance
 	 * @param wvObj
