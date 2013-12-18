@@ -9,6 +9,8 @@ import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import de.grovie.data.importer.obj.GvImporterObj;
+import de.grovie.data.object.GvGeometry;
 import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.GL3.GvRendererGL3;
 import de.grovie.engine.renderer.device.GvCamera;
@@ -145,7 +147,25 @@ public class TestRenderer {
 
 		gvRenderer.start();
 
+		//test drawing cube
 		initVertexData();
+		
+		//test draw obj file
+		//initObj();
+	}
+
+	private static void initObj() {
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		GvGeometry geom = new GvGeometry();
+		GvImporterObj.load(path, geom);
+		
+		indices = geom.getIndices();
+		vertices = geom.getVertices();
+		normals = geom.getNormals();
+		
+		//printArray(vertices);
+		//printArray(normals);
+		//printArray(indices);
 	}
 
 	public static void setup( GL2 gl2, int width, int height ) {
@@ -570,6 +590,15 @@ public class TestRenderer {
 			System.out.println(arr[i]);
 		}
 	}
+	
+	private static void printArray(int[] arr)
+	{
+		for(int i=0; i<arr.length; ++i)
+		{
+			System.out.println(arr[i]);
+		}
+	}
+	
 	
 	static void printLog(GL2 gl2, int obj)
 	{
