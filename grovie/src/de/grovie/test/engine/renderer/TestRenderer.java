@@ -158,6 +158,8 @@ public class TestRenderer {
 	}
 
 	private static void initObj() {
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
 		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
@@ -425,18 +427,18 @@ public class TestRenderer {
 		int idLightDiff = gl2.glGetUniformLocation(shaderProgramId,"lightDif");
 		int idLightSpec = gl2.glGetUniformLocation(shaderProgramId,"lightSpe");
 		gl2.glUniform4f(idLightAmbi,0.1f,0.1f,0.1f,1.0f);
-		gl2.glUniform4f(idLightDiff,1.0f,1.0f,1.0f,1.0f);
-		gl2.glUniform4f(idLightSpec,1.0f,1.0f,1.0f,1.0f);
+		gl2.glUniform4f(idLightDiff,0.7f,0.7f,0.7f,1.0f);
+		gl2.glUniform4f(idLightSpec,0.2f,0.2f,0.2f,1.0f);
 
 		//3. material ambient,diffuse,specular,shininess
 		int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
 		int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
 		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
 		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
-		gl2.glUniform4f(idMaterialAmbi,0.1f,0.0f,0.0f,1.0f);
-		gl2.glUniform4f(idMaterialDiff,0.6f,0.0f,0.0f,1.0f);
-		gl2.glUniform4f(idMaterialSpec,0.3f,0.0f,0.0f,1.0f);
-		gl2.glUniform1f(idMaterialShin, 0.5f);
+		gl2.glUniform4f(idMaterialAmbi,0.05f,0.05f,0.05f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,0.5f,0.5f,0.5f,1.0f);
+		gl2.glUniform4f(idMaterialSpec,0.7f,0.7f,0.7f,1.0f);
+		gl2.glUniform1f(idMaterialShin, 0.078125f);
 
 		//4. global ambient
 		int idGlobalAmbi = gl2.glGetUniformLocation(shaderProgramId,"globalAmbi");
@@ -595,6 +597,14 @@ public class TestRenderer {
 
 		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY); 
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY); 
+	}
+	
+	private static void drawObjStandard(GL2 gl2)
+	{
+		for(int i=0; i<indices.length; ++i)
+		{
+			
+		}
 	}
 
 	private static void drawObjVBO(GL2 gl2)

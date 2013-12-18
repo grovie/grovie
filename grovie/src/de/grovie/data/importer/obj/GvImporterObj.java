@@ -93,6 +93,8 @@ public class GvImporterObj {
 						geom.setIndexValue(counter, face.vertIndices[k]);
 						counter++;
 					}
+					
+					//face.
 				}
 			}
 		}
