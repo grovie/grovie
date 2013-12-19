@@ -21,7 +21,7 @@ public class GvDeviceGL2 extends GvDevice{
 
 	@Override
 	public GvShaderProgram createShaderProgram(String vertexShaderSource,
-			String geometryShaderSource, String fragmentShaderSource) {
+			String fragmentShaderSource) {
 		// TODO Auto-generated method stub
 		return null;
 	}

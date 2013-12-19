@@ -11,7 +11,6 @@ public abstract class GvDevice {
 			GvRenderer renderer);
 	
 	public abstract GvShaderProgram createShaderProgram(String vertexShaderSource, 
-			String geometryShaderSource,
 			String fragmentShaderSource);
 	
 	public abstract GvVertexBuffer createVertexBuffer(int sizeInBytes);
