@@ -5,6 +5,7 @@ import javax.media.opengl.GLAutoDrawable;
 import de.grovie.engine.renderer.GvEventListener;
 import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.test.engine.renderer.TestRenderer;
+import de.grovie.test.engine.renderer.TestRendererDeferred;
 
 public class GvEventListenerGL3  extends GvEventListener {
 
@@ -18,7 +19,11 @@ public class GvEventListenerGL3  extends GvEventListener {
 //		OneTriangleAWT.render( glAutoDrawable.getGL().getGL2(), 
 //				glAutoDrawable.getWidth(), 
 //				glAutoDrawable.getHeight() );
-		TestRenderer.render( glAutoDrawable.getGL().getGL2(), 
+//		TestRenderer.render( glAutoDrawable.getGL().getGL2(), 
+//				glAutoDrawable.getWidth(), 
+//				glAutoDrawable.getHeight(),
+//				this.lRenderer);
+		TestRendererDeferred.render( glAutoDrawable.getGL().getGL2(), 
 				glAutoDrawable.getWidth(), 
 				glAutoDrawable.getHeight(),
 				this.lRenderer);
@@ -26,7 +31,8 @@ public class GvEventListenerGL3  extends GvEventListener {
 	
 	@Override
 	public void init(GLAutoDrawable glAutoDrawable) {
-		TestRenderer.init(glAutoDrawable.getGL().getGL2());
+//		TestRenderer.init(glAutoDrawable.getGL().getGL2());
+		TestRendererDeferred.init(glAutoDrawable.getGL().getGL2());
 	}
 
 	@Override
@@ -34,7 +40,10 @@ public class GvEventListenerGL3  extends GvEventListener {
 //		OneTriangleAWT.setup( glAutoDrawable.getGL().getGL2(),
 //				width,
 //				height );
-		TestRenderer.setup( glAutoDrawable.getGL().getGL2(),
+//		TestRenderer.setup( glAutoDrawable.getGL().getGL2(),
+//				width,
+//				height );
+		TestRendererDeferred.setup( glAutoDrawable.getGL().getGL2(),
 				width,
 				height );
 	}
