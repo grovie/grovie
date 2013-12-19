@@ -12,9 +12,10 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
 import de.grovie.engine.renderer.GvRenderer;
-import de.grovie.engine.renderer.GL3.GvRendererGL3;
+import de.grovie.engine.renderer.GL2.GvRendererGL2;
 import de.grovie.engine.renderer.device.GvCamera;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
+import static de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
 
 public class TestRenderer {
 
@@ -142,12 +143,12 @@ public class TestRenderer {
 		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
 
 		//create renderer to use - OpenGL 3x
-		GvRendererGL3 gvRenderer = new GvRendererGL3(
+		GvRendererGL2 gvRenderer = new GvRendererGL2(
 				windowSystem,
 				"Test VBO",
 				640,
 				480);
-
+		
 		//test drawing cube
 		//initVertexData();
 
@@ -161,9 +162,9 @@ public class TestRenderer {
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 
@@ -173,12 +174,36 @@ public class TestRenderer {
 		System.out.println("Polygon count: " + indices.length/3);
 	}
 
-	public static void setup( GL2 gl2, int width, int height ) {
+	public static void reshape( GL2 gl2, int width, int height,
+			GvRenderer lRenderer) {
 
+		gl2.glViewport(0, 0, width, height);
+		float aspectRatio = (float)width / (float)height;
+
+		//set aspect ratio into camera instance
+		if(lRenderer.getRendererStateMachine().setState(
+				RendererState.CAMERA_ASPECT_CHANGE)
+				)
+		{
+			lRenderer.getRendererStateMachine().cameraSetAspect(aspectRatio);
+			lRenderer.getRendererStateMachine().setState(RendererState.IDLE);
+		}
+		
+		lRenderer.getRendererStateMachine().getCamera(cameraInstance);
+		
+		/* Setup the view of the cube. */
+		gl2.glMatrixMode(GL2.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		glu.gluPerspective( cameraInstance.lFov,
+				cameraInstance.lAspect,
+				cameraInstance.lNear,
+				cameraInstance.lFar	
+				);
 	}
 
-	public static void init( GL2 gl2) {
-		initGL(gl2);
+	public static void init( GL2 gl2, GvRenderer renderer) {
+		
+		initGL(gl2,renderer);
 		initShaders(gl2);
 		initVBOs(gl2);
 	}
@@ -440,7 +465,7 @@ public class TestRenderer {
 		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
 		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
 		gl2.glUniform4f(idMaterialAmbi,0.05f,0.05f,0.05f,1.0f);
-		gl2.glUniform4f(idMaterialDiff,0.0f,0.9f,0.1f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,0.9f,0.9f,0.9f,1.0f);
 		gl2.glUniform4f(idMaterialSpec,0.2f,0.2f,0.2f,1.0f);
 		gl2.glUniform1f(idMaterialShin, 0.078125f);
 
@@ -497,13 +522,8 @@ public class TestRenderer {
 
 	}
 
-	private static void initGL(GL2 gl2)
+	private static void initGL(GL2 gl2, GvRenderer renderer)
 	{
-		/* Enable a single OpenGL light. */
-		//gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, light_diffuse,0);
-		//gl2.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, light_position,0);
-		//gl2.glEnable(GL2.GL_LIGHT0);
-		//gl2.glEnable(GL2.GL_LIGHTING);
 		gl2.glDisable(GL2.GL_LIGHTING);
 
 		/* Use depth buffering for hidden surface elimination. */
@@ -512,13 +532,16 @@ public class TestRenderer {
 		glu = new GLU();
 		glut = new GLUT();
 
+		renderer.getRendererStateMachine().getCamera(cameraInstance);
+		
 		/* Setup the view of the cube. */
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
-		glu.gluPerspective( /* field of view in degree */ 60.0,
-				/* aspect ratio */ 1.0,
-				/* Z near */ 0.1, /* Z far */ 100.0);
-
+		glu.gluPerspective( cameraInstance.lFov,
+				cameraInstance.lAspect,
+				cameraInstance.lNear,
+				cameraInstance.lFar	
+				);
 	}
 
 	public static void render( GL2 gl2, int width, int height , GvRenderer renderer) {

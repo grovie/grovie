@@ -11,8 +11,6 @@ public abstract class GvRenderer implements Runnable {
 	//window system
 	GvWindowSystem lWindowSystem;
 	String lWindowTitle;
-	int lWindowWidth;
-	int lWindowHeight;
 	
 	//drawing objects
 	GvDevice lDevice;
@@ -30,8 +28,8 @@ public abstract class GvRenderer implements Runnable {
 	{
 		lWindowSystem = windowSystem;
 		lWindowTitle = windowTitle;
-		lWindowWidth = windowWidth;
-		lWindowHeight = windowHeight;
+		
+		lRendererStateMachine = new GvRendererStateMachine(windowWidth,windowHeight);
 
 		lThread = new Thread(this, "GroViE Renderer");
 	}
@@ -45,7 +43,6 @@ public abstract class GvRenderer implements Runnable {
 	public void run() {
 		lDevice = createDevice();
 		lEventListener = createEventListener();
-		lRendererStateMachine = new GvRendererStateMachine();
 		lGraphicsWindow = lDevice.createWindow(
 				lWindowSystem,
 				this);
@@ -64,16 +61,6 @@ public abstract class GvRenderer implements Runnable {
 	public String getWindowTitle()
 	{
 		return lWindowTitle;
-	}
-	
-	public int getWindowWidth()
-	{
-		return lWindowWidth;
-	}
-	
-	public int getWindowHeight()
-	{
-		return lWindowHeight;
 	}
 	
 	public void redraw()

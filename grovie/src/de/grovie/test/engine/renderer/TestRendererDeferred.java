@@ -11,29 +11,35 @@ import com.jogamp.opengl.util.gl2.GLUT;
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
 import de.grovie.engine.renderer.GvRenderer;
-import de.grovie.engine.renderer.GL3.GvRendererGL3;
+import de.grovie.engine.renderer.GvRendererStateMachine;
+import de.grovie.engine.renderer.GL2.GvRendererGL2;
+import de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
+import de.grovie.engine.renderer.device.GvCamera;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 
 public class TestRendererDeferred {
+
+	//camera
+	static GvCamera cameraInstance = new GvCamera();
 
 	//geometry
 	public static float vertices[]; //vertices
 	public static float normals[]; 	//normals
 	public static int indices[];	//vertex indices
-	
+
 	//OpenGL VBO and index buffer object identifiers
 	public static int[] vboId; //vbo Id
 	public static int[] iboId; //index array object id
 	//OpenGL utility classes
 	static GLU glu;
 	static GLUT glut;
-	
+
 	public static void main(String[] args) {
 		//create windowing system - Java AWT
 		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
 
 		//create renderer to use - OpenGL 3x
-		GvRendererGL3 gvRenderer = new GvRendererGL3(
+		GvRendererGL2 gvRenderer = new GvRendererGL2(
 				windowSystem,
 				"Test VBO",
 				640,
@@ -41,7 +47,7 @@ public class TestRendererDeferred {
 
 		//test draw obj file
 		initObj();
-		
+
 		gvRenderer.start();
 
 	}
@@ -49,9 +55,9 @@ public class TestRendererDeferred {
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 
@@ -61,19 +67,19 @@ public class TestRendererDeferred {
 		System.out.println("Polygon count: " + indices.length/3);
 	}
 
-	public static void init(GL2 gl2) {
-		initGL(gl2);
+	public static void init(GL2 gl2, GvRenderer renderer) {
+		initGL(gl2,renderer);
 		initShaders(gl2);
 		initVBOs(gl2);
 	}
-	
+
 	private static void initShaders(GL2 gl2) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	private static void initGL(GL2 gl2) {
-		
+	private static void initGL(GL2 gl2, GvRenderer renderer) {
+
 		gl2.glDisable(GL2.GL_LIGHTING);
 
 		/* Use depth buffering for hidden surface elimination. */
@@ -85,10 +91,17 @@ public class TestRendererDeferred {
 		/* Setup the view of the cube. */
 		gl2.glMatrixMode(GL2.GL_PROJECTION);
 		gl2.glLoadIdentity();
-		glu.gluPerspective( /* field of view in degree */ 60.0,
-				/* aspect ratio */ 1.0,
-				/* Z near */ 0.1, /* Z far */ 100.0);
 
+		renderer.getRendererStateMachine().getCamera(cameraInstance);
+
+		/* Setup the view of the cube. */
+		gl2.glMatrixMode(GL2.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		glu.gluPerspective( cameraInstance.lFov,
+				cameraInstance.lAspect,
+				cameraInstance.lNear,
+				cameraInstance.lFar	
+				);
 	}
 
 	private static void initVBOs(GL2 gl2) {
@@ -137,14 +150,40 @@ public class TestRendererDeferred {
 
 	public static void render(GL2 gl2, int width, int height,
 			GvRenderer lRenderer) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
 
-	public static void setup(GL2 gl2, int width, int height) {
-		// TODO Auto-generated method stub
-		
+	}
+
+
+
+	public static void reshape(GL2 gl2, int width, int height,
+			GvRenderer lRenderer) {
+
+		GvRendererStateMachine sMachine = lRenderer.getRendererStateMachine();
+		if(sMachine.setState(RendererState.SCREEN_DIMENSIONS_CHANGE))
+		{
+			sMachine.screenSetDimensions(width, height);
+			sMachine.setState(RendererState.IDLE);
+		}
+
+		gl2.glViewport(0, 0, width, height);
+		float aspectRatio = (float)width / (float)height;
+
+		//set aspect ratio into camera instance
+		if(sMachine.setState(RendererState.CAMERA_ASPECT_CHANGE))
+		{
+			lRenderer.getRendererStateMachine().cameraSetAspect(aspectRatio);
+			lRenderer.getRendererStateMachine().setState(RendererState.IDLE);
+		}
+
+		sMachine.getCamera(cameraInstance);
+
+		/* Setup the view of the cube. */
+		gl2.glMatrixMode(GL2.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		glu.gluPerspective( cameraInstance.lFov,
+				cameraInstance.lAspect,
+				cameraInstance.lNear,
+				cameraInstance.lFar	
+				);
 	}
 }

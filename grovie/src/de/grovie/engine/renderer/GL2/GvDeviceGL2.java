@@ -1,4 +1,4 @@
-package de.grovie.engine.renderer.GL3;
+package de.grovie.engine.renderer.GL2;
 
 import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.device.GvDevice;
@@ -7,7 +7,7 @@ import de.grovie.engine.renderer.device.GvShaderProgram;
 import de.grovie.engine.renderer.device.GvVertexBuffer;
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 
-public class GvDeviceGL3 extends GvDevice{
+public class GvDeviceGL2 extends GvDevice{
 
 	@Override
 	public GvGraphicsWindow  createWindow(
@@ -16,7 +16,7 @@ public class GvDeviceGL3 extends GvDevice{
 		
 		GvWindowSystem winSys = windowSystem.getInstance(renderer);
 		
-		return new GvGraphicsWindowGL3(winSys);
+		return new GvGraphicsWindowGL2(winSys);
 	}
 
 	@Override

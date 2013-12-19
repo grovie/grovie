@@ -15,7 +15,12 @@ public class GvRendererStateMachine {
 		IDLE,
 		CAMERA_ROTATION,
 		CAMERA_TRANSLATION,
-		CAMERA_MOVE_FORTH_BACK;
+		CAMERA_MOVE_FORTH_BACK,
+		CAMERA_FOV_CHANGE,
+		CAMERA_ASPECT_CHANGE,
+		CAMERA_NEAR_CHANGE,
+		CAMERA_FAR_CHANGE,
+		SCREEN_DIMENSIONS_CHANGE;
 	}
 	
 	/** Renderer state is a state machine. 
@@ -27,7 +32,13 @@ public class GvRendererStateMachine {
 	/**
 	 * Camera instance
 	 */
-	GvCamera lCamera;
+	private GvCamera lCamera;
+	
+	/**
+	 * Screen dimensions
+	 */
+	private int lScreenWidth;
+	private int lScreenHeight;
 	
 	/**
 	 * Default constructor - default state is idle
@@ -36,6 +47,17 @@ public class GvRendererStateMachine {
 	{
 		lState = RendererState.IDLE; //handler begins in idling state
 		lCamera = new GvCamera();
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public GvRendererStateMachine(int screenWidth, int screenHeight)
+	{
+		lState = RendererState.IDLE; //handler begins in idling state
+		lCamera = new GvCamera((float)screenWidth/(float)screenHeight);
+		lScreenWidth = screenWidth;
+		lScreenHeight= screenHeight;
 	}
 	
 	/**
@@ -50,23 +72,7 @@ public class GvRendererStateMachine {
 			lState = state;
 			return true;
 		}
-		else if(lState == RendererState.CAMERA_ROTATION)
-		{
-			if(state == RendererState.IDLE)
-			{
-				lState = RendererState.IDLE;
-				return true;
-			}
-		}
-		else if(lState == RendererState.CAMERA_TRANSLATION)
-		{
-			if(state == RendererState.IDLE)
-			{
-				lState = RendererState.IDLE;
-				return true;
-			}
-		}
-		else if(lState == RendererState.CAMERA_MOVE_FORTH_BACK)
+		else
 		{
 			if(state == RendererState.IDLE)
 			{
@@ -110,16 +116,57 @@ public class GvRendererStateMachine {
 	
 	public void getCamera(GvCamera anotherCamera)
 	{
-		anotherCamera.lPosition[0] = lCamera.lPosition[0];
-		anotherCamera.lPosition[1] = lCamera.lPosition[1];
-		anotherCamera.lPosition[2] = lCamera.lPosition[2];
-		
-		anotherCamera.lUp[0] = lCamera.lUp[0];
-		anotherCamera.lUp[1] = lCamera.lUp[1];
-		anotherCamera.lUp[2] = lCamera.lUp[2];
-		
-		anotherCamera.lView[0] = lCamera.lView[0];
-		anotherCamera.lView[1] = lCamera.lView[1];
-		anotherCamera.lView[2] = lCamera.lView[2];
+		lCamera.copyCamera(anotherCamera);
+	}
+	
+	public void cameraSetAspect(float aspect)
+	{
+		if(lState == RendererState.CAMERA_ASPECT_CHANGE)
+		{
+			lCamera.setAspect(aspect);
+		}
+	}
+	
+	public void cameraSetNear(float near)
+	{
+		if(lState == RendererState.CAMERA_NEAR_CHANGE)
+		{
+			lCamera.setNear(near);
+		}
+	}
+	
+	public void cameraSetFar(float far)
+	{
+		if(lState == RendererState.CAMERA_FAR_CHANGE)
+		{
+			lCamera.setFar(far);
+		}
+	}
+	
+	public void cameraSetFov(float fov)
+	{
+		if(lState == RendererState.CAMERA_FOV_CHANGE)
+		{
+			lCamera.setFov(fov);
+		}
+	}
+	
+	public void screenSetDimensions(int width, int height)
+	{
+		if(lState == RendererState.SCREEN_DIMENSIONS_CHANGE)
+		{
+			lScreenWidth = width;
+			lScreenHeight = height;
+		}
+	}
+	
+	public int getScreenWidth()
+	{
+		return lScreenWidth;
+	}
+	
+	public int getScreenHeight()
+	{
+		return lScreenHeight;
 	}
 }

@@ -2,7 +2,7 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
-import de.grovie.engine.renderer.GL3.GvRendererGL3;
+import de.grovie.engine.renderer.GL2.GvRendererGL2;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 
 public class GvSandbox {
@@ -23,7 +23,7 @@ public class GvSandbox {
 		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
 		
 		//create renderer to use
-		GvRendererGL3 gvRenderer = new GvRendererGL3(
+		GvRendererGL2 gvRenderer = new GvRendererGL2(
 				windowSystem,
 				"GroViE Sandbox",
 				kWindowWidth,

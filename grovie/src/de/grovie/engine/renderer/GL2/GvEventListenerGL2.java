@@ -1,4 +1,4 @@
-package de.grovie.engine.renderer.GL3;
+package de.grovie.engine.renderer.GL2;
 
 import javax.media.opengl.GLAutoDrawable;
 
@@ -7,9 +7,9 @@ import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.test.engine.renderer.TestRenderer;
 import de.grovie.test.engine.renderer.TestRendererDeferred;
 
-public class GvEventListenerGL3  extends GvEventListener {
+public class GvEventListenerGL2  extends GvEventListener {
 
-	public GvEventListenerGL3(GvRenderer renderer)
+	public GvEventListenerGL2(GvRenderer renderer)
 	{
 		super(renderer);
 	}
@@ -19,20 +19,20 @@ public class GvEventListenerGL3  extends GvEventListener {
 //		OneTriangleAWT.render( glAutoDrawable.getGL().getGL2(), 
 //				glAutoDrawable.getWidth(), 
 //				glAutoDrawable.getHeight() );
-//		TestRenderer.render( glAutoDrawable.getGL().getGL2(), 
-//				glAutoDrawable.getWidth(), 
-//				glAutoDrawable.getHeight(),
-//				this.lRenderer);
-		TestRendererDeferred.render( glAutoDrawable.getGL().getGL2(), 
+		TestRenderer.render( glAutoDrawable.getGL().getGL2(), 
 				glAutoDrawable.getWidth(), 
 				glAutoDrawable.getHeight(),
 				this.lRenderer);
+//		TestRendererDeferred.render( glAutoDrawable.getGL().getGL2(), 
+//				glAutoDrawable.getWidth(), 
+//				glAutoDrawable.getHeight(),
+//				this.lRenderer);
 	}
 	
 	@Override
 	public void init(GLAutoDrawable glAutoDrawable) {
-//		TestRenderer.init(glAutoDrawable.getGL().getGL2());
-		TestRendererDeferred.init(glAutoDrawable.getGL().getGL2());
+		TestRenderer.init(glAutoDrawable.getGL().getGL2(),this.lRenderer);
+//		TestRendererDeferred.init(glAutoDrawable.getGL().getGL2(),this.lRenderer);
 	}
 
 	@Override
@@ -40,12 +40,14 @@ public class GvEventListenerGL3  extends GvEventListener {
 //		OneTriangleAWT.setup( glAutoDrawable.getGL().getGL2(),
 //				width,
 //				height );
-//		TestRenderer.setup( glAutoDrawable.getGL().getGL2(),
-//				width,
-//				height );
-		TestRendererDeferred.setup( glAutoDrawable.getGL().getGL2(),
+		TestRenderer.reshape( glAutoDrawable.getGL().getGL2(),
 				width,
-				height );
+				height,
+				this.lRenderer);
+//		TestRendererDeferred.reshape( glAutoDrawable.getGL().getGL2(),
+//				width,
+//				height,
+//				this.lRenderer);
 	}
 
 	@Override

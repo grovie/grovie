@@ -37,7 +37,8 @@ public class GvWindowSystemAWT extends GvWindowSystem {
 			}
 		});
 
-		lWindowAWT.setSize( renderer.getWindowWidth(), renderer.getWindowHeight() );
+		lWindowAWT.setSize( renderer.getRendererStateMachine().getScreenWidth(),
+				renderer.getRendererStateMachine().getScreenHeight());
 		lWindowAWT.setVisible( true );
 		
 		return this;
