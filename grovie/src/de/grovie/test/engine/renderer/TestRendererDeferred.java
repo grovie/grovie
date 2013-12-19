@@ -34,7 +34,7 @@ public class TestRendererDeferred {
 	static GLU glu;
 	static GLUT glut;
 
-	//gBuffer
+	//deferred pipeline - pass 1 - gBuffer
 	static final int gBufferTargetCount = 3;
 	static int[] gBufferProgram;
 	static int[] gBufferShaderV;
@@ -42,6 +42,9 @@ public class TestRendererDeferred {
 	static int[] gBufferTgtsRender;
 	static int[] gBufferTgtsTexture;
 	static int[] gBufferFbo;
+	
+	//deferred pipeline - pass 2 - light
+	
 
 	public static void main(String[] args) {
 		//create windowing system - Java AWT
@@ -167,10 +170,13 @@ public class TestRendererDeferred {
 					cameraInstance.lPosition[1]+cameraInstance.lView[1],      /* center is at (0,0,0) */
 					cameraInstance.lPosition[2]+cameraInstance.lView[2],
 					cameraInstance.lUp[0], cameraInstance.lUp[1],cameraInstance.lUp[2]);      /* up is in positive Y direction */
+			//gl2.glColor4f(1.0f,0,0,1.0f);
 			drawObjVBO(gl2);
 		gBufferStop(gl2);
 
-		drawTexture(gBufferTgtsTexture[0], gl2,renderer);
+		drawTexture(gBufferTgtsTexture[0], gl2,renderer);	//FOR DEBUG - see normal buffer
+		//drawTexture(gBufferTgtsTexture[1], gl2,renderer);	//FOR DEBUG - see normal buffer
+		//drawTexture(gBufferTgtsTexture[2], gl2,renderer); //FOR DEBUG - see depth buffer
 	}
 
 	private static void gBufferStop(GL2 gl2) {

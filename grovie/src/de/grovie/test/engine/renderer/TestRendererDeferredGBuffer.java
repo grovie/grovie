@@ -7,7 +7,7 @@ public class TestRendererDeferredGBuffer {
 			"                                                             							\n"+
 			"void main( void )                                            							\n"+
 			"{                                                            							\n"+
-			"    normal = normalize(gl_NormalMatrix * gl_Normal);									\n"+
+			"    normal = gl_Normal;																\n"+
 			"                                                             							\n"+
 			"    gl_FrontColor = gl_Color;                 											\n"+
 			"    gl_Position = ftransform();	   													\n"+

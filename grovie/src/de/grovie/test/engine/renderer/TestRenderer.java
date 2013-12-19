@@ -88,8 +88,8 @@ public class TestRenderer {
 				"{"+
 				//		"    //convert normal from model space to world space"+
 				//		"    normal = normalize((gl_ModelViewMatrix * vec4(gl_Normal, 0.0)).xyz);"+
-				"    normal = normalize(gl_NormalMatrix * gl_Normal);"+ //same as line above but optimized
-				"    lightDirWorld = normalize(gl_NormalMatrix * vec4(lightDir,0.0).xyz);"+ //should pre-compute this
+				"    normal = gl_Normal;"+ //same as line above but optimized
+				"    lightDirWorld = vec4(lightDir,0.0).xyz;"+ //should pre-compute this
 				//        "    normal = gl_Normal;"+
 				//		""+
 				//		"    //compute cos of angle between normal and light direction (world space)"+
