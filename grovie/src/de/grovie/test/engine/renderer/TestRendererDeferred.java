@@ -6,6 +6,10 @@ import java.nio.IntBuffer;
 import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.LUDecomposition;
+import org.apache.commons.math3.linear.RealMatrix;
+
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import de.grovie.data.importer.obj.GvImporterObj;
@@ -15,12 +19,22 @@ import de.grovie.engine.renderer.GvRendererStateMachine;
 import de.grovie.engine.renderer.GL2.GvRendererGL2;
 import de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
 import de.grovie.engine.renderer.device.GvCamera;
+import de.grovie.engine.renderer.device.GvLight;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 
 public class TestRendererDeferred {
 
-	//camera
+	//camera - temporary variable for copying camera info from renderer state machine
 	static GvCamera cameraInstance = new GvCamera();
+
+	//light - temporary variable for copying light info from renderer state machine
+	static GvLight lightInstance = new GvLight();
+
+	//view, projection 
+	static float[] matProjection = new float[16];	//projection matrix obtained from obtained from openGL in pass 1
+	static float[] matView = new float[16];		//view matrix obtained from obtained from openGL in pass 1
+	static float[] matViewInv = new float[16];	//inverse of view matrix
+	static float[] eyeSpaceBound = new float[2];//right and top bounds of view frustum
 
 	//geometry
 	public static float vertices[]; //vertices
@@ -42,9 +56,26 @@ public class TestRendererDeferred {
 	static int[] gBufferTgtsRender;
 	static int[] gBufferTgtsTexture;
 	static int[] gBufferFbo;
-	
+
 	//deferred pipeline - pass 2 - light
-	
+	static final int lightTargetCount = 2;
+	static int[] lightAProgram;
+	static int[] lightAShaderV;
+	static int[] lightAShaderF;
+	static int[] lightBProgram;
+	static int[] lightBShaderV;
+	static int[] lightBShaderF;
+	static int[] lightATgtsRender;
+	static int[] lightATgtsTexture;
+	static int[] lightAFbo;
+	static int[] lightBTgtsRender;
+	static int[] lightBTgtsTexture;
+	static int[] lightBFbo;
+	static int lightAPrevDiff;
+	static int lightAPrevSpec;
+	static int lightBPrevDiff;
+	static int lightBPrevSpec;
+	static boolean lightShaderToggle;
 
 	public static void main(String[] args) {
 		//create windowing system - Java AWT
@@ -83,29 +114,29 @@ public class TestRendererDeferred {
 		initGL(gl2,renderer);
 		initShaders(gl2, renderer);
 		initVBOs(gl2);
-		
-		
 	}
 
 	private static void initShaders(GL2 gl2, GvRenderer renderer) {
 		gBufferProgram = new int[1];
 		gBufferShaderV = new int[1];
 		gBufferShaderF = new int[1];
-		gBufferTgtsRender  = new int[3];
-		gBufferTgtsTexture = new int[3];
+		gBufferTgtsRender  = new int[gBufferTargetCount];
+		gBufferTgtsTexture = new int[gBufferTargetCount];
 		gBufferFbo = new int[1];
 
-		//		gBufferDeleteAll(gl2);
-		//		gBufferInit(gl2, renderer);
-		//
-		//		lightADeleteAll(gl2);
-		//		lightAInit(gl2);
-		//
-		//		lightBDeleteAll(gl2);
-		//		lightBInit(gl2);
-		//
-		//		colorDeleteAll(gl2);
-		//		colorInit(gl2);
+		lightAProgram = new int[1];
+		lightAShaderV = new int[1];
+		lightAShaderF = new int[1];
+		lightATgtsRender  = new int[lightTargetCount];
+		lightATgtsTexture = new int[lightTargetCount];
+		lightAFbo = new int[1];
+
+		lightBProgram = new int[1];
+		lightBShaderV = new int[1];
+		lightBShaderF = new int[1];
+		lightBTgtsRender  = new int[lightTargetCount];
+		lightBTgtsTexture = new int[lightTargetCount];
+		lightBFbo = new int[1];
 	}
 
 	private static void initGL(GL2 gl2, GvRenderer renderer) {
@@ -160,23 +191,267 @@ public class TestRendererDeferred {
 	public static void render(GL2 gl2, int width, int height,
 			GvRenderer renderer) {
 
-		//deferred lighting pipeline - pass 1 - gbuffer
+		//1. deferred lighting pipeline - pass 1 - gbuffer
 		gBufferStart(gl2,renderer);
-			gl2.glMatrixMode(GL2.GL_MODELVIEW);
-			gl2.glLoadIdentity();
-			renderer.getRendererStateMachine().getCamera(cameraInstance);
-			glu.gluLookAt(cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2],  /* eye is at (0,0,5) */
-					cameraInstance.lPosition[0]+cameraInstance.lView[0],
-					cameraInstance.lPosition[1]+cameraInstance.lView[1],      /* center is at (0,0,0) */
-					cameraInstance.lPosition[2]+cameraInstance.lView[2],
-					cameraInstance.lUp[0], cameraInstance.lUp[1],cameraInstance.lUp[2]);      /* up is in positive Y direction */
-			//gl2.glColor4f(1.0f,0,0,1.0f);
-			drawObjVBO(gl2);
+		//gl2.glColor4f(1.0f,0,0,1.0f);
+		drawObjVBO(gl2);
 		gBufferStop(gl2);
 
-		drawTexture(gBufferTgtsTexture[0], gl2,renderer);	//FOR DEBUG - see normal buffer
+		//drawTexture(gBufferTgtsTexture[0], gl2,renderer);	//FOR DEBUG - see normal buffer
 		//drawTexture(gBufferTgtsTexture[1], gl2,renderer);	//FOR DEBUG - see normal buffer
 		//drawTexture(gBufferTgtsTexture[2], gl2,renderer); //FOR DEBUG - see depth buffer
+
+		//2. deferred lighting pipeline - pass 2 - light accumulation
+		//alternate between 2 sets of textures and accumulate lighting computations
+		lightShaderToggle = true;
+		computeViewMatrixInv(); //compute inverse of view matrix
+		computeEyeSpaceBound(renderer); //compute right and top boundaries of view frustum
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int lightCount = sMachine.getLightCount();
+		for(int i=0; i<lightCount; ++i)
+		{
+			if(lightShaderToggle)
+			{
+				lightStart(gl2, renderer, i);
+				drawQuad(gl2,renderer);
+				lightStop(gl2);
+			}
+			else
+			{
+				lightStart(gl2, renderer, i);
+				drawQuad(gl2,renderer);
+				lightStop(gl2);
+			}
+
+			//switch shader for next light
+			lightShaderToggle = !lightShaderToggle;
+		}
+
+		drawTexture(lightATgtsTexture[0], gl2,renderer); 	//FOR DEBUG - see light buffer
+	}
+
+	/**
+	 * Computes the inverse of the view matrix
+	 */
+	private static void computeViewMatrixInv() {
+		double[][] viewMat2Array = new double[][]{
+				{matView[0],matView[1],matView[2],matView[3]},
+				{matView[4],matView[5],matView[6],matView[7]},
+				{matView[8],matView[9],matView[10],matView[11]},
+				{matView[12],matView[13],matView[14],matView[15]}
+		};
+		RealMatrix viewMatApache = new Array2DRowRealMatrix(viewMat2Array);
+		RealMatrix vInverse = new LUDecomposition(viewMatApache).getSolver().getInverse();
+		double[][] viewMatInv2Array = vInverse.getData();
+
+		matViewInv[0]=(float)viewMatInv2Array[0][0];
+		matViewInv[1]=(float)viewMatInv2Array[0][1];
+		matViewInv[2]=(float)viewMatInv2Array[0][2];
+		matViewInv[3]=(float)viewMatInv2Array[0][3];
+		matViewInv[4]=(float)viewMatInv2Array[1][0];
+		matViewInv[5]=(float)viewMatInv2Array[1][1];
+		matViewInv[6]=(float)viewMatInv2Array[1][2];
+		matViewInv[7]=(float)viewMatInv2Array[1][3];
+		matViewInv[8]=(float)viewMatInv2Array[2][0];
+		matViewInv[9]=(float)viewMatInv2Array[2][1];
+		matViewInv[10]=(float)viewMatInv2Array[2][2];
+		matViewInv[11]=(float)viewMatInv2Array[2][3];
+		matViewInv[12]=(float)viewMatInv2Array[3][0];
+		matViewInv[13]=(float)viewMatInv2Array[3][1];
+		matViewInv[14]=(float)viewMatInv2Array[3][2];
+		matViewInv[15]=(float)viewMatInv2Array[3][3];
+
+
+	}
+	
+	private static void computeEyeSpaceBound(GvRenderer renderer)
+	{
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		sMachine.getCamera(cameraInstance);
+
+		eyeSpaceBound[1] = (float) (cameraInstance.lNear * Math.tan((cameraInstance.lFov/180.0)*Math.PI/2.0));
+		eyeSpaceBound[0] = eyeSpaceBound[1]*cameraInstance.lAspect;
+	}
+
+	private static void lightStop(GL2 gl2) {
+		//unbind and disable textures
+		gl2.glActiveTexture(GL2.GL_TEXTURE0);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE1);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE2);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE3);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+		
+		gl2.glUseProgram(0);
+
+		gl2.glPopAttrib();
+
+		//switch back to window-system-provided framebuffer
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
+	}
+
+	private static void lightStart(GL2 gl2, GvRenderer renderer, int lightIndex) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		sMachine.getCamera(cameraInstance);
+		sMachine.getLight(lightIndex,lightInstance);
+		
+		if(lightShaderToggle)
+		{
+			gl2.glUseProgram(lightAProgram[0]);
+			
+			//set values to be accessed by fragment shader
+			int idPosition = gl2.glGetUniformLocation(lightAProgram[0],"tImage0"); //depth texture
+			int idNormal = gl2.glGetUniformLocation(lightAProgram[0],"tImage1"); //normal texture
+			int idPrevDiff = gl2.glGetUniformLocation(lightAProgram[0],"tImage2"); //previous accumulated light diffuse texture
+			int idPrevSpec = gl2.glGetUniformLocation(lightAProgram[0],"tImage3"); //previous accumulated light specular texture
+
+			int idLight = gl2.glGetUniformLocation(lightAProgram[0],"light"); //light position
+			int idLightDiff = gl2.glGetUniformLocation(lightAProgram[0],"lightDiff"); //light diffuse color/intensity
+			int idLightSpec = gl2.glGetUniformLocation(lightAProgram[0],"lightSpec"); //light specular color/intensity
+
+			int idCameraPosition = gl2.glGetUniformLocation(lightAProgram[0],"cameraPosition");	//camera world position
+			int idViewMatrixInv= gl2.glGetUniformLocation(lightAProgram[0],"viewMatrixInv"); //project matrix inverse
+
+			int idClipPlanes= gl2.glGetUniformLocation(lightAProgram[0],"clipPlanes"); //znear and zfar
+			int idWindowSize= gl2.glGetUniformLocation(lightAProgram[0],"windowSize"); //width and height
+			int idRightAndTop= gl2.glGetUniformLocation(lightAProgram[0],"rightAndTop"); //eye space frustrum boundaries
+			
+			//set values
+			gl2.glUniform3f(idLight,
+					lightInstance.lPosition[0],
+					lightInstance.lPosition[1],
+					lightInstance.lPosition[2]);
+			gl2.glUniform4f(idLightDiff,lightInstance.lDiffuse[0],
+					lightInstance.lDiffuse[1],
+					lightInstance.lDiffuse[2],
+					lightInstance.lDiffuse[3]);
+			gl2.glUniform4f(idLightSpec,lightInstance.lSpecular[0],
+					lightInstance.lSpecular[1],
+					lightInstance.lSpecular[2],
+					lightInstance.lSpecular[3]);
+			gl2.glUniform3f(idCameraPosition,
+					cameraInstance.lPosition[0],
+					cameraInstance.lPosition[1],
+					cameraInstance.lPosition[2]);
+			FloatBuffer viewInvWrap = FloatBuffer.wrap(matViewInv);
+			gl2.glUniformMatrix4fv(idViewMatrixInv,1,false,viewInvWrap);
+			gl2.glUniform2f(idClipPlanes, cameraInstance.lNear, cameraInstance.lFar);
+			gl2.glUniform2f(idWindowSize, sMachine.getScreenWidth(), sMachine.getScreenHeight());
+			gl2.glUniform2f(idRightAndTop,eyeSpaceBound[0],eyeSpaceBound[1]);
+			
+			gl2.glEnable(GL2.GL_TEXTURE_2D);
+			
+			gl2.glActiveTexture(GL2.GL_TEXTURE0);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,gBufferTgtsTexture[2]); //bind zbuffer texture
+			gl2.glUniform1i (idPosition, 0);
+
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 1);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,gBufferTgtsTexture[0]); //bind normal texture
+			gl2.glUniform1i (idNormal, 1);
+			
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 2);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,lightAPrevDiff);
+			gl2.glUniform1i (idPrevDiff, 2);
+
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 3);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,lightAPrevSpec);
+			gl2.glUniform1i(idPrevSpec, 3);
+			
+			//Switch target frame buffer to fbo instance in this class
+			gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, lightAFbo[0]);
+			gl2.glPushAttrib(GL2.GL_VIEWPORT_BIT);
+			gl2.glViewport(0,0,sMachine.getScreenWidth(), sMachine.getScreenHeight());
+
+			//switch draw buffers to the render targets
+			int buffers[] = new int[]{
+					GL2.GL_COLOR_ATTACHMENT0,
+					GL2.GL_COLOR_ATTACHMENT1
+			};
+			IntBuffer intBuffers = IntBuffer.wrap(buffers);
+			gl2.glDrawBuffers(2, intBuffers);
+		}
+		else
+		{
+			gl2.glUseProgram(lightBProgram[0]);
+			
+			//set values to be accessed by fragment shader
+			int idPosition = gl2.glGetUniformLocation(lightBProgram[0],"tImage0"); //depth texture
+			int idNormal = gl2.glGetUniformLocation(lightBProgram[0],"tImage1"); //normal texture
+			int idPrevDiff = gl2.glGetUniformLocation(lightBProgram[0],"tImage2"); //previous accumulated light diffuse texture
+			int idPrevSpec = gl2.glGetUniformLocation(lightBProgram[0],"tImage3"); //previous accumulated light specular texture
+
+			int idLight = gl2.glGetUniformLocation(lightBProgram[0],"light"); //light position
+			int idLightDiff = gl2.glGetUniformLocation(lightBProgram[0],"lightDiff"); //light diffuse color/intensity
+			int idLightSpec = gl2.glGetUniformLocation(lightBProgram[0],"lightSpec"); //light specular color/intensity
+
+			int idCameraPosition = gl2.glGetUniformLocation(lightBProgram[0],"cameraPosition");	//camera world position
+			int idViewMatrixInv= gl2.glGetUniformLocation(lightBProgram[0],"viewMatrixInv"); //project matrix inverse
+
+			int idClipPlanes= gl2.glGetUniformLocation(lightBProgram[0],"clipPlanes"); //znear and zfar
+			int idWindowSize= gl2.glGetUniformLocation(lightBProgram[0],"windowSize"); //width and height
+			int idRightAndTop= gl2.glGetUniformLocation(lightBProgram[0],"rightAndTop"); //eye space frustrum boundaries
+			
+			//set values
+			gl2.glUniform3f(idLight,
+					lightInstance.lPosition[0],
+					lightInstance.lPosition[1],
+					lightInstance.lPosition[2]);
+			gl2.glUniform4f(idLightDiff,lightInstance.lDiffuse[0],
+					lightInstance.lDiffuse[1],
+					lightInstance.lDiffuse[2],
+					lightInstance.lDiffuse[3]);
+			gl2.glUniform4f(idLightSpec,lightInstance.lSpecular[0],
+					lightInstance.lSpecular[1],
+					lightInstance.lSpecular[2],
+					lightInstance.lSpecular[3]);
+			gl2.glUniform3f(idCameraPosition,
+					cameraInstance.lPosition[0],
+					cameraInstance.lPosition[1],
+					cameraInstance.lPosition[2]);
+			FloatBuffer viewInvWrap = FloatBuffer.wrap(matViewInv);
+			gl2.glUniformMatrix4fv(idViewMatrixInv,1,false,viewInvWrap);
+			gl2.glUniform2f(idClipPlanes, cameraInstance.lNear, cameraInstance.lFar);
+			gl2.glUniform2f(idWindowSize, sMachine.getScreenWidth(), sMachine.getScreenHeight());
+			gl2.glUniform2f(idRightAndTop,eyeSpaceBound[0],eyeSpaceBound[1]);
+			
+			gl2.glEnable(GL2.GL_TEXTURE_2D);
+			
+			gl2.glActiveTexture(GL2.GL_TEXTURE0);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,gBufferTgtsTexture[2]); //bind zbuffer texture
+			gl2.glUniform1i (idPosition, 0);
+
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 1);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,gBufferTgtsTexture[0]); //bind normal texture
+			gl2.glUniform1i (idNormal, 1);
+			
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 2);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,lightBPrevDiff);
+			gl2.glUniform1i (idPrevDiff, 2);
+
+			gl2.glActiveTexture(GL2.GL_TEXTURE0 + 3);
+			gl2.glBindTexture(GL2.GL_TEXTURE_2D,lightBPrevSpec);
+			gl2.glUniform1i(idPrevSpec, 3);
+			
+			//Switch target frame buffer to fbo instance in this class
+			gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, lightBFbo[0]);
+			gl2.glPushAttrib(GL2.GL_VIEWPORT_BIT);
+			gl2.glViewport(0,0,sMachine.getScreenWidth(), sMachine.getScreenHeight());
+
+			//switch draw buffers to the render targets
+			int buffers[] = new int[]{
+					GL2.GL_COLOR_ATTACHMENT0,
+					GL2.GL_COLOR_ATTACHMENT1
+			};
+			IntBuffer intBuffers = IntBuffer.wrap(buffers);
+			gl2.glDrawBuffers(2, intBuffers);
+		}
 	}
 
 	private static void gBufferStop(GL2 gl2) {
@@ -205,23 +480,12 @@ public class TestRendererDeferred {
 		gl2.glEnable(GL2.GL_CULL_FACE);
 		gl2.glEnable(GL2.GL_DEPTH_TEST);
 
-		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
-		sMachine.getCamera(cameraInstance);
-
-		/* Setup the view of the cube. */
-		gl2.glMatrixMode(GL2.GL_PROJECTION);
-		gl2.glLoadIdentity();
-		glu.gluPerspective( cameraInstance.lFov,
-				cameraInstance.lAspect,
-				cameraInstance.lNear,
-				cameraInstance.lFar	
-				);
-
 		//use g buffer fill shading program
 		//gl2.glUseProgram(programId);
 		gl2.glUseProgram(gBufferProgram[0]);
 
 		//render to fbo
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
 		int width = sMachine.getScreenWidth();
 		int height = sMachine.getScreenHeight();
 		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, gBufferFbo[0]);
@@ -239,6 +503,34 @@ public class TestRendererDeferred {
 		};
 		IntBuffer intBuffers = IntBuffer.wrap(buffers);
 		gl2.glDrawBuffers(2, intBuffers);
+
+		//set projection-model-view matrices
+		sMachine.getCamera(cameraInstance);	//get camera info
+		gl2.glMatrixMode(GL2.GL_PROJECTION);//set projection
+		gl2.glLoadIdentity();
+		glu.gluPerspective( cameraInstance.lFov,
+				cameraInstance.lAspect,
+				cameraInstance.lNear,
+				cameraInstance.lFar	
+				);
+		gl2.glMatrixMode(GL2.GL_MODELVIEW);	//set model-view
+		gl2.glLoadIdentity();
+		glu.gluLookAt(cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2],
+				cameraInstance.lPosition[0]+cameraInstance.lView[0],
+				cameraInstance.lPosition[1]+cameraInstance.lView[1],
+				cameraInstance.lPosition[2]+cameraInstance.lView[2],
+				cameraInstance.lUp[0], cameraInstance.lUp[1],cameraInstance.lUp[2]);
+
+		//copy matrices - for pre-computing inverse to use in pass 2,3 
+		gl2.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, matView, 1);		//copy model-view matrix for use in pass 2,3
+		gl2.glGetFloatv(GL2.GL_PROJECTION_MATRIX, matProjection, 1);//copy projection matrix for use in pass 2,3
+		for(int i=0; i<15; ++i)
+		{
+			matView[i] = matView[i+1];
+			matProjection[i] = matProjection[i+1];
+		}
+		matView[15] = 1;
+		matProjection[15] = 0;
 	}
 
 	private static void drawObjVBO(GL2 gl2)
@@ -270,6 +562,7 @@ public class TestRendererDeferred {
 	public static void reshape(GL2 gl2, int width, int height,
 			GvRenderer lRenderer) {
 
+		//set screen dimension changes into renderer state
 		GvRendererStateMachine sMachine = lRenderer.getRendererStateMachine();
 		if(sMachine.setState(RendererState.SCREEN_DIMENSIONS_CHANGE))
 		{
@@ -277,6 +570,7 @@ public class TestRendererDeferred {
 			sMachine.setState(RendererState.IDLE);
 		}
 
+		//set viewport
 		gl2.glViewport(0, 0, width, height);
 		float aspectRatio = (float)width / (float)height;
 
@@ -287,15 +581,20 @@ public class TestRendererDeferred {
 			lRenderer.getRendererStateMachine().setState(RendererState.IDLE);
 		}
 
+		//Re-initialize pipeline passes
+		//pass 1
 		gBufferDeleteAll(gl2);
 		gBufferInit(gl2, lRenderer);
-
+		//pass 2 - light A & B work in an altenating manner, i.e. the output of one is the input to the other
 		lightADeleteAll(gl2);
-		lightAInit(gl2);
-
+		lightAInit(gl2, lRenderer);
 		lightBDeleteAll(gl2);
-		lightBInit(gl2);
-
+		lightBInit(gl2, lRenderer);
+		lightAPrevDiff=lightBTgtsTexture[0];
+		lightAPrevSpec=lightBTgtsTexture[1];
+		lightBPrevDiff=lightATgtsTexture[0];
+		lightBPrevSpec=lightATgtsTexture[1];
+		//pass 3
 		colorDeleteAll(gl2);
 		colorInit(gl2);
 	}
@@ -323,6 +622,13 @@ public class TestRendererDeferred {
 		{	
 			IntBuffer renderIds = IntBuffer.wrap(gBufferTgtsRender);
 			gl2.glDeleteRenderbuffers(2, renderIds);
+		}
+
+		//delete textures
+		if(gBufferTgtsTexture!=null)
+		{
+			IntBuffer textureIds = IntBuffer.wrap(gBufferTgtsTexture);
+			gl2.glDeleteTextures(3, textureIds);
 		}
 	}
 
@@ -474,24 +780,336 @@ public class TestRendererDeferred {
 		gl2.glValidateProgram(gBufferProgram[0]);
 	}
 
-	private static void lightAInit(GL2 gl2) {
-		// TODO Auto-generated method stub
+	private static void lightAInit(GL2 gl2, GvRenderer renderer) {
+		lightAInitShaders(gl2);
+		lightAInitFrameBuffer(gl2);
+		lightAInitRenderBuffer(gl2,renderer);
+		lightAInitTextures(gl2,renderer);
 
+		//check status of FBO after setup
+		int status = gl2.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER);
+		if( status != GL2.GL_FRAMEBUFFER_COMPLETE){
+			gBufferDeleteAll(gl2);
+			System.out.println("Error setting up frame buffer.\n");
+		}
+
+		//Bind back to default window-system-provided frame buffer
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
+	}
+
+	private static void lightAInitTextures(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate texture ids
+		gl2.glGenTextures(lightTargetCount, lightATgtsTexture, 0);
+
+		//setup texture target for position and bind to fbo
+
+		//texture for diffuse component - Set A
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D, lightATgtsTexture[0]);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB32F, width, height, 0, GL2.GL_RGB, GL2.GL_FLOAT, null);
+		gl2.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+				GL2.GL_COLOR_ATTACHMENT0, 
+				GL2.GL_TEXTURE_2D, 
+				lightATgtsTexture[0],
+				0);
+
+		//texture for specular component - Set A
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D, lightATgtsTexture[1]);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB32F, width, height, 0, GL2.GL_RGB, GL2.GL_FLOAT, null);
+		gl2.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+				GL2.GL_COLOR_ATTACHMENT1, 
+				GL2.GL_TEXTURE_2D, 
+				lightATgtsTexture[1],
+				0);
+	}
+
+	private static void lightAInitRenderBuffer(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate render buffer ids
+		IntBuffer intBuffer = IntBuffer.wrap(lightATgtsRender);
+		gl2.glGenRenderbuffers(lightTargetCount, intBuffer);
+
+		//bind render targets to fbo
+
+		//render target 1 - diffuse component A
+		gl2.glBindRenderbuffer(GL2.GL_RENDERBUFFER, lightATgtsRender[0]);
+		gl2.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGB32F, width, height);
+		gl2.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL2.GL_RENDERBUFFER, lightATgtsRender[0]);
+		//render target 2 - specular component A
+		gl2.glBindRenderbuffer(GL2.GL_RENDERBUFFER, lightATgtsRender[1]);
+		gl2.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGB32F, width, height);
+		gl2.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT1, GL2.GL_RENDERBUFFER, lightATgtsRender[1]);
+	}
+
+	private static void lightAInitFrameBuffer(GL2 gl2) {
+		IntBuffer intBuffer = IntBuffer.wrap(lightAFbo);
+
+		//generate fbo
+		gl2.glGenFramebuffers(1, intBuffer);
+
+		//bind fbo
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, lightAFbo[0]);
+	}
+
+	private static void lightAInitShaders(GL2 gl2) {
+		for(int i=0; i<lightAShaderV.length; ++i)
+		{
+			lightAShaderV[i] = gl2.glCreateShader(GL2.GL_VERTEX_SHADER);
+
+			//length of vertex shader program
+			int[] vlen = new int[1];
+			vlen[0] = TestRendererDeferredLight.PROGRAM_V[i].length();
+
+			//place vertex program in 1D array with 1 element
+			String[] program = new String[]{TestRendererDeferredLight.PROGRAM_V[i]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(lightAShaderV[i], 1, program, vlen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(lightAShaderV[i]);
+		}
+
+		for(int j=0; j<lightAShaderF.length; ++j)
+		{
+			lightAShaderF[j] = gl2.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+
+			/*
+			 * Fragment Shader
+			 */
+			//length of fragment shader program
+			int[] flen = new int[1];
+			flen[0] = TestRendererDeferredLight.PROGRAM_F[j].length();
+
+			String[] program = new String[]{TestRendererDeferredLight.PROGRAM_F[j]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(lightAShaderF[j], 1, program, flen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(lightAShaderF[j]);
+		}
+
+		/*
+		 * Shader Program
+		 */
+		lightAProgram[0] = gl2.glCreateProgram();
+		gl2.glAttachShader(lightAProgram[0],lightAShaderV[0]);
+		gl2.glAttachShader(lightAProgram[0],lightAShaderF[0]);
+		gl2.glLinkProgram(lightAProgram[0]);
+		gl2.glValidateProgram(lightAProgram[0]);
 	}
 
 	private static void lightADeleteAll(GL2 gl2) {
-		// TODO Auto-generated method stub
+		//delete shaders and program
+		if((lightAProgram!=null) && (lightAShaderV!=null) && (lightAShaderF!=null) )
+		{
+			gl2.glDetachShader(lightAProgram[0], lightAShaderV[0]);
+			gl2.glDetachShader(lightAProgram[0], lightAShaderF[0]);
+			gl2.glDeleteShader(lightAShaderV[0]);
+			gl2.glDeleteShader(lightAShaderF[0]);
+			gl2.glDeleteProgram(lightAProgram[0]);
+		}
+		//delete frame buffer object
+		if(lightAFbo!=null)
+		{
+			IntBuffer fboIds = IntBuffer.wrap(lightAFbo);
+			gl2.glDeleteFramebuffers(1, fboIds);
+		}
 
+		//delete render buffers
+		if(lightATgtsRender!=null)
+		{	
+			IntBuffer renderIds = IntBuffer.wrap(lightATgtsRender);
+			gl2.glDeleteRenderbuffers(2, renderIds);
+		}
+
+		//delete textures
+		if(lightATgtsTexture!=null)
+		{
+			IntBuffer textureIds = IntBuffer.wrap(lightATgtsTexture);
+			gl2.glDeleteTextures(2, textureIds);
+		}
 	}
 
-	private static void lightBInit(GL2 gl2) {
-		// TODO Auto-generated method stub
+	private static void lightBInit(GL2 gl2, GvRenderer renderer) {
+		lightBInitShaders(gl2);
+		lightBInitFrameBuffer(gl2);
+		lightBInitRenderBuffer(gl2,renderer);
+		lightBInitTextures(gl2,renderer);
 
+		//check status of FBO after setup
+		int status = gl2.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER);
+		if( status != GL2.GL_FRAMEBUFFER_COMPLETE){
+			gBufferDeleteAll(gl2);
+			System.out.println("Error setting up frame buffer.\n");
+		}
+
+		//Bind back to default window-system-provided frame buffer
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
+	}
+
+	private static void lightBInitTextures(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate texture ids
+		gl2.glGenTextures(lightTargetCount, lightBTgtsTexture, 0);
+
+		//setup texture target for position and bind to fbo
+
+		//texture for diffuse component - Set A
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D, lightBTgtsTexture[0]);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB32F, width, height, 0, GL2.GL_RGB, GL2.GL_FLOAT, null);
+		gl2.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+				GL2.GL_COLOR_ATTACHMENT0, 
+				GL2.GL_TEXTURE_2D, 
+				lightBTgtsTexture[0],
+				0);
+
+		//texture for specular component - Set A
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D, lightBTgtsTexture[1]);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB32F, width, height, 0, GL2.GL_RGB, GL2.GL_FLOAT, null);
+		gl2.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+				GL2.GL_COLOR_ATTACHMENT1, 
+				GL2.GL_TEXTURE_2D, 
+				lightBTgtsTexture[1],
+				0);
+	}
+
+	private static void lightBInitRenderBuffer(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate render buffer ids
+		IntBuffer intBuffer = IntBuffer.wrap(lightBTgtsRender);
+		gl2.glGenRenderbuffers(lightTargetCount, intBuffer);
+
+		//bind render targets to fbo
+
+		//render target 1 - diffuse component A
+		gl2.glBindRenderbuffer(GL2.GL_RENDERBUFFER, lightBTgtsRender[0]);
+		gl2.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGB32F, width, height);
+		gl2.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL2.GL_RENDERBUFFER, lightBTgtsRender[0]);
+		//render target 2 - specular component A
+		gl2.glBindRenderbuffer(GL2.GL_RENDERBUFFER, lightBTgtsRender[1]);
+		gl2.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGB32F, width, height);
+		gl2.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT1, GL2.GL_RENDERBUFFER, lightBTgtsRender[1]);
+	}
+
+	private static void lightBInitFrameBuffer(GL2 gl2) {
+		IntBuffer intBuffer = IntBuffer.wrap(lightBFbo);
+
+		//generate fbo
+		gl2.glGenFramebuffers(1, intBuffer);
+
+		//bind fbo
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, lightBFbo[0]);
+	}
+
+	private static void lightBInitShaders(GL2 gl2) {
+		for(int i=0; i<lightBShaderV.length; ++i)
+		{
+			lightBShaderV[i] = gl2.glCreateShader(GL2.GL_VERTEX_SHADER);
+
+			//length of vertex shader program
+			int[] vlen = new int[1];
+			vlen[0] = TestRendererDeferredLight.PROGRAM_V[i].length();
+
+			//place vertex program in 1D array with 1 element
+			String[] program = new String[]{TestRendererDeferredLight.PROGRAM_V[i]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(lightBShaderV[i], 1, program, vlen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(lightBShaderV[i]);
+		}
+
+		for(int j=0; j<lightBShaderF.length; ++j)
+		{
+			lightBShaderF[j] = gl2.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+
+			/*
+			 * Fragment Shader
+			 */
+			//length of fragment shader program
+			int[] flen = new int[1];
+			flen[0] = TestRendererDeferredLight.PROGRAM_F[j].length();
+
+			String[] program = new String[]{TestRendererDeferredLight.PROGRAM_F[j]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(lightBShaderF[j], 1, program, flen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(lightBShaderF[j]);
+		}
+
+		/*
+		 * Shader Program
+		 */
+		lightBProgram[0] = gl2.glCreateProgram();
+		gl2.glAttachShader(lightBProgram[0],lightBShaderV[0]);
+		gl2.glAttachShader(lightBProgram[0],lightBShaderF[0]);
+		gl2.glLinkProgram(lightBProgram[0]);
+		gl2.glValidateProgram(lightBProgram[0]);
 	}
 
 	private static void lightBDeleteAll(GL2 gl2) {
-		// TODO Auto-generated method stub
+		//delete shaders and program
+		if((lightBProgram!=null) && (lightBShaderV!=null) && (lightBShaderF!=null) )
+		{
+			gl2.glDetachShader(lightBProgram[0], lightBShaderV[0]);
+			gl2.glDetachShader(lightBProgram[0], lightBShaderF[0]);
+			gl2.glDeleteShader(lightBShaderV[0]);
+			gl2.glDeleteShader(lightBShaderF[0]);
+			gl2.glDeleteProgram(lightBProgram[0]);
+		}
+		//delete frame buffer object
+		if(lightBFbo!=null)
+		{
+			IntBuffer fboIds = IntBuffer.wrap(lightBFbo);
+			gl2.glDeleteFramebuffers(1, fboIds);
+		}
 
+		//delete render buffers
+		if(lightBTgtsRender!=null)
+		{	
+			IntBuffer renderIds = IntBuffer.wrap(lightBTgtsRender);
+			gl2.glDeleteRenderbuffers(2, renderIds);
+		}
+
+		//delete textures
+		if(lightBTgtsTexture!=null)
+		{
+			IntBuffer textureIds = IntBuffer.wrap(lightBTgtsTexture);
+			gl2.glDeleteTextures(2, textureIds);
+		}
 	}
 
 	private static void colorInit(GL2 gl2) {
@@ -504,6 +1122,37 @@ public class TestRendererDeferred {
 
 	}
 
+	/**
+	 * Draws a quad the size of the viewport
+	 * @param gl2
+	 * @param renderer
+	 */
+	private static void drawQuad(GL2 gl2, GvRenderer renderer)
+	{
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//draw texture
+		gl2.glColor3f(1,1,1);
+		gl2.glBegin(GL2.GL_QUADS);
+		//gl2.glTexCoord2f(0, 1);
+		gl2.glVertex3f(0.0f, height, -1.0f);
+		//gl2.glTexCoord2f(0, 0);
+		gl2.glVertex3f(0.0f, 0.0f  , -1.0f);
+		//gl2.glTexCoord2f(1, 0);
+		gl2.glVertex3f(width , 0.0f  , -1.0f);
+		//gl2.glTexCoord2f(1, 1);
+		gl2.glVertex3f(width , height, -1.0f);
+		gl2.glEnd();
+	}
+
+	/**
+	 * Draws a quad the size of the viewport with the specified texture
+	 * @param textureId
+	 * @param gl2
+	 * @param renderer
+	 */
 	public static void drawTexture(int textureId ,GL2 gl2, GvRenderer renderer)
 	{
 		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();

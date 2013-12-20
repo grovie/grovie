@@ -1,6 +1,7 @@
 package de.grovie.engine.renderer;
 
 import de.grovie.engine.renderer.device.GvCamera;
+import de.grovie.engine.renderer.device.GvLight;
 
 /**
  * This class is a state machine providing access to components in the renderer that can be modified.
@@ -41,12 +42,33 @@ public class GvRendererStateMachine {
 	private int lScreenHeight;
 	
 	/**
+	 * Lights
+	 */
+	private static int DEFAULT_LIGHT_COUNT = 3;
+	private static float[] DEFAULT_LIGHT_0_POS = new float[]{GvLight.DEFAULT_POSITION[0],
+		GvLight.DEFAULT_POSITION[1],
+		GvLight.DEFAULT_POSITION[2]};
+	private static float[] DEFAULT_LIGHT_1_POS = new float[]{-1,1,1};
+	private static float[] DEFAULT_LIGHT_2_POS = new float[]{0,1,-1};
+	private GvLight[] lLights;
+	
+	/**
 	 * Default constructor - default state is idle
 	 */
 	public GvRendererStateMachine()
 	{
 		lState = RendererState.IDLE; //handler begins in idling state
 		lCamera = new GvCamera();
+		lLights = new GvLight[DEFAULT_LIGHT_COUNT];
+		lLights[0] = new GvLight(DEFAULT_LIGHT_0_POS[0],
+				DEFAULT_LIGHT_0_POS[1],
+				DEFAULT_LIGHT_0_POS[2]);
+		lLights[1] = new GvLight(DEFAULT_LIGHT_1_POS[0],
+				DEFAULT_LIGHT_1_POS[1],
+				DEFAULT_LIGHT_1_POS[2]);
+		lLights[2] = new GvLight(DEFAULT_LIGHT_2_POS[0],
+				DEFAULT_LIGHT_2_POS[1],
+				DEFAULT_LIGHT_2_POS[2]);
 	}
 	
 	/**
@@ -168,5 +190,18 @@ public class GvRendererStateMachine {
 	public int getScreenHeight()
 	{
 		return lScreenHeight;
+	}
+	
+	public void getLight(int index, GvLight anotherLight)
+	{
+		if((index>=0)&&(lLights.length >=index))
+		{
+			lLights[index].copyLight(anotherLight);
+		}
+	}
+	
+	public int getLightCount()
+	{
+		return lLights.length;
 	}
 }
