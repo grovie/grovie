@@ -32,7 +32,7 @@ public class TestRendererDeferred {
 	static GvLight lightInstance = new GvLight();
 
 	//view, projection 
-	static float[] matProjection = new float[16];	//projection matrix obtained from obtained from openGL in pass 1
+	//static float[] matProjection = new float[16];	//projection matrix obtained from obtained from openGL in pass 1
 	static float[] matView = new float[16];		//view matrix obtained from obtained from openGL in pass 1
 	static float[] matViewInv = new float[16];	//inverse of view matrix
 	static float[] eyeSpaceBound = new float[2];//right and top bounds of view frustum
@@ -78,6 +78,17 @@ public class TestRendererDeferred {
 	static int lightBPrevSpec;
 	static boolean lightShaderToggle;
 
+	//deferred pipeline - pass 3 - color
+	static final int colorTargetCount = 1;
+	static int[] colorProgram;
+	static int[] colorShaderV;
+	static int[] colorShaderF;
+	static int[] colorTgtsRender;
+	static int[] colorTgtsTexture;
+	static int[] colorFbo;
+
+
+
 	public static void main(String[] args) {
 		//create windowing system - Java AWT
 		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
@@ -99,8 +110,9 @@ public class TestRendererDeferred {
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		GvGeometry geom = new GvGeometry();
@@ -139,6 +151,13 @@ public class TestRendererDeferred {
 		lightBTgtsRender  = new int[lightTargetCount];
 		lightBTgtsTexture = new int[lightTargetCount];
 		lightBFbo = new int[1];
+
+		colorProgram = new int[1];
+		colorShaderV = new int[1];
+		colorShaderF = new int[1];
+		colorTgtsRender  = new int[colorTargetCount];
+		colorTgtsTexture = new int[colorTargetCount];
+		colorFbo = new int[1];
 	}
 
 	private static void initGL(GL2 gl2, GvRenderer renderer) {
@@ -193,27 +212,24 @@ public class TestRendererDeferred {
 	public static void render(GL2 gl2, int width, int height,
 			GvRenderer renderer) {
 
-		//1. deferred lighting pipeline - pass 1 - gbuffer
+		//1. deferred shading pipeline - pass 1 - gbuffer
 		gBufferStart(gl2,renderer);
-		//gl2.glColor4f(1.0f,0,0,1.0f);
+		gl2.glColor4f(1.0f,0,0,1.0f);
 		drawObjVBO(gl2);
 		gBufferStop(gl2);
 
 		//drawTexture(gBufferTgtsTexture[0], gl2,renderer);	//FOR DEBUG - see normal buffer
 		//drawTexture(gBufferTgtsTexture[1], gl2,renderer);	//FOR DEBUG - see color buffer
 		//drawTexture(gBufferTgtsTexture[2], gl2,renderer); //FOR DEBUG - see depth buffer
-		
-		lightShaderToggle = true;
-		lightStart(gl2, renderer, 0);
-		drawQuad(gl2,renderer);
-		lightStop(gl2);
-		drawTexture(lightATgtsTexture[0], gl2,renderer); 
 
-		//2. deferred lighting pipeline - pass 2 - light accumulation
+		//2. deferred shading pipeline - pass 2 - light accumulation
 		//alternate between 2 sets of textures and accumulate lighting computations
-		/*lightShaderToggle = true;
+		lightShaderToggle = true;
 		computeViewMatrixInv(); //compute inverse of view matrix
 		computeEyeSpaceBound(renderer); //compute right and top boundaries of view frustum
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, lightBFbo[0]);
+		gl2.glClear( GL2.GL_COLOR_BUFFER_BIT);
+
 		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
 		int lightCount = sMachine.getLightCount();
 		for(int i=0; i<lightCount; ++i)
@@ -235,8 +251,103 @@ public class TestRendererDeferred {
 			lightShaderToggle = !lightShaderToggle;
 		}
 
-		drawTexture(lightATgtsTexture[0], gl2,renderer); 	//FOR DEBUG - see light buffer
-*/	}
+		//drawTexture(lightATgtsTexture[1], gl2,renderer); 	//FOR DEBUG - see light buffer
+
+		//3. deferred shading pipeline - pass 3 - coloring
+		int texDiff,texSpec;
+		if(lightShaderToggle)
+		{
+			texDiff=lightBTgtsTexture[0]; texSpec=lightBTgtsTexture[1];
+		}
+		else
+		{
+			texDiff=lightATgtsTexture[0]; texSpec=lightATgtsTexture[1];
+		}
+		colorStart(gl2, renderer,texDiff , texSpec);
+		drawQuad(gl2,renderer);
+		colorStop(gl2);
+		
+		drawTexture(colorTgtsTexture[0], gl2,renderer); 	//FOR DEBUG - see light buffer
+		
+	}
+
+	private static void colorStop(GL2 gl2) {
+		//unbind and disable textures
+		gl2.glActiveTexture(GL2.GL_TEXTURE0);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE1);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE2);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE3);
+		gl2.glBindTexture( GL2.GL_TEXTURE_2D, 0 );
+
+		gl2.glDisable(GL2.GL_TEXTURE_2D);
+
+		gl2.glUseProgram(0);
+
+		gl2.glPopAttrib();
+
+		//switch back to window-system-provided framebuffer
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
+	}
+
+	private static void colorStart(GL2 gl2, GvRenderer renderer, int texDiff, int texSpec) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		
+		//orthogonal projection for drawing flat 2d image
+		gl2.glMatrixMode(GL2.GL_PROJECTION);
+		gl2.glLoadIdentity();
+		gl2.glOrtho(0,sMachine.getScreenWidth(),0,sMachine.getScreenHeight(),0.1f,2);	
+		//Model setup
+		gl2.glMatrixMode(GL2.GL_MODELVIEW);
+		gl2.glLoadIdentity();
+		
+		gl2.glUseProgram(colorProgram[0]);
+		
+		int idWidthHeight = gl2.glGetUniformLocation(colorProgram[0],"widthHeight");
+
+		//accumulated diffuse lights
+		int idDiff = gl2.glGetUniformLocation(colorProgram[0],"tImage0");
+		//accumulated specular lights
+		int idSpec = gl2.glGetUniformLocation(colorProgram[0],"tImage1");
+		//color buffer from g-buffer
+		int idColor = gl2.glGetUniformLocation(colorProgram[0],"tImage2");
+
+		//bind textures to uniform variables in shaders
+		gl2.glActiveTexture(GL2.GL_TEXTURE0);
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D,texDiff);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glUniform1i (idDiff, 0);
+
+		gl2.glActiveTexture(GL2.GL_TEXTURE0 + 1);
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D,texSpec);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glUniform1i (idSpec, 1);
+		
+		gl2.glActiveTexture(GL2.GL_TEXTURE0 + 2);
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D,gBufferTgtsTexture[1]);
+		gl2.glEnable(GL2.GL_TEXTURE_2D);
+		gl2.glUniform1i (idColor, 2);
+
+		//bind screen dimensions to uniform variable widthHeight
+		gl2.glUniform2f(idWidthHeight, (float)sMachine.getScreenWidth(), (float)sMachine.getScreenHeight());
+		
+		//Switch target frame buffer to fbo instance in this class
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, colorFbo[0]);
+		gl2.glPushAttrib(GL2.GL_VIEWPORT_BIT);
+		gl2.glViewport(0,0,sMachine.getScreenWidth(), sMachine.getScreenHeight());
+
+		//switch draw buffers to the render targets
+		int buffers[] = new int[]{
+				GL2.GL_COLOR_ATTACHMENT0
+		};
+		IntBuffer intBuffers = IntBuffer.wrap(buffers);
+		gl2.glDrawBuffers(1, intBuffers);
+	}
 
 	/**
 	 * Computes the inverse of the view matrix
@@ -541,14 +652,14 @@ public class TestRendererDeferred {
 
 		//copy matrices - for pre-computing inverse to use in pass 2,3 
 		gl2.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, matView, 1);		//copy model-view matrix for use in pass 2,3
-		gl2.glGetFloatv(GL2.GL_PROJECTION_MATRIX, matProjection, 1);//copy projection matrix for use in pass 2,3
+		//gl2.glGetFloatv(GL2.GL_PROJECTION_MATRIX, matProjection, 1);//copy projection matrix for use in pass 2,3
 		for(int i=0; i<15; ++i)
 		{
 			matView[i] = matView[i+1];
-			matProjection[i] = matProjection[i+1];
+			//matProjection[i] = matProjection[i+1];
 		}
 		matView[15] = 1;
-		matProjection[15] = 0;
+		//matProjection[15] = 0;
 	}
 
 	private static void drawObjVBO(GL2 gl2)
@@ -612,9 +723,9 @@ public class TestRendererDeferred {
 		lightAPrevSpec=lightBTgtsTexture[1];
 		lightBPrevDiff=lightATgtsTexture[0];
 		lightBPrevSpec=lightATgtsTexture[1];
-		//pass 3
+		//pass 3 - color
 		colorDeleteAll(gl2);
-		colorInit(gl2);
+		colorInit(gl2, lRenderer);
 	}
 
 	private static void gBufferDeleteAll(GL2 gl2)
@@ -639,14 +750,14 @@ public class TestRendererDeferred {
 		if(gBufferTgtsRender!=null)
 		{	
 			IntBuffer renderIds = IntBuffer.wrap(gBufferTgtsRender);
-			gl2.glDeleteRenderbuffers(2, renderIds);
+			gl2.glDeleteRenderbuffers(gBufferTargetCount, renderIds);
 		}
 
 		//delete textures
 		if(gBufferTgtsTexture!=null)
 		{
 			IntBuffer textureIds = IntBuffer.wrap(gBufferTgtsTexture);
-			gl2.glDeleteTextures(3, textureIds);
+			gl2.glDeleteTextures(gBufferTargetCount, textureIds);
 		}
 	}
 
@@ -796,7 +907,8 @@ public class TestRendererDeferred {
 		gl2.glAttachShader(gBufferProgram[0],gBufferShaderF[0]);
 		gl2.glLinkProgram(gBufferProgram[0]);
 		gl2.glValidateProgram(gBufferProgram[0]);
-		
+
+		System.out.println("GBuffer Shader: ");
 		printLog(gl2,gBufferShaderV[0]);
 		printLog(gl2,gBufferShaderF[0]);
 		printLog(gl2,gBufferProgram[0]);
@@ -934,7 +1046,8 @@ public class TestRendererDeferred {
 		gl2.glAttachShader(lightAProgram[0],lightAShaderF[0]);
 		gl2.glLinkProgram(lightAProgram[0]);
 		gl2.glValidateProgram(lightAProgram[0]);
-		
+
+		System.out.println("Light Shader A: ");
 		printLog(gl2,lightAShaderV[0]);
 		printLog(gl2,lightAShaderF[0]);
 		printLog(gl2,lightAProgram[0]);
@@ -961,14 +1074,14 @@ public class TestRendererDeferred {
 		if(lightATgtsRender!=null)
 		{	
 			IntBuffer renderIds = IntBuffer.wrap(lightATgtsRender);
-			gl2.glDeleteRenderbuffers(2, renderIds);
+			gl2.glDeleteRenderbuffers(lightTargetCount, renderIds);
 		}
 
 		//delete textures
 		if(lightATgtsTexture!=null)
 		{
 			IntBuffer textureIds = IntBuffer.wrap(lightATgtsTexture);
-			gl2.glDeleteTextures(2, textureIds);
+			gl2.glDeleteTextures(lightTargetCount, textureIds);
 		}
 	}
 
@@ -1104,6 +1217,11 @@ public class TestRendererDeferred {
 		gl2.glAttachShader(lightBProgram[0],lightBShaderF[0]);
 		gl2.glLinkProgram(lightBProgram[0]);
 		gl2.glValidateProgram(lightBProgram[0]);
+		
+		System.out.println("Light Shader B: ");
+		printLog(gl2,lightBShaderV[0]);
+		printLog(gl2,lightBShaderF[0]);
+		printLog(gl2,lightBProgram[0]);
 	}
 
 	private static void lightBDeleteAll(GL2 gl2) {
@@ -1127,25 +1245,169 @@ public class TestRendererDeferred {
 		if(lightBTgtsRender!=null)
 		{	
 			IntBuffer renderIds = IntBuffer.wrap(lightBTgtsRender);
-			gl2.glDeleteRenderbuffers(2, renderIds);
+			gl2.glDeleteRenderbuffers(lightTargetCount, renderIds);
 		}
 
 		//delete textures
 		if(lightBTgtsTexture!=null)
 		{
 			IntBuffer textureIds = IntBuffer.wrap(lightBTgtsTexture);
-			gl2.glDeleteTextures(2, textureIds);
+			gl2.glDeleteTextures(lightTargetCount, textureIds);
 		}
 	}
 
-	private static void colorInit(GL2 gl2) {
-		// TODO Auto-generated method stub
+	private static void colorInit(GL2 gl2, GvRenderer renderer) {
+		colorInitShaders(gl2);
+		colorInitFrameBuffer(gl2);
+		colorInitRenderBuffer(gl2,renderer);
+		colorInitTextures(gl2,renderer);
 
+		//check status of FBO after setup
+		int status = gl2.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER);
+		if( status != GL2.GL_FRAMEBUFFER_COMPLETE){
+			gBufferDeleteAll(gl2);
+			System.out.println("Error setting up frame buffer.\n");
+		}
+
+		//Bind back to default window-system-provided frame buffer
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, 0);
+	}
+
+	private static void colorInitTextures(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate texture ids
+		gl2.glGenTextures(colorTargetCount, colorTgtsTexture, 0);
+
+		//setup texture target for position and bind to fbo
+
+		//texture for diffuse component - Set A
+		gl2.glBindTexture(GL2.GL_TEXTURE_2D, colorTgtsTexture[0]);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+		gl2.glTexImage2D(GL2.GL_TEXTURE_2D, 0, GL2.GL_RGB32F, width, height, 0, GL2.GL_RGB, GL2.GL_FLOAT, null);
+		gl2.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, 
+				GL2.GL_COLOR_ATTACHMENT0, 
+				GL2.GL_TEXTURE_2D, 
+				colorTgtsTexture[0],
+				0);
+	}
+
+	private static void colorInitRenderBuffer(GL2 gl2, GvRenderer renderer) {
+		GvRendererStateMachine sMachine = renderer.getRendererStateMachine();
+		int width = sMachine.getScreenWidth();
+		int height = sMachine.getScreenHeight();
+
+		//generate render buffer ids
+		IntBuffer intBuffer = IntBuffer.wrap(colorTgtsRender);
+		gl2.glGenRenderbuffers(colorTargetCount, intBuffer);
+
+		//bind render targets to fbo
+
+		//render target 1 - diffuse component A
+		gl2.glBindRenderbuffer(GL2.GL_RENDERBUFFER, colorTgtsRender[0]);
+		gl2.glRenderbufferStorage(GL2.GL_RENDERBUFFER, GL2.GL_RGB32F, width, height);
+		gl2.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_COLOR_ATTACHMENT0, GL2.GL_RENDERBUFFER, colorTgtsRender[0]);
+	}
+
+	private static void colorInitFrameBuffer(GL2 gl2) {
+		IntBuffer intBuffer = IntBuffer.wrap(colorFbo);
+
+		//generate fbo
+		gl2.glGenFramebuffers(1, intBuffer);
+
+		//bind fbo
+		gl2.glBindFramebuffer(GL2.GL_FRAMEBUFFER, colorFbo[0]);
+	}
+
+	private static void colorInitShaders(GL2 gl2) {
+		for(int i=0; i<colorShaderV.length; ++i)
+		{
+			colorShaderV[i] = gl2.glCreateShader(GL2.GL_VERTEX_SHADER);
+
+			//length of vertex shader program
+			int[] vlen = new int[1];
+			vlen[0] = TestRendererDeferredColor.PROGRAM_V[i].length();
+
+			//place vertex program in 1D array with 1 element
+			String[] program = new String[]{TestRendererDeferredColor.PROGRAM_V[i]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(colorShaderV[i], 1, program, vlen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(colorShaderV[i]);
+		}
+
+		for(int j=0; j<colorShaderF.length; ++j)
+		{
+			colorShaderF[j] = gl2.glCreateShader(GL2.GL_FRAGMENT_SHADER);
+
+			/*
+			 * Fragment Shader
+			 */
+			//length of fragment shader program
+			int[] flen = new int[1];
+			flen[0] = TestRendererDeferredColor.PROGRAM_F[j].length();
+
+			String[] program = new String[]{TestRendererDeferredColor.PROGRAM_F[j]};
+
+			//link vertex shader id and vertex program
+			gl2.glShaderSource(colorShaderF[j], 1, program, flen, 0);
+
+			//compile vertex shader program
+			gl2.glCompileShader(colorShaderF[j]);
+		}
+
+		/*
+		 * Shader Program
+		 */
+		colorProgram[0] = gl2.glCreateProgram();
+		gl2.glAttachShader(colorProgram[0],colorShaderV[0]);
+		gl2.glAttachShader(colorProgram[0],colorShaderF[0]);
+		gl2.glLinkProgram(colorProgram[0]);
+		gl2.glValidateProgram(colorProgram[0]);
+
+		System.out.println("Color Shader: ");
+		printLog(gl2,colorShaderV[0]);
+		printLog(gl2,colorShaderF[0]);
+		printLog(gl2,colorProgram[0]);
 	}
 
 	private static void colorDeleteAll(GL2 gl2) {
-		// TODO Auto-generated method stub
+		//delete shaders and program
+		if((colorProgram!=null) && (colorShaderV!=null) && (colorShaderF!=null) )
+		{
+			gl2.glDetachShader(colorProgram[0], colorShaderV[0]);
+			gl2.glDetachShader(colorProgram[0], colorShaderF[0]);
+			gl2.glDeleteShader(colorShaderV[0]);
+			gl2.glDeleteShader(colorShaderF[0]);
+			gl2.glDeleteProgram(colorProgram[0]);
+		}
+		//delete frame buffer object
+		if(colorFbo!=null)
+		{
+			IntBuffer fboIds = IntBuffer.wrap(colorFbo);
+			gl2.glDeleteFramebuffers(1, fboIds);
+		}
 
+		//delete render buffers
+		if(colorTgtsRender!=null)
+		{	
+			IntBuffer renderIds = IntBuffer.wrap(colorTgtsRender);
+			gl2.glDeleteRenderbuffers(colorTargetCount, renderIds);
+		}
+
+		//delete textures
+		if(colorTgtsTexture!=null)
+		{
+			IntBuffer textureIds = IntBuffer.wrap(colorTgtsTexture);
+			gl2.glDeleteTextures(colorTargetCount, textureIds);
+		}
 	}
 
 	/**
@@ -1232,7 +1494,7 @@ public class TestRendererDeferred {
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glPopMatrix();
 	}
-	
+
 	static void printLog(GL2 gl2, int obj)
 	{
 		int maxLen[] = new int[1];

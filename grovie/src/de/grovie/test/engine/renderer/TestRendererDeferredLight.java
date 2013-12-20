@@ -6,7 +6,7 @@ public class TestRendererDeferredLight {
 		"void main( void )                                            \n"+
 				"{                                                            \n"+
 				"    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;   \n"+
-								"    gl_FrontColor = vec4(1.0, 1.0, 1.0, 1.0);                 \n"+
+				//				"    gl_FrontColor = vec4(1.0, 1.0, 1.0, 1.0);                 \n"+
 				"}"
 	};
 
@@ -49,6 +49,7 @@ public class TestRendererDeferredLight {
 		"    vec3 position = (viewMatrixInv * viewPos).xyz;                                		\n"+ 
 		"    vec3 normal = texture2D( tImage1, coor).xyz;                           			\n" +
 		"    vec4 prevDiff = texture2D( tImage2, coor );                         				\n" +
+		"    vec4 prevSpec = texture2D( tImage3, coor );                         				\n" +
 		//    diffuse component   
 		"    float NdotL = max(dot(normal,light), 0.0);												\n" +
 		"	 gl_FragData[0] = prevDiff + (NdotL*lightDiff); \n" +
@@ -57,10 +58,10 @@ public class TestRendererDeferredLight {
 		"    if(NdotL > 0.0)"+
 		"    {"+
 		"        float NdotHV = max(dot(normal,halfVector),0.0);"+
-		"        gl_FragData[1] = lightSpec * pow(NdotHV,0.2) ;"+
+		"        gl_FragData[1] = prevSpec + lightSpec * pow(NdotHV,0.2) ;"+
 		"    }"+
 		"    else {"+
-		"        gl_FragData[1]= vec4(0,0,0,0);"+
+		"        gl_FragData[1]= prevSpec;"+
 		"    }"+
 		"}"
 	};
