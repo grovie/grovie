@@ -24,15 +24,7 @@ public class GvCamera {
 
 	public GvCamera()
 	{
-		lPosition = new float[]{DEFAULT_POSITION[0],
-				DEFAULT_POSITION[1],
-				DEFAULT_POSITION[2]};
-		lUp = new float[]{DEFAULT_UP[0],
-				DEFAULT_UP[1],
-				DEFAULT_UP[2]};
-		lView = new float[]{DEFAULT_VIEW[0],
-				DEFAULT_VIEW[1],
-				DEFAULT_VIEW[2]};
+		initDefaultOrientation();
 	
 		lFov = DEFAULT_FOV;
 		lAspect = DEFAULT_ASPECT;
@@ -42,6 +34,16 @@ public class GvCamera {
 	
 	public GvCamera(float aspect)
 	{	
+		initDefaultOrientation();
+	
+		lFov = DEFAULT_FOV;
+		lAspect = aspect;
+		lNear = DEFAULT_NEAR;
+		lFar = DEFAULT_FAR;
+	}
+	
+	private void initDefaultOrientation()
+	{
 		lPosition = new float[]{DEFAULT_POSITION[0],
 				DEFAULT_POSITION[1],
 				DEFAULT_POSITION[2]};
@@ -51,11 +53,6 @@ public class GvCamera {
 		lView = new float[]{DEFAULT_VIEW[0],
 				DEFAULT_VIEW[1],
 				DEFAULT_VIEW[2]};
-	
-		lFov = DEFAULT_FOV;
-		lAspect = aspect;
-		lNear = DEFAULT_NEAR;
-		lFar = DEFAULT_FAR;
 	}
 	
 	public void copyCamera(GvCamera anotherCamera)
