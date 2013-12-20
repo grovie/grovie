@@ -2,7 +2,7 @@ package de.grovie.engine.renderer.device;
 
 public class GvLight {
 
-	public static final float[] DEFAULT_POSITION = new float[]{1,1,1};
+	public static final float[] DEFAULT_POSITION = new float[]{0.57735026919f,0.57735026919f,0.57735026919f};
 	public static final float[] DEFAULT_AMBIENT = new float[]{0.1f,0.1f,0.1f,1.0f};
 	public static final float[] DEFAULT_DIFFUSE = new float[]{0.7f,0.7f,0.7f,1.0f};
 	public static final float[] DEFAULT_SPECULAR = new float[]{0.2f,0.2f,0.2f,1.0f};

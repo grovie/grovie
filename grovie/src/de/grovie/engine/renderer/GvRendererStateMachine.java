@@ -48,17 +48,27 @@ public class GvRendererStateMachine {
 	private static float[] DEFAULT_LIGHT_0_POS = new float[]{GvLight.DEFAULT_POSITION[0],
 		GvLight.DEFAULT_POSITION[1],
 		GvLight.DEFAULT_POSITION[2]};
-	private static float[] DEFAULT_LIGHT_1_POS = new float[]{-1,1,1};
-	private static float[] DEFAULT_LIGHT_2_POS = new float[]{0,1,-1};
+	private static float[] DEFAULT_LIGHT_1_POS = new float[]{-0.57735026919f,0.57735026919f,0.57735026919f};
+	private static float[] DEFAULT_LIGHT_2_POS = new float[]{0,0.70710678118f,-0.70710678118f};
 	private GvLight[] lLights;
 	
 	/**
-	 * Default constructor - default state is idle
+	 * Default constructor - hidden
 	 */
-	public GvRendererStateMachine()
+	private GvRendererStateMachine()
 	{
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public GvRendererStateMachine(int screenWidth, int screenHeight)
+	{
+		lCamera = new GvCamera((float)screenWidth/(float)screenHeight);
+		lScreenWidth = screenWidth;
+		lScreenHeight= screenHeight;
+			
 		lState = RendererState.IDLE; //handler begins in idling state
-		lCamera = new GvCamera();
 		lLights = new GvLight[DEFAULT_LIGHT_COUNT];
 		lLights[0] = new GvLight(DEFAULT_LIGHT_0_POS[0],
 				DEFAULT_LIGHT_0_POS[1],
@@ -69,17 +79,6 @@ public class GvRendererStateMachine {
 		lLights[2] = new GvLight(DEFAULT_LIGHT_2_POS[0],
 				DEFAULT_LIGHT_2_POS[1],
 				DEFAULT_LIGHT_2_POS[2]);
-	}
-	
-	/**
-	 * Constructor
-	 */
-	public GvRendererStateMachine(int screenWidth, int screenHeight)
-	{
-		lState = RendererState.IDLE; //handler begins in idling state
-		lCamera = new GvCamera((float)screenWidth/(float)screenHeight);
-		lScreenWidth = screenWidth;
-		lScreenHeight= screenHeight;
 	}
 	
 	/**

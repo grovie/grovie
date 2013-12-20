@@ -6,7 +6,7 @@ public class TestRendererDeferredLight {
 		"void main( void )                                            \n"+
 				"{                                                            \n"+
 				"    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;   \n"+
-				//				"    gl_FrontColor = vec4(1.0, 1.0, 1.0, 1.0);                 \n"+
+								"    gl_FrontColor = vec4(1.0, 1.0, 1.0, 1.0);                 \n"+
 				"}"
 	};
 
@@ -25,30 +25,11 @@ public class TestRendererDeferredLight {
 		"uniform vec2 windowSize; 																\n" +
 		"uniform vec2 rightAndTop; 																\n" +
 		"uniform int lightType; 																\n" +
-		//				"subroutine uniform lightDirection lightSelectDir;										\n" +
 		"                                                                                    	\n" +
-		"#define ZNEAR clipPlanes.x       														\n"+
-		"#define ZFAR clipPlanes.y        														\n"+
 		"                          																\n"+
-		//				"subroutine vec3 lightDirection(vec3 pos);												\n"+
-		//				"																						\n"+
-		//				"subroutine (lightDirection ) vec3 directedDirection(vec3 pos) {						\n"+
-		//				"	return light;																		\n"+
-		//				"}																						\n"+
-		//				"																						\n"+
-		//				"subroutine (lightDirection ) vec3 pointDirection(vec3 pos) {							\n"+
-		//				"	return light-pos;																	\n"+
-		//				"}																						\n"+
-		//				"vec3 directedDirection(vec3 pos) {														\n"+
-		//				"	return light;																		\n"+
-		//				"}																						\n"+
-		//				"																						\n"+
-		//				"vec3 pointDirection(vec3 pos) {														\n"+
-		//				"	return light-pos;																	\n"+
-		//				"}																						\n"+
-
 		"void main( void )                                                                   	\n" +
 		"{                                                                                   	\n" +
+		//    ndc - normalized device coordinates
 		"    vec3 ndcPos;                                                              			\n"+
 		"    vec2 adjust = vec2(0.5,0.5);						                         	 	\n" +
 		"	 vec2 coor = (gl_FragCoord.xy+adjust) / windowSize;			 				 		\n" +
@@ -56,43 +37,31 @@ public class TestRendererDeferredLight {
 		"    ndcPos.z = texture2D(tImage0, coor).r; // or gl_FragCoord.z      					\n"+
 		"    ndcPos.xy -= 0.5;                                                            		\n"+
 		"    ndcPos.xy *= 2.0;                                                            		\n"+
-		"                                                                                  		\n" +
+		//    restoring world-space position from depth
 		" 	 vec4 viewPos; 																		\n"+
-		"    viewPos.z = -ZNEAR / (ZFAR - (ndcPos.z * (ZFAR-ZNEAR))) * ZFAR; 					\n"+
+		"    viewPos.z = -clipPlanes.x / (clipPlanes.y - (ndcPos.z * (clipPlanes.y-clipPlanes.x))) * clipPlanes.y; 					\n"+
 		"    viewPos.x = ndcPos.x * rightAndTop.x;   											\n" +                                                                            
 		"    viewPos.y = ndcPos.y * rightAndTop.y;   											\n" +
-		"    float scale = -viewPos.z / ZNEAR; 													\n"+
+		"    float scale = -viewPos.z / clipPlanes.x; 													\n"+
 		"    viewPos.x *= scale; 																\n"+
 		"    viewPos.y *= scale; 																\n"+
 		"    viewPos.w = 1;                                                                     \n"+
-		"    vec3 position = (viewMatrixInv * viewPos).xyz;                                		\n"+
-		//				"    vec3 position = texture2D(tImage0, coor).xyz;                                		\n"+
+		"    vec3 position = (viewMatrixInv * viewPos).xyz;                                		\n"+ 
 		"    vec3 normal = texture2D( tImage1, coor).xyz;                           			\n" +
 		"    vec4 prevDiff = texture2D( tImage2, coor );                         				\n" +
-		"    vec4 prevSpec = texture2D( tImage3, coor );                           				\n" +
-		"                                                                                    	\n" +
-		//				"    vec3 lightDir = light - position ;                                               	\n" +
-		//				"    vec3 lightDir = lightSelectDir(position);                                         	\n" +
-		"	 vec3 lightDir;	float dist;															\n" +	
-		"	 if(lightType==0){																	\n" +														
-		"    	lightDir = light-position;														\n" +
-		" 		dist = length(lightDir);														\n"+
-		"    }                                                                                	\n" +
-		"	 else {																				\n"+
-		"		lightDir = light;																\n"+
-		"		dist = 700;																		\n" +
-		"	 }																					\n"+		
-		//				"    float dist = length(lightDir);                                                   	\n" +
-		"    normal = normalize(normal);                                                      	\n" +
-		"    lightDir = normalize(lightDir);                                                  	\n" +
-		"    vec3 eyeDir = normalize(cameraPosition-position);                                	\n" +
-		"    vec3 vHalfVector = normalize(lightDir+eyeDir);                                   	\n" +                                                         
-		//				"	 gl_FragData[0] = (prevDiff * 0.5)+ (((dot(normal,lightDir)+1)/2) * (lightPow.x/dist) * lightDiff)*0.5; \n" +
-		//				"    gl_FragData[1] = (prevSpec * 0.5)+ (pow(((dot(normal,vHalfVector)+1)/2),0.5) * (lightPow.y/dist) * lightSpec)*0.5; \n" +
-		"	 gl_FragData[0] = (prevDiff )+ (((dot(normal,lightDir)+1)/2) * (lightPow.x/dist) * lightDiff); \n" +
-		"    gl_FragData[1] = (prevSpec )+ (pow(((dot(normal,vHalfVector)+1)/2),0.5) * (lightPow.y/dist) * lightSpec); \n" +
-		//				"	 gl_FragData[0] = prevDiff + ((dot(normal,lightDir)+1)/2) * lightDiff; \n" +
-		//				"    gl_FragData[1] = prevSpec + pow(((dot(normal,vHalfVector)+1)/2),0.5) * lightSpec; \n" +
+		//    diffuse component   
+		"    float NdotL = max(dot(normal,light), 0.0);												\n" +
+		"	 gl_FragData[0] = prevDiff + (NdotL*lightDiff); \n" +
+		//    specular component
+		"    vec3 halfVector = light + normalize(cameraPosition-position);"+
+		"    if(NdotL > 0.0)"+
+		"    {"+
+		"        float NdotHV = max(dot(normal,halfVector),0.0);"+
+		"        gl_FragData[1] = lightSpec * pow(NdotHV,0.2) ;"+
+		"    }"+
+		"    else {"+
+		"        gl_FragData[1]= vec4(0,0,0,0);"+
+		"    }"+
 		"}"
 	};
 }

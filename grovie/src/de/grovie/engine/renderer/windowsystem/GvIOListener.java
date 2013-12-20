@@ -23,7 +23,7 @@ public class GvIOListener {
 	public static final int MOUSE_BUTTON_RIGHT 	= 3;
 	public static final float MOUSE_SENSITIVITY_ROTATION = 50.0f;
 	public static final float MOUSE_SENSITIVITY_TRANSLATION = 10.0f;
-	public static final float MOUSE_SENSITIVITY_FORTH_BACK = 10.0f;
+	public static final float MOUSE_SENSITIVITY_FORTH_BACK = 5.0f;
 
 	//mouse event variables
 	int lMousePressX;

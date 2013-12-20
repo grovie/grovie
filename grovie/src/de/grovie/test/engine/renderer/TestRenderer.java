@@ -106,7 +106,7 @@ public class TestRenderer {
 				"    ambientColorGlobal = materialAmb * globalAmb;"+
 				//		""+
 				//		"    //half vector for specular term"+
-				"    halfVector = lightDirWorld + normalize(cameraPos-(gl_ModelViewMatrix * gl_Vertex).xyz);"+
+				"    halfVector = lightDirWorld + normalize(cameraPos-gl_Vertex.xyz);"+
 				//		""+
 				//      "    //computer specular term - blinn-phong"+
 				"    if(NdotL > 0.0)"+
@@ -120,6 +120,7 @@ public class TestRenderer {
 				//		""+
 				//		"    //diffuse term + ambient term + global ambient + specular term"+
 				"    gl_FrontColor = NdotL * diffuseColor + ambientColor + ambientColorGlobal + specularColor;"+
+				//"    gl_FrontColor = specularColor;"+
 				//		""+
 				//		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+ //convert position from model to projected space
 				"	 gl_Position = ftransform();"+ //same as line above but optimized
@@ -457,7 +458,7 @@ public class TestRenderer {
 		int idLightSpec = gl2.glGetUniformLocation(shaderProgramId,"lightSpe");
 		gl2.glUniform4f(idLightAmbi,0.1f,0.1f,0.1f,1.0f);
 		gl2.glUniform4f(idLightDiff,0.7f,0.7f,0.7f,1.0f);
-		gl2.glUniform4f(idLightSpec,0.2f,0.2f,0.2f,1.0f);
+		gl2.glUniform4f(idLightSpec,0.7f,0.7f,0.7f,1.0f);
 
 		//3. material ambient,diffuse,specular,shininess
 		int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
