@@ -7,7 +7,6 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
 
-import de.grovie.engine.renderer.GvEventListener;
 import de.grovie.engine.renderer.GvRenderer;
 import de.grovie.engine.renderer.windowsystem.GvWindowSystem;
 

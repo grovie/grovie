@@ -5,6 +5,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
@@ -19,6 +20,11 @@ import static de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
 
 public class TestRenderer {
 
+	/**
+	 * Frame time
+	 */
+	static double frameTime;
+	
 	/**
 	 * Utility method instances
 	 */
@@ -54,7 +60,12 @@ public class TestRenderer {
 		{4, 5, 1, 0}, {5, 6, 2, 1}, {7, 4, 0, 3} };
 	public static float[][] v = new float[8][3];
 
-
+	/**
+	 * VAO
+	 */
+	public static int[] vaoId; //vao ID
+	
+	
 	/**
 	 * Variables for VBO drawing
 	 */
@@ -163,8 +174,8 @@ public class TestRenderer {
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
-		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
@@ -481,6 +492,12 @@ public class TestRenderer {
 
 	private static void initVBOs(GL2 gl2) {
 
+		//generate VAO
+		vaoId = new int[1];
+		IntBuffer vaoIdBuffer = IntBuffer.wrap(vaoId);
+		gl2.glGenVertexArrays(1, vaoIdBuffer); // Create our Vertex Array Object
+		gl2.glBindVertexArray(vaoId[0]); // Bind our Vertex Array Object so we can use it  
+		
 		//generate VBO
 		vboId = new int[1];
 		IntBuffer vboIdBuffer = IntBuffer.wrap(vboId);
@@ -520,7 +537,13 @@ public class TestRenderer {
 				GL2.GL_STATIC_DRAW //buffer usage hint
 				);
 
-
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY); 
+		gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
+		gl2.glNormalPointer(GL2.GL_FLOAT, 0, vertices.length*4);
+		
+		gl2.glBindVertexArray(0); // Disable VAO 
+		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0); //Disable VBO
 	}
 
 	private static void initGL(GL2 gl2, GvRenderer renderer)
@@ -545,12 +568,16 @@ public class TestRenderer {
 				);
 	}
 
-	public static void render( GL2 gl2, int width, int height , GvRenderer renderer) {
+	public static void render( GLAutoDrawable glAutoDrawable, GL2 gl2, int width, int height , GvRenderer renderer) {
+		
+		long frameStart = System.nanoTime();
+		
 		gl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
 		//set camera
 		gl2.glMatrixMode(GL2.GL_MODELVIEW);
 		gl2.glLoadIdentity();
+
 		renderer.getRendererStateMachine().getCamera(cameraInstance);
 		glu.gluLookAt(cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2],  /* eye is at (0,0,5) */
 				cameraInstance.lPosition[0]+cameraInstance.lView[0],
@@ -561,13 +588,28 @@ public class TestRenderer {
 		gl2.glUseProgram(shaderProgramId); 
 		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
 		gl2.glUniform3f(idCameraPos,cameraInstance.lPosition[0],cameraInstance.lPosition[1],cameraInstance.lPosition[2]);
-
-
-
+		
 		//draw objects
 		//drawBoxStandard(gl2);
 		//drawBoxVBO(gl2);
-		drawObjVBO(gl2);
+		//drawObjVBO(gl2);
+		drawObjVBOVAO(gl2);
+		
+		//draw text
+		gl2.glWindowPos2i(5, 5);
+		gl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frame time: " + frameTime);
+		gl2.glWindowPos2i(5, 15);
+		gl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		glut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "FPS: " + 1.0/frameTime);
+		
+		//swap draw buffers
+		glAutoDrawable.swapBuffers();
+		
+		//update frame time
+		frameTime = (double)((System.nanoTime()-frameStart) / 1000000000.0);
+		
+		
 	}
 
 	private static void	drawBoxStandard(GL2 gl2)
@@ -657,6 +699,20 @@ public class TestRenderer {
 
 		gl2.glDisableClientState(GL2.GL_VERTEX_ARRAY); 
 		gl2.glDisableClientState(GL2.GL_NORMAL_ARRAY); 
+	}
+	
+	private static void drawObjVBOVAO(GL2 gl2)
+	{
+		gl2.glBindVertexArray(vaoId[0]);
+		
+		gl2.glDrawElements(
+				GL2.GL_TRIANGLES,      // mode
+				indices.length,    // count
+				GL2.GL_UNSIGNED_INT,   // type
+				0           // element array buffer offset
+				);
+
+		gl2.glBindVertexArray(0);
 	}
 
 	private static void printArray(float[] arr)

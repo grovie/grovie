@@ -110,10 +110,10 @@ public class TestRendererDeferred {
 	private static void initObj() {
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\sponza.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\teapot\\teapot2.obj";
 		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\dragon\\dragon2.obj";
-		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/sponza.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
@@ -772,7 +772,12 @@ public class TestRendererDeferred {
 		int status = gl2.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER);
 		if( status != GL2.GL_FRAMEBUFFER_COMPLETE){
 			gBufferDeleteAll(gl2);
-			System.out.println("Error setting up frame buffer.\n");
+			System.out.println("FBO: Error setting up frame buffer.\n");
+			
+			if(status == GL2.GL_FRAMEBUFFER_UNSUPPORTED)
+			{
+				System.out.println("     FBO: Unsupported.\n");
+			}
 		}
 
 		//Bind back to default window-system-provided frame buffer

@@ -45,7 +45,7 @@ public class TestRendererDeferredLight {
 		"    float scale = -viewPos.z / clipPlanes.x; 													\n"+
 		"    viewPos.x *= scale; 																\n"+
 		"    viewPos.y *= scale; 																\n"+
-		"    viewPos.w = 1;                                                                     \n"+
+		"    viewPos.w = 1.0;                                                                     \n"+
 		"    vec3 position = (viewMatrixInv * viewPos).xyz;                                		\n"+ 
 		"    vec3 normal = texture2D( tImage1, coor).xyz;                           			\n" +
 		"    vec4 prevDiff = texture2D( tImage2, coor );                         				\n" +

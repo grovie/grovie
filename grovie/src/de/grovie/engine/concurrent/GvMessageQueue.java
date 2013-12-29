@@ -2,8 +2,6 @@ package de.grovie.engine.concurrent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-import de.grovie.test.engine.concurrent.TestMessageRequest;
-
 public class GvMessageQueue {
 
 	private LinkedBlockingQueue<GvMessage> lQueue;
