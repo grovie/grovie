@@ -1,5 +1,7 @@
 package de.grovie.test.engine.renderer;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -9,6 +11,9 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
 import com.jogamp.opengl.util.gl2.GLUT;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
@@ -18,7 +23,7 @@ import de.grovie.engine.renderer.device.GvCamera;
 import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
 import static de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
 
-public class TestRenderer {
+public class TestRendererTex {
 
 	/**
 	 * Frame time
@@ -75,6 +80,7 @@ public class TestRenderer {
 	public static float vertices[]; //vertices
 	public static float normals[]; 	//normals
 	public static int indices[];	//vertex indices
+	public static float uv[];		//uv coords
 	public static String[] shaderV = {
 		"uniform vec3 cameraPos;"+ //camera position world space
 				"uniform vec4 globalAmb;"+ //global ambient
@@ -135,19 +141,26 @@ public class TestRenderer {
 				//		""+
 				//		"	 gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex;"+ //convert position from model to projected space
 				"	 gl_Position = ftransform();"+ //same as line above but optimized
+				"    gl_TexCoord[0] = gl_MultiTexCoord0;"+
 				"}"
 	};
 
 	public static String[] shaderF = {
+		"uniform sampler2D texture1;"+
 		"void main()"+
 				"{"+
-				"	 gl_FragColor = gl_Color;"+
+				"	 gl_FragColor = gl_Color * texture2D(texture1, gl_TexCoord[0].st);"+
 				"}"
 	};
 	public static int shaderVId;
 	public static int shaderFId;
 	public static int shaderProgramId;
-
+	
+	/**
+	 * Textures
+	 */
+	static TextureData texData;
+	static Texture tex;
 
 	public static void main(String[] args)
 	{
@@ -215,14 +228,24 @@ public class TestRenderer {
 	}
 
 	public static void init( GL2 gl2, GvRenderer renderer) {
+		initTexture(gl2);
 		initGL(gl2,renderer);
 		initShaders(gl2);
 		initVBOs(gl2);
+		
 	}
 
 	private static void initTexture(GL2 gl2) {
-		// TODO Auto-generated method stub
-		
+		// Load earth texture.
+        try {
+            InputStream stream = new FileInputStream("/Users/yongzhiong/Downloads/test.jpg");
+            texData = TextureIO.newTextureData(gl2.getGLProfile(),stream, false, "jpg");
+            tex = TextureIO.newTexture(texData);
+        }
+        catch (Exception exc) {
+            exc.printStackTrace();
+            System.exit(1);
+        }
 	}
 
 	private static void initVertexData()
@@ -238,6 +261,7 @@ public class TestRenderer {
 		vertices = new float[72];
 		normals = new float[72];
 		indices = new int[36];
+		uv = new float[48];
 
 		//init normals
 		float norm[] = {0,0,0};
@@ -425,7 +449,60 @@ public class TestRenderer {
 		indices[33]=22;
 		indices[34]=23;
 		indices[35]=20;
-
+		
+		uv[0] = 1.0f;
+		uv[1] = 0.0f;
+		uv[2] = 0.0f;
+		uv[3] = 0.0f;
+		uv[4] = 0.0f;
+		uv[5] = 1.0f;
+		uv[6] = 1.0f;
+		uv[7] = 1.0f;
+		
+		uv[8] = 1.0f;
+		uv[9] = 0.0f;
+		uv[10] = 0.0f;
+		uv[11] = 0.0f;
+		uv[12] = 0.0f;
+		uv[13] = 1.0f;
+		uv[14] = 1.0f;
+		uv[15] = 1.0f;
+		
+		uv[16] = 1.0f;
+		uv[17] = 0.0f;
+		uv[18] = 0.0f;
+		uv[19] = 0.0f;
+		uv[20] = 0.0f;
+		uv[21] = 1.0f;
+		uv[22] = 1.0f;
+		uv[23] = 1.0f;
+		
+		uv[24] = 1.0f;
+		uv[25] = 0.0f;
+		uv[26] = 0.0f;
+		uv[27] = 0.0f;
+		uv[28] = 0.0f;
+		uv[29] = 1.0f;
+		uv[30] = 1.0f;
+		uv[31] = 1.0f;
+		
+		uv[32] = 1.0f;
+		uv[33] = 0.0f;
+		uv[34] = 0.0f;
+		uv[35] = 0.0f;
+		uv[36] = 0.0f;
+		uv[37] = 1.0f;
+		uv[38] = 1.0f;
+		uv[39] = 1.0f;
+		
+		uv[40] = 1.0f;
+		uv[41] = 0.0f;
+		uv[42] = 0.0f;
+		uv[43] = 0.0f;
+		uv[44] = 0.0f;
+		uv[45] = 1.0f;
+		uv[46] = 1.0f;
+		uv[47] = 1.0f;
 		//		System.out.println("vertices for VBO");
 		//		printArray(vertices);
 		//		System.out.println("normals for VBO");
@@ -482,8 +559,8 @@ public class TestRenderer {
 		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
 		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
 		gl2.glUniform4f(idMaterialAmbi,0.1f,0.1f,0.1f,1.0f);
-		gl2.glUniform4f(idMaterialDiff,0.6f,0.0f,0.0f,1.0f);
-		gl2.glUniform4f(idMaterialSpec,0.1f,0.1f,0.1f,1.0f);
+		gl2.glUniform4f(idMaterialDiff,0.6f,0.6f,0.6f,1.0f);
+		gl2.glUniform4f(idMaterialSpec,0.2f,0.2f,0.2f,1.0f);
 		gl2.glUniform1f(idMaterialShin, 0.01f);
 
 		//4. global ambient
@@ -493,6 +570,10 @@ public class TestRenderer {
 		//5. camera position
 		int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
 		gl2.glUniform3f(idCameraPos,cameraPosition[0],cameraPosition[1],cameraPosition[2]);
+		
+		//6. texture
+		int idTexture = gl2.glGetUniformLocation(shaderProgramId, "texture1");
+		gl2.glUniform1i(idTexture,0);
 	}
 
 	private static void initVBOs(GL2 gl2) {
@@ -513,7 +594,7 @@ public class TestRenderer {
 
 		//set total size of buffer (allocate)
 		gl2.glBufferData(GL2.GL_ARRAY_BUFFER, //type of buffer
-				(vertices.length * 4)+(normals.length * 4), //size in bytes of buffer
+				(vertices.length * 4)+(normals.length * 4)+(uv.length * 4), //size in bytes of buffer
 				null, //no data to be copied into VBO at this moment
 				GL2.GL_STATIC_DRAW //buffer usage hint
 				);
@@ -525,6 +606,10 @@ public class TestRenderer {
 		//copy normals data into VBO
 		FloatBuffer normalsBuffer = FloatBuffer.wrap(normals);
 		gl2.glBufferSubData(GL2.GL_ARRAY_BUFFER, vertices.length*4, normals.length*4, normalsBuffer);
+		
+		//copy uv data into VBO
+		FloatBuffer uvBuffer = FloatBuffer.wrap(uv);
+		gl2.glBufferSubData(GL2.GL_ARRAY_BUFFER, vertices.length*4 + normals.length*4, uv.length*4, uvBuffer);
 
 		//generate Index buffer
 		iboId = new int[1];
@@ -546,6 +631,8 @@ public class TestRenderer {
 		gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
 		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
 		gl2.glNormalPointer(GL2.GL_FLOAT, 0, vertices.length*4);
+		gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY); 
+		gl2.glTexCoordPointer(2,GL2.GL_FLOAT, 0, vertices.length*4 + normals.length*4);
 		
 		gl2.glBindVertexArray(0); // Disable VAO 
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0); //Disable VBO
@@ -649,7 +736,9 @@ public class TestRenderer {
 	private static void drawBoxVBOVAO(GL2 gl2)
 	{
 		// Adjust cube position to be asthetic angle.
-				
+		tex.enable(gl2);
+		tex.bind(gl2);
+		
 		gl2.glBindVertexArray(vaoId[0]);
 		
 		gl2.glDrawElements(
