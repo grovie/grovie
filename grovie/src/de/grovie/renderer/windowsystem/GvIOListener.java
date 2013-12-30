@@ -61,7 +61,7 @@ public class GvIOListener {
 	public void mouseWheelMovedGv(int wheelRotation)
 	{
 		GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
-		if(stateMachine.setState(GvRendererStateMachine.RendererState.CAMERA_MOVE_FORTH_BACK))
+		if(stateMachine.setState(GvRendererStateMachine.GvRendererState.CAMERA_MOVE_FORTH_BACK))
 		{
 			float dist = wheelRotation/MOUSE_SENSITIVITY_FORTH_BACK;
 
@@ -76,7 +76,7 @@ public class GvIOListener {
 											+(dist*(float)lCameraTemp.lView[2])
 					);
 			
-			stateMachine.setState(GvRendererStateMachine.RendererState.IDLE);
+			stateMachine.setState(GvRendererStateMachine.GvRendererState.IDLE);
 
 			//redraw to visualize rotation
 			lRenderer.refresh();
@@ -96,7 +96,7 @@ public class GvIOListener {
 		if(button == MOUSE_BUTTON_RIGHT)
 		{
 			if(lRenderer.getRendererStateMachine().setState(
-					GvRendererStateMachine.RendererState.CAMERA_ROTATION))
+					GvRendererStateMachine.GvRendererState.CAMERA_ROTATION))
 			{
 				this.rememberMouseLocation(x,y); //remember mouse press location
 				this.rememberCameraOrientation(); //remember camera orientation
@@ -105,7 +105,7 @@ public class GvIOListener {
 		else if(button == MOUSE_BUTTON_MIDDLE)
 		{
 			if(lRenderer.getRendererStateMachine().setState(
-					GvRendererStateMachine.RendererState.CAMERA_TRANSLATION))
+					GvRendererStateMachine.GvRendererState.CAMERA_TRANSLATION))
 			{
 				this.rememberMouseLocation(x,y); //remember mouse press location
 				this.rememberCameraOrientation(); //remember camera orientation
@@ -124,17 +124,17 @@ public class GvIOListener {
 		if(button == MOUSE_BUTTON_RIGHT)
 		{
 			GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
-			if(stateMachine.getState() == GvRendererStateMachine.RendererState.CAMERA_ROTATION)
+			if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_ROTATION)
 			{
-				stateMachine.setState(GvRendererStateMachine.RendererState.IDLE);
+				stateMachine.setState(GvRendererStateMachine.GvRendererState.IDLE);
 			}
 		}
 		else if(button == MOUSE_BUTTON_MIDDLE)
 		{
 			GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
-			if(stateMachine.getState() == GvRendererStateMachine.RendererState.CAMERA_TRANSLATION)
+			if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_TRANSLATION)
 			{
-				stateMachine.setState(GvRendererStateMachine.RendererState.IDLE);
+				stateMachine.setState(GvRendererStateMachine.GvRendererState.IDLE);
 			}
 		}
 	}
@@ -147,7 +147,7 @@ public class GvIOListener {
 	public void mouseDraggedGv(int x, int y)
 	{
 		GvRendererStateMachine stateMachine = lRenderer.getRendererStateMachine();
-		if(stateMachine.getState() == GvRendererStateMachine.RendererState.CAMERA_ROTATION)
+		if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_ROTATION)
 		{
 			//translate mouse motion to angles of rotation
 			double angleX = (lMousePressX - x)/MOUSE_SENSITIVITY_ROTATION; //rotate along vertical axis
@@ -194,7 +194,7 @@ public class GvIOListener {
 			lRenderer.refresh();
 
 		}
-		else if(stateMachine.getState() == GvRendererStateMachine.RendererState.CAMERA_TRANSLATION)
+		else if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_TRANSLATION)
 		{
 			//translate mouse motion to translation distance
 			float distX = (x-lMousePressX)/MOUSE_SENSITIVITY_TRANSLATION;

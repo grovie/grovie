@@ -1,16 +1,25 @@
 package de.grovie.renderer.GL2;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 import javax.media.opengl.GL2;
 
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
+
+import de.grovie.exception.GvExceptionRendererIndexBuffer;
 import de.grovie.exception.GvExceptionRendererShaderProgram;
+import de.grovie.exception.GvExceptionRendererTexture2D;
 import de.grovie.exception.GvExceptionRendererVertexBuffer;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvGraphicsWindow;
+import de.grovie.renderer.GvIndexBuffer;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GvShaderProgram;
+import de.grovie.renderer.GvTexture2D;
 import de.grovie.renderer.GvVertexBuffer;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
@@ -140,5 +149,57 @@ public class GvDeviceGL2 extends GvDevice{
 		{
 			System.out.println(new String(infoLog));
 		}
+	}
+
+	@Override
+	public GvIndexBuffer createIndexBuffer(long sizeInBytes)
+			throws GvExceptionRendererIndexBuffer {
+		try{
+			//get reference to jogl gl2
+			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			
+			//generate vertex buffer id
+			int iboId[] = new int[1];
+			IntBuffer iboIdBuffer = IntBuffer.wrap(iboId);
+			gl2.glGenBuffers(1, iboIdBuffer);
+
+			//bind IBO
+			gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, iboId[0]);
+
+			//set total size of buffer (allocate)
+			gl2.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, 	//type of buffer
+					sizeInBytes, 							//size in bytes of buffer
+					null, 									//no data to be copied into VBO at this moment
+					GL2.GL_STATIC_DRAW 						//buffer usage hint
+					);
+			
+			//unbind VBO
+			gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
+			
+			return new GvIndexBuffer(iboId[0], sizeInBytes);
+		}
+		catch(Exception e)
+		{
+			throw new GvExceptionRendererIndexBuffer("Error generating Index Buffer.");
+		}
+	}
+
+	@Override
+	public GvTexture2D createTexture2D(InputStream inputStream, String dataType)
+			throws GvExceptionRendererTexture2D {
+		try {
+			//get reference to jogl gl2
+			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			
+			//create texture using jogl's utility methods
+            TextureData texData = TextureIO.newTextureData(gl2.getGLProfile(),
+            		inputStream, false, dataType);
+            Texture tex = TextureIO.newTexture(texData);
+            
+            return new GvTexture2DGL2(tex.getTarget(), tex, texData);
+        }
+        catch (Exception e) {
+        	throw new GvExceptionRendererTexture2D("Error generating Texture2D.");
+        }
 	}
 }

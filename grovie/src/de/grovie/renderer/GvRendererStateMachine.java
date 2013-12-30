@@ -10,7 +10,7 @@ package de.grovie.renderer;
  */
 public class GvRendererStateMachine {
 
-	public enum RendererState
+	public enum GvRendererState
 	{
 		IDLE,
 		CAMERA_ROTATION,
@@ -27,7 +27,7 @@ public class GvRendererStateMachine {
 	 * At one moment in time, it is operating/resting in a single state.
 	 * E.g., camera rotation, etc.
 	 */ 
-	private RendererState lState;	
+	private GvRendererState lState;	
 	
 	/**
 	 * Camera instance
@@ -58,7 +58,7 @@ public class GvRendererStateMachine {
 		lCamera = new GvCamera((float)screenWidth/(float)screenHeight);
 		lScreen = new GvScreen(screenWidth, screenHeight);
 			
-		lState = RendererState.IDLE; //handler begins in idling state
+		lState = GvRendererState.IDLE; //handler begins in idling state
 		lLights = new GvLight[DEFAULT_LIGHT_COUNT];
 		lLights[0] = new GvLight(DEFAULT_LIGHT_0_POS[0],
 				DEFAULT_LIGHT_0_POS[1],
@@ -76,32 +76,32 @@ public class GvRendererStateMachine {
 	 * @param state
 	 * @return true if state was set, false otherwise
 	 */
-	public boolean setState(RendererState state)
+	public boolean setState(GvRendererState state)
 	{
-		if(lState == RendererState.IDLE)
+		if(lState == GvRendererState.IDLE)
 		{
 			lState = state;
 			return true;
 		}
 		else
 		{
-			if(state == RendererState.IDLE)
+			if(state == GvRendererState.IDLE)
 			{
-				lState = RendererState.IDLE;
+				lState = GvRendererState.IDLE;
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	public RendererState getState()
+	public GvRendererState getState()
 	{
 		return lState;
 	}
 	
 	public void cameraSetView(float x, float y, float z)
 	{
-		if(lState == RendererState.CAMERA_ROTATION)
+		if(lState == GvRendererState.CAMERA_ROTATION)
 		{
 			lCamera.setView(x, y, z);
 		}
@@ -109,8 +109,8 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetPosition(float x, float y, float z)
 	{
-		if((lState == RendererState.CAMERA_TRANSLATION)||
-			(lState == RendererState.CAMERA_MOVE_FORTH_BACK)
+		if((lState == GvRendererState.CAMERA_TRANSLATION)||
+			(lState == GvRendererState.CAMERA_MOVE_FORTH_BACK)
 				)
 		{
 			lCamera.setPosition(x, y, z);
@@ -119,7 +119,7 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetUp(float x, float y, float z)
 	{
-		if(lState == RendererState.CAMERA_ROTATION)
+		if(lState == GvRendererState.CAMERA_ROTATION)
 		{
 			lCamera.setUp(x, y, z);
 		}
@@ -132,7 +132,7 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetAspect(float aspect)
 	{
-		if(lState == RendererState.CAMERA_ASPECT_CHANGE)
+		if(lState == GvRendererState.CAMERA_ASPECT_CHANGE)
 		{
 			lCamera.setAspect(aspect);
 		}
@@ -140,7 +140,7 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetNear(float near)
 	{
-		if(lState == RendererState.CAMERA_NEAR_CHANGE)
+		if(lState == GvRendererState.CAMERA_NEAR_CHANGE)
 		{
 			lCamera.setNear(near);
 		}
@@ -148,7 +148,7 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetFar(float far)
 	{
-		if(lState == RendererState.CAMERA_FAR_CHANGE)
+		if(lState == GvRendererState.CAMERA_FAR_CHANGE)
 		{
 			lCamera.setFar(far);
 		}
@@ -156,7 +156,7 @@ public class GvRendererStateMachine {
 	
 	public void cameraSetFov(float fov)
 	{
-		if(lState == RendererState.CAMERA_FOV_CHANGE)
+		if(lState == GvRendererState.CAMERA_FOV_CHANGE)
 		{
 			lCamera.setFov(fov);
 		}
@@ -164,7 +164,7 @@ public class GvRendererStateMachine {
 	
 	public void screenSetDimensions(int width, int height)
 	{
-		if(lState == RendererState.SCREEN_DIMENSIONS_CHANGE)
+		if(lState == GvRendererState.SCREEN_DIMENSIONS_CHANGE)
 		{
 			lScreen.setScreenWidth(width);
 			lScreen.setScreenHeight(height);

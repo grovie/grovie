@@ -20,7 +20,7 @@ import de.grovie.renderer.GvLight;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GvRendererStateMachine;
 import de.grovie.renderer.GL2.GvRendererGL2;
-import de.grovie.renderer.GvRendererStateMachine.RendererState;
+import de.grovie.renderer.GvRendererStateMachine.GvRendererState;
 import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
 
 public class TestRendererDeferred {
@@ -693,10 +693,10 @@ public class TestRendererDeferred {
 
 		//set screen dimension changes into renderer state
 		GvRendererStateMachine sMachine = lRenderer.getRendererStateMachine();
-		if(sMachine.setState(RendererState.SCREEN_DIMENSIONS_CHANGE))
+		if(sMachine.setState(GvRendererState.SCREEN_DIMENSIONS_CHANGE))
 		{
 			sMachine.screenSetDimensions(width, height);
-			sMachine.setState(RendererState.IDLE);
+			sMachine.setState(GvRendererState.IDLE);
 		}
 
 		//set viewport
@@ -704,10 +704,10 @@ public class TestRendererDeferred {
 		float aspectRatio = (float)width / (float)height;
 
 		//set aspect ratio into camera instance
-		if(sMachine.setState(RendererState.CAMERA_ASPECT_CHANGE))
+		if(sMachine.setState(GvRendererState.CAMERA_ASPECT_CHANGE))
 		{
 			lRenderer.getRendererStateMachine().cameraSetAspect(aspectRatio);
-			lRenderer.getRendererStateMachine().setState(RendererState.IDLE);
+			lRenderer.getRendererStateMachine().setState(GvRendererState.IDLE);
 		}
 
 		//Re-initialize pipeline passes

@@ -102,25 +102,22 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		//disable JOGL auto buffer swap to allow timing frame draw
 		lGLAutoDrawable.setAutoSwapBufferMode(false);
 		
-		//check if FBOs are supported. use deferred shading pipeline if supported.
-		//TODO: check FBO support
+		//check if multi-color attachment FBOs are supported. assign pipeline
+		if(lGLAutoDrawable.getContext().hasFullFBOSupport())
+			lPipeline = new GvPipelineGL2Deferred();
+		else
+			lPipeline = new GvPipelineGL2();
 	}
-
+	
 	@Override
-	public void display() {
-
-		//Record start time
-		lDrawStart = System.nanoTime();
+	public void display2DOverlay() {
 		
-		//trigger pipeline process
-		//TODO: pipeline implementation
-		
+	}
+	
+	@Override
+	public void displayEnd() {
 		//swap draw buffers
-		lGLAutoDrawable.swapBuffers();
-		
-		//Record end time
-		lFrameTime = (double)((System.nanoTime()-lDrawStart) / 1000000000.0);
-		
+		lGLAutoDrawable.swapBuffers();		
 	}
 
 	@Override

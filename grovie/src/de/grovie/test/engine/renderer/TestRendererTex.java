@@ -21,7 +21,7 @@ import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GL2.GvRendererGL2;
 import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
-import static de.grovie.renderer.GvRendererStateMachine.RendererState;
+import static de.grovie.renderer.GvRendererStateMachine.GvRendererState;
 
 public class TestRendererTex {
 
@@ -208,11 +208,11 @@ public class TestRendererTex {
 
 		//set aspect ratio into camera instance
 		if(lRenderer.getRendererStateMachine().setState(
-				RendererState.CAMERA_ASPECT_CHANGE)
+				GvRendererState.CAMERA_ASPECT_CHANGE)
 				)
 		{
 			lRenderer.getRendererStateMachine().cameraSetAspect(aspectRatio);
-			lRenderer.getRendererStateMachine().setState(RendererState.IDLE);
+			lRenderer.getRendererStateMachine().setState(GvRendererState.IDLE);
 		}
 		
 		lRenderer.getRendererStateMachine().getCamera(cameraInstance);

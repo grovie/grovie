@@ -2,6 +2,14 @@ package de.grovie.renderer;
 
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
+/**
+ * This class is an abstract renderer above any graphics API.
+ * An instance of this class runs as an independent (rendering) 
+ * thread from the other components of the GroViE engine.
+ * 
+ * @author yong
+ *
+ */
 public abstract class GvRenderer implements Runnable {
 
 	Thread lThread;
@@ -12,6 +20,7 @@ public abstract class GvRenderer implements Runnable {
 	
 	//variables related to drawing 
 	GvDevice lDevice;
+	GvContext lContext;
 	GvIllustrator lIllustrator;
 	GvGraphicsWindow lGraphicsWindow;
 	
@@ -40,6 +49,7 @@ public abstract class GvRenderer implements Runnable {
 	@Override
 	public void run() {
 		lDevice = createDevice();
+		lContext = createContext();
 		lIllustrator = createIllustrator();
 		lGraphicsWindow = lDevice.createWindow(
 				lWindowSystem,
@@ -61,11 +71,15 @@ public abstract class GvRenderer implements Runnable {
 		return lWindowTitle;
 	}
 	
+	/**
+	 * Repaints or refreshes the drawing canvas
+	 */
 	public void refresh()
 	{
 		lGraphicsWindow.getWindowSystem().getCanvas().refresh();
 	}
 	
 	public abstract GvDevice createDevice();
+	public abstract GvContext createContext();
 	public abstract GvIllustrator createIllustrator();
 }
