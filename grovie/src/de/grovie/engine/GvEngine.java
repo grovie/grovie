@@ -2,7 +2,7 @@ package de.grovie.engine;
 
 import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
-import de.grovie.engine.renderer.GvRenderer;
+import de.grovie.renderer.GvRenderer;
 
 /**
  * This class is the main class representing the visualization engine.

@@ -2,8 +2,8 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
-import de.grovie.engine.renderer.GL2.GvRendererGL2;
-import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
+import de.grovie.renderer.GL2.GvRendererGL2;
+import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
 
 public class GvSandbox {
 
@@ -20,7 +20,7 @@ public class GvSandbox {
 		GvEngine engine = GvEngine.getInstance(); //uses embedded db by default
 		
 		//create windowing system - Java AWT
-		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
+		GvWindowSystemAWTGL windowSystem = new GvWindowSystemAWTGL();
 		
 		//create renderer to use
 		GvRendererGL2 gvRenderer = new GvRendererGL2(

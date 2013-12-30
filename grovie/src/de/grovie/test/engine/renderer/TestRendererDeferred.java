@@ -15,13 +15,13 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
-import de.grovie.engine.renderer.GvRenderer;
-import de.grovie.engine.renderer.GvRendererStateMachine;
-import de.grovie.engine.renderer.GL2.GvRendererGL2;
-import de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
-import de.grovie.engine.renderer.device.GvCamera;
-import de.grovie.engine.renderer.device.GvLight;
-import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
+import de.grovie.renderer.GvCamera;
+import de.grovie.renderer.GvLight;
+import de.grovie.renderer.GvRenderer;
+import de.grovie.renderer.GvRendererStateMachine;
+import de.grovie.renderer.GL2.GvRendererGL2;
+import de.grovie.renderer.GvRendererStateMachine.RendererState;
+import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
 
 public class TestRendererDeferred {
 
@@ -91,7 +91,7 @@ public class TestRendererDeferred {
 
 	public static void main(String[] args) {
 		//create windowing system - Java AWT
-		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
+		GvWindowSystemAWTGL windowSystem = new GvWindowSystemAWTGL();
 
 		//create renderer to use - OpenGL 3x
 		GvRendererGL2 gvRenderer = new GvRendererGL2(

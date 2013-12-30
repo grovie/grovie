@@ -17,11 +17,11 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
-import de.grovie.engine.renderer.GvRenderer;
-import de.grovie.engine.renderer.GL2.GvRendererGL2;
-import de.grovie.engine.renderer.device.GvCamera;
-import de.grovie.engine.renderer.windowsystem.AWT.GvWindowSystemAWT;
-import static de.grovie.engine.renderer.GvRendererStateMachine.RendererState;
+import de.grovie.renderer.GvCamera;
+import de.grovie.renderer.GvRenderer;
+import de.grovie.renderer.GL2.GvRendererGL2;
+import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
+import static de.grovie.renderer.GvRendererStateMachine.RendererState;
 
 public class TestRendererTex {
 
@@ -165,7 +165,7 @@ public class TestRendererTex {
 	public static void main(String[] args)
 	{
 		//create windowing system - Java AWT
-		GvWindowSystemAWT windowSystem = new GvWindowSystemAWT();
+		GvWindowSystemAWTGL windowSystem = new GvWindowSystemAWTGL();
 
 		//create renderer to use - OpenGL 3x
 		GvRendererGL2 gvRenderer = new GvRendererGL2(
