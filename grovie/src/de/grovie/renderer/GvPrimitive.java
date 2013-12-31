@@ -1,13 +1,17 @@
 package de.grovie.renderer;
 
+/**
+ * Types of primitives recognized in GroViE.
+ * 
+ * @author yong
+ *
+ */
 public class GvPrimitive {
 
-	public enum GvPrimitiveType
-	{
-		POINT,
-		TRIANGLE,
-		TRIANGLE_STRIP
-	}
+	public static final int PRIMITIVE_POINT 			= 0;
+	public static final int PRIMITIVE_TRIANGLE 			= 1;
+	public static final int PRIMITIVE_TRIANGLE_STRIP 	= 2;
 	
-	public GvPrimitiveType lType;
+	public static final int PRIMITIVE_COUNT				= 3;
+	
 }

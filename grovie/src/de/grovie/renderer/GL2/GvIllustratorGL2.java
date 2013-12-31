@@ -5,14 +5,13 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 import de.grovie.renderer.GvIllustrator;
-import de.grovie.renderer.GvRenderer;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	
 	GLAutoDrawable lGLAutoDrawable;
 	GL2 lGL2;
 	
-	public GvIllustratorGL2(GvRenderer renderer)
+	public GvIllustratorGL2(GvRendererGL2 renderer)
 	{
 		super(renderer);
 		
