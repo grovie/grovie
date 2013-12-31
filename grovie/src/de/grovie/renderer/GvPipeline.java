@@ -2,12 +2,14 @@ package de.grovie.renderer;
 
 import java.util.ArrayList;
 
-public class GvPipeline {
+public abstract class GvPipeline {
 
-	private ArrayList<GvPass> lPasses; //rendering passes
+	protected GvRenderer lRenderer;		//reference to renderer
+	protected ArrayList<GvPass> lPasses; 	//rendering passes
 	
-	public GvPipeline()
+	public GvPipeline(GvRenderer renderer)
 	{
+		this.lRenderer = renderer;
 		this.lPasses = new ArrayList<GvPass>();
 	}
 	
@@ -26,4 +28,6 @@ public class GvPipeline {
 	{
 		lPasses.add(pass);
 	}
+	
+	public abstract void reshape(int x, int y, int width, int height);
 }

@@ -3,120 +3,88 @@ package de.grovie.renderer.GL2;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.glu.GLU;
+
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import de.grovie.renderer.GvIllustrator;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	
-	GLAutoDrawable lGLAutoDrawable;
-	GL2 lGL2;
+	GLAutoDrawable lglAutoDrawable;
+	GL2 lgl2;
+	GLU lglu;
+	GLUT lglut;
 	
 	public GvIllustratorGL2(GvRendererGL2 renderer)
 	{
 		super(renderer);
 		
-		lGLAutoDrawable = null;
-		lGL2 = null;
+		lglAutoDrawable = null;
+		lgl2 = null;
 	}
 	
 	@Override
 	public void display(GLAutoDrawable glAutoDrawable) {
-		
-		lGLAutoDrawable = glAutoDrawable;
-		lGL2 = glAutoDrawable.getGL().getGL2();
-		
 		display();
-		
-//		OneTriangleAWT.render( glAutoDrawable.getGL().getGL2(), 
-//				glAutoDrawable.getWidth(), 
-//				glAutoDrawable.getHeight() );
-//		TestRenderer.render( glAutoDrawable, glAutoDrawable.getGL().getGL2(), 
-//				glAutoDrawable.getWidth(), 
-//				glAutoDrawable.getHeight(),
-//				this.lRenderer);
-//		TestRendererTex.render( glAutoDrawable, glAutoDrawable.getGL().getGL2(), 
-//				glAutoDrawable.getWidth(), 
-//				glAutoDrawable.getHeight(),
-//				this.lRenderer);
-		
-//		TestRendererDeferred.render( glAutoDrawable.getGL().getGL2(), 
-//				glAutoDrawable.getWidth(), 
-//				glAutoDrawable.getHeight(),
-//				this.lRenderer);
 	}
 	
 	@Override
 	public void init(GLAutoDrawable glAutoDrawable) {
-		
-		lGLAutoDrawable = glAutoDrawable;
-		lGL2 = glAutoDrawable.getGL().getGL2();
-		
+		lglAutoDrawable = glAutoDrawable;
+		lgl2 = glAutoDrawable.getGL().getGL2();
+		lglu = new GLU();
+		lglut = new GLUT();
 		init();
-		
-//		TestRenderer.init(glAutoDrawable.getGL().getGL2(),this.lRenderer);
-//		TestRendererTex.init(glAutoDrawable.getGL().getGL2(),this.lRenderer);
-//		TestRendererDeferred.init(glAutoDrawable.getGL().getGL2(),this.lRenderer);
 	}
 
 	@Override
 	public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width, int height) {
-		
-		lGLAutoDrawable = glAutoDrawable;
-		lGL2 = glAutoDrawable.getGL().getGL2();
-		
 		reshape(x,y,width,height);
-		
-//		OneTriangleAWT.setup( glAutoDrawable.getGL().getGL2(),
-//				width,
-//				height );
-//		TestRenderer.reshape( glAutoDrawable.getGL().getGL2(),
-//				width,
-//				height,
-//				this.lRenderer);
-//		TestRendererTex.reshape( glAutoDrawable.getGL().getGL2(),
-//				width,
-//				height,
-//				this.lRenderer);
-//		TestRendererDeferred.reshape( glAutoDrawable.getGL().getGL2(),
-//				width,
-//				height,
-//				this.lRenderer);
 	}
 
 	@Override
 	public void dispose(GLAutoDrawable glAutoDrawable) {
-		lGLAutoDrawable = glAutoDrawable;
-		lGL2 = glAutoDrawable.getGL().getGL2();
-		
 		dispose();
 	}
 
 	@Override
 	public void reshape(int x, int y, int width, int height) {
-
+		lPipeline.reshape(x,y,width,height);
 	}
 
 	@Override
 	public void init() {
 		//disable JOGL auto buffer swap to allow timing frame draw
-		lGLAutoDrawable.setAutoSwapBufferMode(false);
+		lglAutoDrawable.setAutoSwapBufferMode(false);
 		
 		//check if multi-color attachment FBOs are supported. assign pipeline
-		if(lGLAutoDrawable.getContext().hasFullFBOSupport())
-			lPipeline = new GvPipelineGL2Deferred();
+		if(lglAutoDrawable.getContext().hasFullFBOSupport())
+			lPipeline = new GvPipelineGL2Deferred(lRenderer, lglAutoDrawable, lgl2, lglu);
 		else
-			lPipeline = new GvPipelineGL2();
+			lPipeline = new GvPipelineGL2(lRenderer, lglAutoDrawable, lgl2, lglu);
 	}
 	
 	@Override
 	public void display2DOverlay() {
-		
+		if(lRenderer.getRendererStateMachine().getOverlayOn())
+		{
+			lgl2.glWindowPos2i(5, 5);
+			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frame time: " + lFrameTime);
+			lgl2.glWindowPos2i(5, 15);
+			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "FPS: " + 1.0/lFrameTime);
+		}
 	}
 	
+	/**
+	 * Invoked after display3D() and display2DOverlay()
+	 */
 	@Override
 	public void displayEnd() {
 		//swap draw buffers
-		lGLAutoDrawable.swapBuffers();		
+		lglAutoDrawable.swapBuffers();		
 	}
 
 	@Override
@@ -125,18 +93,18 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	}
 
 	public GLAutoDrawable getGLAutoDrawable() {
-		return lGLAutoDrawable;
+		return lglAutoDrawable;
 	}
 
 	public void setGLAutoDrawable(GLAutoDrawable glAutoDrawable) {
-		this.lGLAutoDrawable = glAutoDrawable;
+		this.lglAutoDrawable = glAutoDrawable;
 	}
 
 	public GL2 getGL2() {
-		return lGL2;
+		return lgl2;
 	}
 
 	public void setGL2(GL2 gl2) {
-		this.lGL2 = gl2;
+		this.lgl2 = gl2;
 	}
 }

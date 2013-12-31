@@ -56,7 +56,7 @@ public class GvDrawGroup {
 	 * @param textureCount
 	 * @param materialCount
 	 */
-	public void initGroupsTextures(int textureCount, int materialCount)
+	private void initGroupsTextures(int textureCount, int materialCount)
 	{
 		for(int i=0; i<textureCount; ++i)
 		{
@@ -69,7 +69,7 @@ public class GvDrawGroup {
 	 * 
 	 * @param materialCount
 	 */
-	public void initGroupsMaterials(int materialCount)
+	private void initGroupsMaterials(int materialCount)
 	{
 		for(int i=0; i<materialCount; ++i)
 		{
@@ -81,7 +81,7 @@ public class GvDrawGroup {
 	 * Initialize this draw group as groups of vertices, each with a different 
 	 * primitive type.
 	 */
-	public void initGroupsPrimitives()
+	private void initGroupsPrimitives()
 	{
 		for(int i=0; i<GvPrimitive.PRIMITIVE_COUNT; ++i)
 		{

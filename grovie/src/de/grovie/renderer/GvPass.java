@@ -7,7 +7,26 @@ package de.grovie.renderer;
  *
  */
 public abstract class GvPass {
+	
+	protected GvRenderer lRenderer;
+	
+	public GvPass(GvRenderer renderer)
+	{
+		this.lRenderer = renderer;
+	}
+	
+	//rendering pass initialization
+	public abstract void init();
+	
+	//rendering pass viewport re-shaping
+	public abstract void reshape(int x, int y, int width, int height);
+	
+	//pre-execution procedures
 	public abstract void start();
+	
+	//rendering pass execution
 	public abstract void execute();
-	public abstract void stop();
+	
+	//post-execution procedures
+	public abstract void stop();	
 }

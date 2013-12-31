@@ -20,7 +20,8 @@ public class GvRendererStateMachine {
 		CAMERA_ASPECT_CHANGE,
 		CAMERA_NEAR_CHANGE,
 		CAMERA_FAR_CHANGE,
-		SCREEN_DIMENSIONS_CHANGE;
+		SCREEN_DIMENSIONS_CHANGE,
+		OVERLAY_ON_CHANGE;
 	}
 	
 	/** Renderer state is a state machine. 
@@ -51,6 +52,11 @@ public class GvRendererStateMachine {
 	private GvLight[] lLights;
 	
 	/**
+	 * Overlay 2D
+	 */
+	private boolean lOverlayOn;
+	
+	/**
 	 * Constructor
 	 */
 	public GvRendererStateMachine(int screenWidth, int screenHeight)
@@ -69,6 +75,8 @@ public class GvRendererStateMachine {
 		lLights[2] = new GvLight(DEFAULT_LIGHT_2_POS[0],
 				DEFAULT_LIGHT_2_POS[1],
 				DEFAULT_LIGHT_2_POS[2]);
+		
+		lOverlayOn = true;
 	}
 	
 	/**
@@ -171,6 +179,14 @@ public class GvRendererStateMachine {
 		}
 	}
 	
+	public void overlayOnToggle()
+	{
+		if(lState == GvRendererState.OVERLAY_ON_CHANGE)
+		{
+			lOverlayOn = !lOverlayOn;
+		}
+	}
+	
 	public int getScreenWidth()
 	{
 		return lScreen.getScreenWidth();
@@ -192,5 +208,10 @@ public class GvRendererStateMachine {
 	public int getLightCount()
 	{
 		return lLights.length;
+	}
+	
+	public boolean getOverlayOn()
+	{
+		return lOverlayOn;
 	}
 }
