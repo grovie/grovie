@@ -19,10 +19,11 @@ public abstract class GvRenderer implements Runnable {
 	String lWindowTitle;
 	
 	//variables related to drawing 
-	GvDevice lDevice;
-	GvContext lContext;
-	GvIllustrator lIllustrator;
-	GvGraphicsWindow lGraphicsWindow;
+	GvDevice lDevice;					//rendering device factory - objects can be shared between contexts
+	GvContext lContext;					//rendering context factory
+	GvIllustrator lIllustrator;			//drawing mechanism and 3d pipelines
+	GvGraphicsWindow lGraphicsWindow;	//drawing canvas
+	GvAnimator lAnimator;				//looping mechanism for this rendering thread
 	
 	//state machine that controls interaction with state of renderer
 	GvRendererStateMachine lRendererStateMachine;
@@ -51,9 +52,11 @@ public abstract class GvRenderer implements Runnable {
 		lDevice = createDevice();
 		lContext = createContext();
 		lIllustrator = createIllustrator();
+		lAnimator = createAnimator();
 		lGraphicsWindow = lDevice.createWindow(
 				lWindowSystem,
 				this);
+		
 	}
 	
 	public GvRendererStateMachine getRendererStateMachine()
@@ -79,7 +82,18 @@ public abstract class GvRenderer implements Runnable {
 		lGraphicsWindow.getWindowSystem().getCanvas().refresh();
 	}
 	
+	public GvDevice getDevice()
+	{
+		return lDevice;
+	}
+	
+	public GvAnimator getAnimator()
+	{
+		return lAnimator;
+	}
+	
 	public abstract GvDevice createDevice();
 	public abstract GvContext createContext();
 	public abstract GvIllustrator createIllustrator();
+	public abstract GvAnimator createAnimator();
 }

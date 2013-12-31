@@ -2,6 +2,7 @@ package de.grovie.renderer.GL2;
 
 import java.util.ArrayList;
 
+import de.grovie.renderer.GvAnimator;
 import de.grovie.renderer.GvContext;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvDrawGroup;
@@ -35,6 +36,9 @@ public class GvRendererGL2 extends GvRenderer{
 		
 		lTextures = new ArrayList<GvTexture2DGL2>();
 		lMaterials = new ArrayList<GvMaterial>();
+		
+		lDrawGroupRender = new GvDrawGroup();
+		lDrawGroupUpdate = new GvDrawGroup();
 	}
 
 	@Override
@@ -50,6 +54,11 @@ public class GvRendererGL2 extends GvRenderer{
 	@Override
 	public GvIllustrator createIllustrator() {
 		return new GvIllustratorGL2(this);
+	}
+	
+	@Override
+	public GvAnimator createAnimator() {
+		return new GvAnimatorGL2();
 	}
 
 	public void addTexture2D(GvTexture2DGL2 tex)
@@ -70,10 +79,29 @@ public class GvRendererGL2 extends GvRenderer{
 	 */
 	protected void initDrawGroups()
 	{
-		lDrawGroupRender = new GvDrawGroup();
-		lDrawGroupUpdate = new GvDrawGroup();
-		
 		lDrawGroupRender.initGroups(lTextures.size(), lMaterials.size());
 		lDrawGroupUpdate.initGroups(lTextures.size(), lMaterials.size());
 	}
+	
+	protected void drawPoints(int shaderId)
+	{
+		
+	}
+	
+	protected void drawTexturePoints(int shaderId)
+	{
+		
+	}
+	
+	protected void drawTriangles(int shaderId)
+	{
+		
+	}
+	
+	protected void drawTextureTriangles(int shaderId)
+	{
+		
+	}
+
+	
 }

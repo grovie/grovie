@@ -4,6 +4,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
+import de.grovie.exception.GvExceptionRendererPassShaderResource;
 import de.grovie.renderer.GvPipeline;
 import de.grovie.renderer.GvRenderer;
 
@@ -13,7 +14,7 @@ public class GvPipelineGL2 extends GvPipeline{
 	GL2 lgl2;
 	GLU lglu;
 	
-	public GvPipelineGL2(GvRenderer renderer, GLAutoDrawable glAutoDrawable, GL2 gl2, GLU glu)
+	public GvPipelineGL2(GvRenderer renderer, GLAutoDrawable glAutoDrawable, GL2 gl2, GLU glu) throws GvExceptionRendererPassShaderResource
 	{
 		super(renderer);
 		this.lglAutoDrawable = glAutoDrawable;
@@ -22,7 +23,7 @@ public class GvPipelineGL2 extends GvPipeline{
 		init();
 	}
 	
-	public void init() {
+	public void init() throws GvExceptionRendererPassShaderResource {
 		this.addPass(new GvPassGL2(lglAutoDrawable, lgl2, lglu, lRenderer));
 		
 		for(int i=0; i<lPasses.size(); ++i)

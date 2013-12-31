@@ -37,7 +37,7 @@ public class GvDeviceGL2 extends GvDevice{
 		GvWindowSystem winSys = windowSystem.getInstance(renderer);
 		
 		winSys.getCanvas().setEventListener(renderer.getIllustrator());
-		
+
 		return new GvGraphicsWindowGL2(winSys);
 	}
 

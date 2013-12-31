@@ -5,8 +5,11 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
 
+import de.grovie.exception.GvExceptionRendererPassShaderResource;
+import de.grovie.renderer.GvAnimator;
 import de.grovie.renderer.GvIllustrator;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
@@ -35,7 +38,18 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		lgl2 = glAutoDrawable.getGL().getGL2();
 		lglu = new GLU();
 		lglut = new GLUT();
-		init();
+		
+		//glAutoDrawable.getGL().setSwapInterval(1); //uncomment this line for v-sync
+		Animator animator = (Animator)lRenderer.getAnimator();
+		animator.add(glAutoDrawable);
+		animator.setRunAsFastAsPossible(true);
+		animator.start();
+		
+		try {
+			init();
+		} catch (GvExceptionRendererPassShaderResource e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	@Override
@@ -54,14 +68,14 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	}
 
 	@Override
-	public void init() {
+	public void init() throws GvExceptionRendererPassShaderResource {
 		//disable JOGL auto buffer swap to allow timing frame draw
 		lglAutoDrawable.setAutoSwapBufferMode(false);
 		
 		//check if multi-color attachment FBOs are supported. assign pipeline
-		if(lglAutoDrawable.getContext().hasFullFBOSupport())
-			lPipeline = new GvPipelineGL2Deferred(lRenderer, lglAutoDrawable, lgl2, lglu);
-		else
+		//if(lglAutoDrawable.getContext().hasFullFBOSupport())
+		//	lPipeline = new GvPipelineGL2Deferred(lRenderer, lglAutoDrawable, lgl2, lglu);
+		//else
 			lPipeline = new GvPipelineGL2(lRenderer, lglAutoDrawable, lgl2, lglu);
 	}
 	

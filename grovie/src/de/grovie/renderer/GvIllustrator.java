@@ -1,18 +1,24 @@
 package de.grovie.renderer;
 
+import de.grovie.exception.GvExceptionRendererPassShaderResource;
+
 public abstract class GvIllustrator{
 
 	protected GvRenderer lRenderer;	//reference to owner(GvRenderer)
 	protected GvPipeline lPipeline;	//3D pipeline
 	
-	protected long lDrawStart;	//start time before drawing a frame
-	protected double lFrameTime;//time taken to draw a frame
+	protected long lDrawStart;			//start time before drawing a frame
+	protected double lFrameTime;		//time taken to draw a frame
+	protected double lFrameTimeAccum;	//accumulated frame timings (used to compute average)
+	protected int lFrameCountAccum;		//accumulated frame count (used to compute average)
 	
 	public GvIllustrator(GvRenderer renderer)
 	{
 		lRenderer = renderer;
 		lDrawStart=0;
 		lFrameTime=0;
+		lFrameTimeAccum = 0;
+		lFrameCountAccum=0;
 	}
 	
 	public void display()
@@ -26,7 +32,15 @@ public abstract class GvIllustrator{
 		displayEnd(); //finishing calls
 		
 		//Record end time
-		lFrameTime = (double)((System.nanoTime()-lDrawStart) / 1000000000.0);
+		lFrameTimeAccum += (double)((System.nanoTime()-lDrawStart) / 1000000000.0);
+		lFrameCountAccum ++;
+		
+		if(lFrameTimeAccum > 2.0)
+		{
+			lFrameTime = lFrameTimeAccum/(double)lFrameCountAccum;
+			lFrameTimeAccum = 0;
+			lFrameCountAccum = 0;
+		}
 	}
 	
 	public void display3D()
@@ -34,7 +48,7 @@ public abstract class GvIllustrator{
 		lPipeline.execute();
 	}
 	
-	public abstract void init();	//initialize rendering, init 3D-pipeline
+	public abstract void init() throws GvExceptionRendererPassShaderResource;	//initialize rendering, init 3D-pipeline
 	public abstract void reshape(int x, int y, int width, int height);
 	public abstract void display2DOverlay();
 	public abstract void displayEnd();
