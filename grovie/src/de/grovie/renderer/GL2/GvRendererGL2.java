@@ -2,6 +2,8 @@ package de.grovie.renderer.GL2;
 
 import java.util.ArrayList;
 
+import javax.media.opengl.GL2;
+
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.renderer.GvAnimator;
@@ -11,6 +13,9 @@ import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvRenderer;
+import de.grovie.renderer.GvShaderProgram;
+import de.grovie.renderer.GvTexture2D;
+import de.grovie.renderer.GvVertexArray;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
 /**
@@ -83,8 +88,8 @@ public class GvRendererGL2 extends GvRenderer{
 	 */
 	protected void initDrawGroups() throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
-		lDrawGroupRender.initGroups(lTextures.size(), lMaterials.size(), lDevice, lContext);
-		lDrawGroupUpdate.initGroups(lTextures.size(), lMaterials.size(), lDevice, lContext);
+		lDrawGroupRender.initGroups(lTextures.size(), lMaterials.size(), lContext);
+		lDrawGroupUpdate.initGroups(lTextures.size(), lMaterials.size(), lContext);
 	}
 	
 	public GvDrawGroup getDrawGroupRender()
@@ -97,25 +102,48 @@ public class GvRendererGL2 extends GvRenderer{
 		return lDrawGroupUpdate;
 	}
 	
-	protected void drawPoints(int shaderId)
+	public void swapBuffers()
 	{
-		
+		GvDrawGroup tempDrawGrp = lDrawGroupRender;
+		lDrawGroupRender = lDrawGroupUpdate;
+		lDrawGroupUpdate = tempDrawGrp;
+	}
+
+	public ArrayList<GvTexture2DGL2> getTextures() {
+		return lTextures;
+	}
+
+	public void setTextures(ArrayList<GvTexture2DGL2> textures) {
+		this.lTextures = textures;
+	}
+
+	public ArrayList<GvMaterial> getMaterials() {
+		return lMaterials;
+	}
+
+	public void setMaterials(ArrayList<GvMaterial> materials) {
+		this.lMaterials = materials;
 	}
 	
-	protected void drawTexturePoints(int shaderId)
-	{
-		
-	}
-	
-	protected void drawTriangles(int shaderId)
-	{
-		
-	}
-	
-	protected void drawTextureTriangles(int shaderId)
-	{
-		
-	}
+//	protected void drawPoints(int shaderId)
+//	{
+//		
+//	}
+//	
+//	protected void drawTexturePoints(int shaderId)
+//	{
+//		
+//	}
+//	
+//	protected void drawTriangles(int shaderId)
+//	{
+//		
+//	}
+//	
+//	protected void drawTextureTriangles(int shaderId)
+//	{
+//		
+//	}
 
 	
 }

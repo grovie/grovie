@@ -92,6 +92,11 @@ public abstract class GvRenderer implements Runnable {
 		return lAnimator;
 	}
 	
+	public GvContext getContext()
+	{
+		return lContext;
+	}
+	
 	public abstract GvDevice createDevice();
 	public abstract GvContext createContext();
 	public abstract GvIllustrator createIllustrator();

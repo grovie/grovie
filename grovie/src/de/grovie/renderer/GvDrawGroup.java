@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererIndexBuffer;
+import de.grovie.exception.GvExRendererVertexArray;
+import de.grovie.exception.GvExRendererVertexBuffer;
 
 /**
  * This class contains a group of geometry that share a common 
@@ -48,14 +51,14 @@ public class GvDrawGroup {
 	 * @throws GvExRendererDrawGroup 
 	 * @throws GvExRendererBufferSet 
 	 */
-	public void initGroups(int textureCount, int materialCount, GvDevice device, GvContext context) 
+	public void initGroups(int textureCount, int materialCount, GvContext context) 
 			throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
 		//non-textured group
-		this.addGroup(context.createDrawGroup()).initGroupsMaterials(materialCount, device, context);
+		this.addGroup(context.createDrawGroup()).initGroupsMaterials(materialCount, context);
 		
 		//textured group
-		this.addGroup(context.createDrawGroup()).initGroupsTextures(textureCount, materialCount, device, context);
+		this.addGroup(context.createDrawGroup()).initGroupsTextures(textureCount, materialCount, context);
 		
 		//dual-textured group
 		//future extension
@@ -70,12 +73,12 @@ public class GvDrawGroup {
 	 * @param device
 	 * @throws GvExRendererBufferSet 
 	 */
-	private void initGroupsTextures(int textureCount, int materialCount, GvDevice device, GvContext context)
+	private void initGroupsTextures(int textureCount, int materialCount, GvContext context)
 			throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
 		for(int i=0; i<textureCount; ++i)
 		{
-			this.addGroup(context.createDrawGroup()).initGroupsMaterials(materialCount, device, context);
+			this.addGroup(context.createDrawGroup()).initGroupsMaterials(materialCount, context);
 		}
 	}
 	
@@ -86,12 +89,12 @@ public class GvDrawGroup {
 	 * @param device
 	 * @throws GvExRendererBufferSet 
 	 */
-	private void initGroupsMaterials(int materialCount, GvDevice device, GvContext context)
+	private void initGroupsMaterials(int materialCount, GvContext context)
 			throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
 		for(int i=0; i<materialCount; ++i)
 		{
-			this.addGroup(context.createDrawGroup()).initGroupsPrimitives(device, context);
+			this.addGroup(context.createDrawGroup()).initGroupsPrimitives(context);
 		}
 	}
 	
@@ -102,12 +105,12 @@ public class GvDrawGroup {
 	 * @param device
 	 * @throws GvExRendererBufferSet 
 	 */
-	private void initGroupsPrimitives(GvDevice device, GvContext context)
+	private void initGroupsPrimitives(GvContext context)
 			throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
 		for(int i=0; i<GvPrimitive.PRIMITIVE_COUNT; ++i)
 		{
-			this.addGroup(context.createDrawGroup()).initGroupsBackFaceCull(device, context);
+			this.addGroup(context.createDrawGroup()).initGroupsBackFaceCull(context);
 		}
 	}
 	
@@ -118,11 +121,11 @@ public class GvDrawGroup {
 	 * @param device
 	 * @throws GvExRendererBufferSet 
 	 */
-	private void initGroupsBackFaceCull(GvDevice device, GvContext context) 
+	private void initGroupsBackFaceCull(GvContext context) 
 			throws GvExRendererBufferSet
 	{
-		this.addGroup(context.createBufferSet(device, context)); //single-sided primitives, culling enabled
-		this.addGroup(context.createBufferSet(device, context)); //dual-sided primitives, culling disabled
+		this.addGroup(context.createBufferSet()); //single-sided primitives, culling enabled
+		this.addGroup(context.createBufferSet()); //dual-sided primitives, culling disabled
 	}
 	
 	/**
@@ -190,5 +193,43 @@ public class GvDrawGroup {
 			return lGroups.get(GROUP_BACKFACE_CULLED);
 		else
 			return lGroups.get(GROUP_NON_BACKFACE_CULLED);
+	}
+	
+	/**
+	 * Recursive call to clear buffers
+	 */
+	public void clear(GvRenderer renderer)
+	{
+		for(int i=0; i<lGroups.size(); ++i)
+		{
+			lGroups.get(i).clear(renderer);
+		}
+	}
+	
+	/**
+	 * Recursive to update hardware buffers
+	 * @throws GvExRendererVertexArray 
+	 * @throws GvExRendererVertexBuffer 
+	 * @throws GvExRendererIndexBuffer 
+	 */
+	public void update(GvRenderer renderer) throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
+	{
+		for(int i=0; i<lGroups.size(); ++i)
+		{
+			lGroups.get(i).update(renderer);
+		}
+	}
+	
+	/**
+	 * Recursive to update VAOs
+	 * @param renderer
+	 * @throws GvExRendererVertexArray 
+	 */
+	public void updateVAO(GvRenderer renderer) throws GvExRendererVertexArray
+	{
+		for(int i=0; i<lGroups.size(); ++i)
+		{
+			lGroups.get(i).updateVAO(renderer);
+		}
 	}
 }

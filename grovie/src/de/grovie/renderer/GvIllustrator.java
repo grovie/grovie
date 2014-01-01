@@ -1,5 +1,6 @@
 package de.grovie.renderer;
 
+import de.grovie.exception.GvExRendererDrawGroupRetrieval;
 import de.grovie.exception.GvExRendererPassShaderResource;
 
 public abstract class GvIllustrator{
@@ -30,7 +31,13 @@ public abstract class GvIllustrator{
 		processMessages();
 		
 		//draw 3d and 2d-overlay
-		display3D();
+		try{
+			display3D();
+		}
+		catch(GvExRendererDrawGroupRetrieval e)
+		{
+			System.out.println("Error retrieving draw group category.");
+		}
 		display2DOverlay();
 		displayEnd(); //finishing calls
 		
@@ -46,7 +53,7 @@ public abstract class GvIllustrator{
 		}
 	}
 	
-	public void display3D()
+	public void display3D() throws GvExRendererDrawGroupRetrieval
 	{
 		lPipeline.execute();
 	}

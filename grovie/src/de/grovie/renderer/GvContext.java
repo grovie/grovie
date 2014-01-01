@@ -20,12 +20,12 @@ public abstract class GvContext {
 		lRenderer = renderer;
 	}
 	
-	public abstract GvVertexArray createVertexArray() 
+	public abstract GvVertexArray createVertexArray(GvVertexArray vao) 
 			throws GvExRendererVertexArray;
 	
 	public abstract GvDrawGroup createDrawGroup() 
 			throws GvExRendererDrawGroup;
 	
-	public abstract GvDrawGroup createBufferSet(GvDevice device, GvContext context) 
+	public abstract GvDrawGroup createBufferSet() 
 			throws GvExRendererBufferSet;
 }

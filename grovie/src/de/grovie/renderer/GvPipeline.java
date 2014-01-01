@@ -2,6 +2,8 @@ package de.grovie.renderer;
 
 import java.util.ArrayList;
 
+import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+
 public abstract class GvPipeline {
 
 	protected GvRenderer lRenderer;		//reference to renderer
@@ -13,7 +15,7 @@ public abstract class GvPipeline {
 		this.lPasses = new ArrayList<GvPass>();
 	}
 	
-	public void execute()
+	public void execute() throws GvExRendererDrawGroupRetrieval
 	{
 		for(int i=0; i<lPasses.size(); ++i)
 		{
@@ -27,6 +29,11 @@ public abstract class GvPipeline {
 	public void addPass(GvPass pass)
 	{
 		lPasses.add(pass);
+	}
+	
+	public GvPass getPass()
+	{
+		return lPasses.get(0);
 	}
 	
 	public abstract void reshape(int x, int y, int width, int height);
