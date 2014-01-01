@@ -7,28 +7,10 @@ package de.grovie.renderer;
  * @author yong
  *
  */
-public class GvVertexBuffer {
+public class GvVertexBuffer extends GvBuffer {
 
-	private int lId;		//id of vertex buffer
-	private long lSize;		//size in bytes
-	
 	public GvVertexBuffer(int id, long size)
 	{
-		this.lId = id;
-		this.lSize = size;
+		super(id,size);
 	}
-	
-	public int getId() {
-		return lId;
-	}
-	public void setId(int id) {
-		this.lId = id;
-	}
-	public long getSize() {
-		return lSize;
-	}
-	public void setSize(long size) {
-		this.lSize = size;
-	}
-	
 }

@@ -1,5 +1,8 @@
 package de.grovie.renderer.GL2;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -8,9 +11,14 @@ import javax.media.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
 
-import de.grovie.exception.GvExceptionRendererPassShaderResource;
-import de.grovie.renderer.GvAnimator;
+import de.grovie.data.importer.obj.GvImporterObj;
+import de.grovie.data.object.GvGeometry;
+import de.grovie.exception.GvExRendererPassShaderResource;
+import de.grovie.renderer.GvDrawGroup;
+import de.grovie.renderer.GvBufferSet;
 import de.grovie.renderer.GvIllustrator;
+import de.grovie.renderer.GvMaterial;
+import de.grovie.renderer.GvPrimitive;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	
@@ -47,7 +55,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		
 		try {
 			init();
-		} catch (GvExceptionRendererPassShaderResource e) {
+		} catch (GvExRendererPassShaderResource e) {
 			System.out.println(e.getMessage());
 		}
 	}
@@ -68,7 +76,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	}
 
 	@Override
-	public void init() throws GvExceptionRendererPassShaderResource {
+	public void init() throws GvExRendererPassShaderResource {
 		//disable JOGL auto buffer swap to allow timing frame draw
 		lglAutoDrawable.setAutoSwapBufferMode(false);
 		
@@ -77,6 +85,39 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		//	lPipeline = new GvPipelineGL2Deferred(lRenderer, lglAutoDrawable, lgl2, lglu);
 		//else
 			lPipeline = new GvPipelineGL2(lRenderer, lglAutoDrawable, lgl2, lglu);
+			
+		//FOR DEBUG
+		try{
+			GvRendererGL2 rendererGL2 = (GvRendererGL2)lRenderer;
+			//add test material
+			rendererGL2.addMaterial(new GvMaterial());
+			//add test texture
+			InputStream stream = new FileInputStream("/Users/yongzhiong/Downloads/test.jpg");
+			rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
+			//init draw groups
+			rendererGL2.initDrawGroups();
+			//create VBO/VAO/IBO
+			GvDrawGroup drawGrpRender = rendererGL2.getDrawGroupRender();
+			GvBufferSet bufferSet = drawGrpRender.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+			bufferSet.addArrayBuffer();
+			bufferSet.addElementBuffer();
+			//prepare test geom
+			String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
+			GvGeometry geom = new GvGeometry();
+			GvImporterObj.load(path, geom);
+			int indices[] = geom.getIndices();
+			float vertices[] = geom.getVertices();
+			float normals[] = geom.getNormals();
+			//send geom to buffers
+			
+		}
+		catch(Exception e)
+		{
+			System.out.println("test fail");
+			System.out.println(e.getMessage());
+		}
+		
+		//END DEBUG
 	}
 	
 	@Override
@@ -120,5 +161,11 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 	public void setGL2(GL2 gl2) {
 		this.lgl2 = gl2;
+	}
+
+	@Override
+	public void processMessages() {
+		// TODO check message queues and process messages
+		
 	}
 }

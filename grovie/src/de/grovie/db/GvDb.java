@@ -3,7 +3,7 @@ package de.grovie.db;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
-import de.grovie.exception.GvExceptionDbUnrecognizedImpl;
+import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 /**
  * This class provides database access to the package de.grovie.data.
@@ -33,9 +33,9 @@ public class GvDb {
 	/**
 	 * Constructor
 	 * @param dbPathAbs
-	 * @throws GvExceptionDbUnrecognizedImpl
+	 * @throws GvExDbUnrecognizedImpl
 	 */
-	private GvDb(String dbPathAbs) throws GvExceptionDbUnrecognizedImpl
+	private GvDb(String dbPathAbs) throws GvExDbUnrecognizedImpl
 	{
 		lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 		lGrovieDbImpl = lGrovieDbImplDefault;
@@ -45,15 +45,15 @@ public class GvDb {
 	 * Constructor
 	 * @param dbPathAbs
 	 * @param impl
-	 * @throws GvExceptionDbUnrecognizedImpl
+	 * @throws GvExDbUnrecognizedImpl
 	 */
-	private GvDb(String dbPathAbs, GvDbImpl impl) throws GvExceptionDbUnrecognizedImpl
+	private GvDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
 	{
 		try{
 			lGraph = createDb(dbPathAbs, impl);
 			lGrovieDbImpl = impl;
 		}
-		catch(GvExceptionDbUnrecognizedImpl err)
+		catch(GvExDbUnrecognizedImpl err)
 		{
 			lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 			lGrovieDbImpl = lGrovieDbImplDefault;
@@ -65,23 +65,23 @@ public class GvDb {
 	 * @param dbPathAbs
 	 * @param impl
 	 * @return instance of graph database
-	 * @throws GvExceptionDbUnrecognizedImpl
+	 * @throws GvExDbUnrecognizedImpl
 	 */
-	private Graph createDb(String dbPathAbs, GvDbImpl impl) throws GvExceptionDbUnrecognizedImpl
+	private Graph createDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
 	{
 		if(impl==GvDbImpl.NEO4J)
 			return new Neo4jGraph(dbPathAbs);
 		else
-			throw new GvExceptionDbUnrecognizedImpl("GrovieExceptionDb unrecognized database implementation: " + impl);
+			throw new GvExDbUnrecognizedImpl("GrovieExceptionDb unrecognized database implementation: " + impl);
 	}
 
 	/**
 	 * Get singleton instance of GrovieDb
 	 * @param dbPathAbs
 	 * @return
-	 * @throws GvExceptionDbUnrecognizedImpl
+	 * @throws GvExDbUnrecognizedImpl
 	 */
-	public static GvDb getInstance(String dbPathAbs) throws GvExceptionDbUnrecognizedImpl {
+	public static GvDb getInstance(String dbPathAbs) throws GvExDbUnrecognizedImpl {
 		if (lInstance == null) {
 			lInstance = new GvDb(dbPathAbs);
 		}
@@ -93,9 +93,9 @@ public class GvDb {
 	 * @param dbPathAbs
 	 * @param impl
 	 * @return instance of GrovieDb
-	 * @throws GvExceptionDbUnrecognizedImpl
+	 * @throws GvExDbUnrecognizedImpl
 	 */
-	public static GvDb getInstance(String dbPathAbs, GvDbImpl impl) throws GvExceptionDbUnrecognizedImpl {
+	public static GvDb getInstance(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl {
 		if (lInstance == null) {
 			lInstance = new GvDb(dbPathAbs, impl);
 		}

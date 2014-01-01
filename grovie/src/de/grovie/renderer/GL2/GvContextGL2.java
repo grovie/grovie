@@ -4,8 +4,13 @@ import java.nio.IntBuffer;
 
 import javax.media.opengl.GL2;
 
-import de.grovie.exception.GvExceptionRendererVertexArray;
+import de.grovie.exception.GvExRendererDrawGroup;
+import de.grovie.exception.GvExRendererBufferSet;
+import de.grovie.exception.GvExRendererVertexArray;
+import de.grovie.renderer.GvBufferSet;
 import de.grovie.renderer.GvContext;
+import de.grovie.renderer.GvDevice;
+import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GvVertexArray;
 
@@ -16,7 +21,7 @@ public class GvContextGL2 extends GvContext {
 	}
 
 	@Override
-	public GvVertexArray createVertexArray() throws GvExceptionRendererVertexArray {
+	public GvVertexArray createVertexArray() throws GvExRendererVertexArray {
 		try
 		{
 			//get reference to jogl gl2
@@ -33,8 +38,19 @@ public class GvContextGL2 extends GvContext {
 		}
 		catch(Exception e)
 		{
-			throw new GvExceptionRendererVertexArray("Error generating VAO.");
+			throw new GvExRendererVertexArray("Error generating VAO.");
 		}
+	}
+
+	@Override
+	public GvDrawGroup createDrawGroup() throws GvExRendererDrawGroup {
+		return new GvDrawGroup();
+	}
+
+	@Override
+	public GvBufferSet createBufferSet(GvDevice device, GvContext context)
+			throws GvExRendererBufferSet {
+		return (GvBufferSet)new GvBufferSetGL2(device,context);
 	}
 
 }

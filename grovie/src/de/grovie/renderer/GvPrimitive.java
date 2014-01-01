@@ -10,8 +10,7 @@ public class GvPrimitive {
 
 	public static final int PRIMITIVE_POINT 			= 0;
 	public static final int PRIMITIVE_TRIANGLE 			= 1;
-	public static final int PRIMITIVE_TRIANGLE_STRIP 	= 2;
 	
-	public static final int PRIMITIVE_COUNT				= 3;
+	public static final int PRIMITIVE_COUNT				= 2;
 	
 }

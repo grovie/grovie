@@ -1,6 +1,8 @@
 package de.grovie.renderer;
 
-import de.grovie.exception.GvExceptionRendererVertexArray;
+import de.grovie.exception.GvExRendererDrawGroup;
+import de.grovie.exception.GvExRendererBufferSet;
+import de.grovie.exception.GvExRendererVertexArray;
 
 /**
  * This class represents a factory for graphics-related entities
@@ -18,5 +20,12 @@ public abstract class GvContext {
 		lRenderer = renderer;
 	}
 	
-	public abstract GvVertexArray createVertexArray() throws GvExceptionRendererVertexArray;
+	public abstract GvVertexArray createVertexArray() 
+			throws GvExRendererVertexArray;
+	
+	public abstract GvDrawGroup createDrawGroup() 
+			throws GvExRendererDrawGroup;
+	
+	public abstract GvDrawGroup createBufferSet(GvDevice device, GvContext context) 
+			throws GvExRendererBufferSet;
 }

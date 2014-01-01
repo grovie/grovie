@@ -1,9 +1,9 @@
 package de.grovie.exception;
 
 @SuppressWarnings("serial")
-public class GvException extends Exception{
+public class GvEx extends Exception{
 
-	public GvException(String err) {
+	public GvEx(String err) {
 		super(err);
 	}
 

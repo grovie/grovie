@@ -6,7 +6,7 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
-import de.grovie.exception.GvExceptionRendererPassShaderResource;
+import de.grovie.exception.GvExRendererPassShaderResource;
 import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvPass;
@@ -35,7 +35,7 @@ public class GvPassGL2 extends GvPass {
 	
 	
 
-	public GvPassGL2(GLAutoDrawable glAutoDrawable, GL2 gl2, GLU glu, GvRenderer renderer) throws GvExceptionRendererPassShaderResource
+	public GvPassGL2(GLAutoDrawable glAutoDrawable, GL2 gl2, GLU glu, GvRenderer renderer) throws GvExRendererPassShaderResource
 	{
 		super(renderer);
 		this.lglAutoDrawable = glAutoDrawable;
@@ -46,7 +46,7 @@ public class GvPassGL2 extends GvPass {
 	}
 
 	@Override
-	public void init() throws GvExceptionRendererPassShaderResource {
+	public void init() throws GvExRendererPassShaderResource {
 		//gl states
 		lgl2.glDisable(GL2.GL_LIGHTING);
 		lgl2.glEnable(GL2.GL_DEPTH_TEST);
@@ -86,7 +86,7 @@ public class GvPassGL2 extends GvPass {
 //			lShaderTexMatTri = device.createShaderProgram(srcTextureMaterialTriangleV, srcTextureMaterialTriangleF);
 
 		} catch (Exception e) {
-			throw new GvExceptionRendererPassShaderResource("Error loading shader source");
+			throw new GvExRendererPassShaderResource("Error loading shader source");
 		}
 	}
 

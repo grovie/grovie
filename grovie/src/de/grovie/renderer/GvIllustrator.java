@@ -1,6 +1,6 @@
 package de.grovie.renderer;
 
-import de.grovie.exception.GvExceptionRendererPassShaderResource;
+import de.grovie.exception.GvExRendererPassShaderResource;
 
 public abstract class GvIllustrator{
 
@@ -26,6 +26,9 @@ public abstract class GvIllustrator{
 		//Record start time
 		lDrawStart = System.nanoTime();
 		
+		//Inter-thread message queue handling
+		processMessages();
+		
 		//draw 3d and 2d-overlay
 		display3D();
 		display2DOverlay();
@@ -48,10 +51,10 @@ public abstract class GvIllustrator{
 		lPipeline.execute();
 	}
 	
-	public abstract void init() throws GvExceptionRendererPassShaderResource;	//initialize rendering, init 3D-pipeline
+	public abstract void init() throws GvExRendererPassShaderResource;	//initialize rendering, init 3D-pipeline
 	public abstract void reshape(int x, int y, int width, int height);
 	public abstract void display2DOverlay();
 	public abstract void displayEnd();
 	public abstract void dispose();
-	
+	public abstract void processMessages();
 }

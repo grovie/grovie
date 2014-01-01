@@ -1,6 +1,6 @@
 package de.grovie.renderer;
 
-import de.grovie.exception.GvExceptionRendererPassShaderResource;
+import de.grovie.exception.GvExRendererPassShaderResource;
 
 /**
  * An abstract representation of a rendering pass.
@@ -18,7 +18,7 @@ public abstract class GvPass {
 	}
 	
 	//rendering pass initialization
-	public abstract void init() throws GvExceptionRendererPassShaderResource;
+	public abstract void init() throws GvExRendererPassShaderResource;
 	
 	//rendering pass viewport re-shaping
 	public abstract void reshape(int x, int y, int width, int height);

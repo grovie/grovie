@@ -10,10 +10,10 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
 
-import de.grovie.exception.GvExceptionRendererIndexBuffer;
-import de.grovie.exception.GvExceptionRendererShaderProgram;
-import de.grovie.exception.GvExceptionRendererTexture2D;
-import de.grovie.exception.GvExceptionRendererVertexBuffer;
+import de.grovie.exception.GvExRendererIndexBuffer;
+import de.grovie.exception.GvExRendererShaderProgram;
+import de.grovie.exception.GvExRendererTexture2D;
+import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvGraphicsWindow;
 import de.grovie.renderer.GvIndexBuffer;
@@ -43,7 +43,7 @@ public class GvDeviceGL2 extends GvDevice{
 
 	@Override
 	public GvShaderProgram createShaderProgram(String vertexShaderSource,
-			String fragmentShaderSource) throws GvExceptionRendererShaderProgram  {
+			String fragmentShaderSource) throws GvExRendererShaderProgram  {
 		try{
 			//get reference to jogl gl2
 			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
@@ -82,12 +82,12 @@ public class GvDeviceGL2 extends GvDevice{
 		}
 		catch(Exception e)
 		{
-			throw new GvExceptionRendererShaderProgram("Error generating shader program.");
+			throw new GvExRendererShaderProgram("Error generating shader program.");
 		}
 	}
 
 	@Override
-	public GvVertexBuffer createVertexBuffer(long sizeInBytes) throws GvExceptionRendererVertexBuffer {
+	public GvVertexBuffer createVertexBuffer(long sizeInBytes) throws GvExRendererVertexBuffer {
 		try{
 			//get reference to jogl gl2
 			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
@@ -114,7 +114,7 @@ public class GvDeviceGL2 extends GvDevice{
 		}
 		catch(Exception e)
 		{
-			throw new GvExceptionRendererVertexBuffer("Error generating VBO.");
+			throw new GvExRendererVertexBuffer("Error generating VBO.");
 		}
 	}
 
@@ -153,7 +153,7 @@ public class GvDeviceGL2 extends GvDevice{
 
 	@Override
 	public GvIndexBuffer createIndexBuffer(long sizeInBytes)
-			throws GvExceptionRendererIndexBuffer {
+			throws GvExRendererIndexBuffer {
 		try{
 			//get reference to jogl gl2
 			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
@@ -180,13 +180,13 @@ public class GvDeviceGL2 extends GvDevice{
 		}
 		catch(Exception e)
 		{
-			throw new GvExceptionRendererIndexBuffer("Error generating Index Buffer.");
+			throw new GvExRendererIndexBuffer("Error generating Index Buffer.");
 		}
 	}
 
 	@Override
 	public GvTexture2D createTexture2D(InputStream inputStream, String dataType)
-			throws GvExceptionRendererTexture2D {
+			throws GvExRendererTexture2D {
 		try {
 			//get reference to jogl gl2
 			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
@@ -199,7 +199,7 @@ public class GvDeviceGL2 extends GvDevice{
             return new GvTexture2DGL2(tex.getTarget(), tex, texData);
         }
         catch (Exception e) {
-        	throw new GvExceptionRendererTexture2D("Error generating Texture2D.");
+        	throw new GvExRendererTexture2D("Error generating Texture2D.");
         }
 	}
 }

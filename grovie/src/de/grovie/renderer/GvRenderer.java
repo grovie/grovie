@@ -15,18 +15,18 @@ public abstract class GvRenderer implements Runnable {
 	Thread lThread;
 	
 	//window system
-	GvWindowSystem lWindowSystem;
-	String lWindowTitle;
+	private GvWindowSystem lWindowSystem;
+	private String lWindowTitle;
 	
 	//variables related to drawing 
-	GvDevice lDevice;					//rendering device factory - objects can be shared between contexts
-	GvContext lContext;					//rendering context factory
-	GvIllustrator lIllustrator;			//drawing mechanism and 3d pipelines
-	GvGraphicsWindow lGraphicsWindow;	//drawing canvas
-	GvAnimator lAnimator;				//looping mechanism for this rendering thread
+	protected GvDevice lDevice;					//rendering device factory - objects can be shared between contexts
+	protected GvContext lContext;				//rendering context factory
+	private GvIllustrator lIllustrator;			//drawing mechanism and 3d pipelines
+	private GvGraphicsWindow lGraphicsWindow;	//drawing canvas
+	private GvAnimator lAnimator;				//looping mechanism for this rendering thread
 	
 	//state machine that controls interaction with state of renderer
-	GvRendererStateMachine lRendererStateMachine;
+	private GvRendererStateMachine lRendererStateMachine;
 	
 	public GvRenderer(
 			GvWindowSystem windowSystem, 

@@ -2,10 +2,10 @@ package de.grovie.renderer;
 
 import java.io.InputStream;
 
-import de.grovie.exception.GvExceptionRendererIndexBuffer;
-import de.grovie.exception.GvExceptionRendererShaderProgram;
-import de.grovie.exception.GvExceptionRendererTexture2D;
-import de.grovie.exception.GvExceptionRendererVertexBuffer;
+import de.grovie.exception.GvExRendererIndexBuffer;
+import de.grovie.exception.GvExRendererShaderProgram;
+import de.grovie.exception.GvExRendererTexture2D;
+import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
 /**
@@ -29,14 +29,14 @@ public abstract class GvDevice {
 			GvRenderer renderer);
 	
 	public abstract GvShaderProgram createShaderProgram(String vertexShaderSource, 
-			String fragmentShaderSource) throws GvExceptionRendererShaderProgram;
+			String fragmentShaderSource) throws GvExRendererShaderProgram;
 	
 	public abstract GvVertexBuffer createVertexBuffer(long sizeInBytes) 
-			throws GvExceptionRendererVertexBuffer;
+			throws GvExRendererVertexBuffer;
 	
 	public abstract GvIndexBuffer createIndexBuffer(long sizeInBytes) 
-			throws GvExceptionRendererIndexBuffer;
+			throws GvExRendererIndexBuffer;
 	
 	public abstract GvTexture2D createTexture2D(InputStream inputStream, String dataType) 
-			throws GvExceptionRendererTexture2D;
+			throws GvExRendererTexture2D;
 }

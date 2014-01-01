@@ -21,7 +21,7 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 import de.grovie.db.GvDb;
-import de.grovie.exception.GvExceptionDbUnrecognizedImpl;
+import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 
 
@@ -39,9 +39,9 @@ public class TestArchitect2 {
 
 	/**
 	 * @param args
-	 * @throws GvExceptionDbUnrecognizedImpl 
+	 * @throws GvExDbUnrecognizedImpl 
 	 */
-	public static void main(String[] args) throws GvExceptionDbUnrecognizedImpl {
+	public static void main(String[] args) throws GvExDbUnrecognizedImpl {
 
 		System.out.println("TestArchitect Main");
 
@@ -66,7 +66,7 @@ public class TestArchitect2 {
 	}
 	
 	
-	public TestArchitect2() throws GvExceptionDbUnrecognizedImpl
+	public TestArchitect2() throws GvExDbUnrecognizedImpl
 	{
 		System.out.println("TestArchitect Main");
 
@@ -89,7 +89,7 @@ public class TestArchitect2 {
 		}
 	}
 
-	private static void createDB() throws GvExceptionDbUnrecognizedImpl
+	private static void createDB() throws GvExDbUnrecognizedImpl
 	{
 		graphDb = GvDb.getInstance(DB_PATH);
 		graph = graphDb.getGraph();

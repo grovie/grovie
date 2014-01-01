@@ -2,6 +2,8 @@ package de.grovie.renderer.GL2;
 
 import java.util.ArrayList;
 
+import de.grovie.exception.GvExRendererBufferSet;
+import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.renderer.GvAnimator;
 import de.grovie.renderer.GvContext;
 import de.grovie.renderer.GvDevice;
@@ -76,11 +78,23 @@ public class GvRendererGL2 extends GvRenderer{
 	 * 1 for rendering, 1 for real-time updating.
 	 * This method should be invoked by the illustrator/pipeline
 	 * after device creates all textures and all material types loaded.
+	 * @throws GvExRendererDrawGroup 
+	 * @throws GvExRendererBufferSet 
 	 */
-	protected void initDrawGroups()
+	protected void initDrawGroups() throws GvExRendererDrawGroup, GvExRendererBufferSet
 	{
-		lDrawGroupRender.initGroups(lTextures.size(), lMaterials.size());
-		lDrawGroupUpdate.initGroups(lTextures.size(), lMaterials.size());
+		lDrawGroupRender.initGroups(lTextures.size(), lMaterials.size(), lDevice, lContext);
+		lDrawGroupUpdate.initGroups(lTextures.size(), lMaterials.size(), lDevice, lContext);
+	}
+	
+	public GvDrawGroup getDrawGroupRender()
+	{
+		return lDrawGroupRender;
+	}
+	
+	public GvDrawGroup getDrawGroupUpdate()
+	{
+		return lDrawGroupUpdate;
 	}
 	
 	protected void drawPoints(int shaderId)
