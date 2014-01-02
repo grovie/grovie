@@ -13,6 +13,7 @@ public abstract class GvIllustrator{
 	protected double lFrameTime;		//time taken to draw a frame
 	protected double lFrameTimeAccum;	//accumulated frame timings (used to compute average)
 	protected int lFrameCountAccum;		//accumulated frame count (used to compute average)
+	protected long lVertexCount;		//number of vertices rendered
 	
 	public GvIllustrator(GvRenderer renderer)
 	{
@@ -21,6 +22,7 @@ public abstract class GvIllustrator{
 		lFrameTime=0;
 		lFrameTimeAccum = 0;
 		lFrameCountAccum=0;
+		lVertexCount=0;
 	}
 	
 	public void display()
@@ -59,6 +61,16 @@ public abstract class GvIllustrator{
 	public void display3D() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
 	{
 		lPipeline.execute();
+	}
+	
+	public void setVertexCount(long vertexCount)
+	{
+		lVertexCount = vertexCount;
+	}
+	
+	public long getVertexCount()
+	{
+		return lVertexCount;
 	}
 	
 	public abstract void init() throws GvExRendererPassShaderResource;	//initialize rendering, init 3D-pipeline

@@ -7,12 +7,15 @@ import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
+import com.jogamp.opengl.util.texture.Texture;
+
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
 import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 import de.grovie.exception.GvExRendererPassShaderResource;
 import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvDrawGroup;
+import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvLight;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPass;
@@ -25,7 +28,7 @@ import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.util.file.FileResource;
 
 /**
- * This class emulates the OpenGL fixed pipeline using VBOs/VAOs as well as custom shaders.
+ * This class emulates the OpenGL fixed pipeline using VBOs/VAOs and custom shaders.
  * 
  * @author yong
  *
@@ -41,6 +44,9 @@ public class GvPassGL2 extends GvPass {
 	
 	//container for copying light info from renderer
 	private GvLight lLightCopy;
+	
+	//vertex counter
+	private long lVertexCount;
 
 	//container for selecting primitive type and shader program
 	private class GvShaderPrimitiveWrapper
@@ -70,6 +76,7 @@ public class GvPassGL2 extends GvPass {
 		lCameraCopy = new GvCamera();
 		lLightCopy = new GvLight();
 		lShaderPrimitiveWrapper = new GvShaderPrimitiveWrapper();
+		lVertexCount = 0;
 		init();
 	}
 
@@ -149,48 +156,34 @@ public class GvPassGL2 extends GvPass {
 		
 		GvRendererGL2 renderer = (GvRendererGL2)lRenderer;
 		
+		//reset vertex counter
+		lVertexCount = 0;
+		
 		//get reference to group of geometry for rendering
 		GvDrawGroup drawGroup = renderer.getDrawGroupRender();
 		
 		//get list of materials in scene
 		ArrayList<GvMaterial> materials = renderer.getMaterials();
 		
+		//get list of textures in scene
+		ArrayList<GvTexture2DGL2> textures = renderer.getTextures();
+		
 		//get number of lights in scene
 		int lightCount = renderer.getRendererStateMachine().getLightCount();
 		
 		//render non-textured geometry
-		for(int materialIndex=0; materialIndex<materials.size(); ++materialIndex)
-		{
-			for(int primitiveIndex=0; primitiveIndex<GvPrimitive.PRIMITIVE_COUNT; ++primitiveIndex)
-			{
-				//render backface-culled geometry
-				GvBufferSetGL2 bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
-						false,			//non-textured
-						-1,				//non-textured
-						materialIndex,
-						primitiveIndex,
-						true); 			//culled geometry
-				executeBufferSet(bufferSet, renderer, materials.get(materialIndex), primitiveIndex, lightCount,true);
-				
-				//render non-backface-culled geometry
-				bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
-						false,			//non-textured
-						-1,				//non-textured
-						materialIndex,
-						primitiveIndex,
-						false); 		//un-culled geometry
-				executeBufferSet(bufferSet, renderer, materials.get(materialIndex), primitiveIndex, lightCount,false);
-			}
-		}
-		
+		lgl2.glBindTexture(GL2.GL_TEXTURE_2D, 0);
+		traverseGroupsMaterialsPrimitives(materials, drawGroup, renderer, lightCount,false,-1);
 		//render textured geometry
-		
+		traverseGroupsTextures(textures, materials, drawGroup, renderer, lightCount);
+			
+		//update vertex count
+		GvIllustrator illustrator = renderer.getIllustrator();
+		illustrator.setVertexCount(lVertexCount);
 	}
 
 	@Override
 	public void stop() {
-		// TODO Auto-generated method stub
-
 	}
 
 	/**
@@ -273,28 +266,27 @@ public class GvPassGL2 extends GvPass {
 		}
 	}
 	
-	private void selectProgramAndGLPrimitive(int primitiveType) throws GvExRendererPassPrimitiveTypeUnknown
+	private void selectProgramAndGLPrimitive(int primitiveType, boolean textured) throws GvExRendererPassPrimitiveTypeUnknown
 	{
-		if(primitiveType==GvPrimitive.PRIMITIVE_POINT)
+		switch(primitiveType)
 		{
-			lShaderPrimitiveWrapper.lGLShader = lShaderMatPoint.getId();
+		case GvPrimitive.PRIMITIVE_POINT:
+			lShaderPrimitiveWrapper.lGLShader = textured?lShaderTexMatPoint.getId():lShaderMatPoint.getId();
 			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_POINTS;
-		}
-		else if(primitiveType==GvPrimitive.PRIMITIVE_TRIANGLE)
-		{
-			lShaderPrimitiveWrapper.lGLShader = lShaderMatTri.getId();
+			break;
+		case GvPrimitive.PRIMITIVE_TRIANGLE:
+			lShaderPrimitiveWrapper.lGLShader = textured?lShaderTexMatTri.getId():lShaderMatTri.getId();
 			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_TRIANGLES;
-		}
-		else if(primitiveType==GvPrimitive.PRIMITIVE_TRIANGLE_STRIP)
-		{
-			lShaderPrimitiveWrapper.lGLShader = lShaderMatTri.getId();
+			break;
+		case GvPrimitive.PRIMITIVE_TRIANGLE_STRIP:
+			lShaderPrimitiveWrapper.lGLShader = textured?lShaderTexMatTri.getId():lShaderMatTri.getId();
 			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_TRIANGLE_STRIP;
-		}
-		else
+			break;
+		default:
 			throw new GvExRendererPassPrimitiveTypeUnknown("Unknown primitive type");
-		
+		}
 	}
-	
+
 	private void executeBufferSet(GvBufferSetGL2 bufferSet, GvRendererGL2 renderer, GvMaterial material, int primitiveIndex, int lightCount, boolean culled) throws GvExRendererPassPrimitiveTypeUnknown
 	{
 		ArrayList<GvVertexArray> vaos = bufferSet.getVertexArrays();
@@ -307,7 +299,7 @@ public class GvPassGL2 extends GvPass {
 				renderer.updateRenderState(lStateCullDisabled, lgl2);
 			
 			//select correct GL primitive type constant and shader program
-			selectProgramAndGLPrimitive(primitiveIndex);
+			selectProgramAndGLPrimitive(primitiveIndex,false);
 			
 			//bind and use shader program
 			GL2 gl2 = ((GvIllustratorGL2)renderer.getIllustrator()).getGL2();
@@ -343,7 +335,50 @@ public class GvPassGL2 extends GvPass {
 						);
 				
 				gl2.glBindVertexArray(0);
+				
+				lVertexCount += vao.getSizeVertices();
 			}
+		}
+	}
+	
+	private void traverseGroupsMaterialsPrimitives(ArrayList<GvMaterial> materials, GvDrawGroup drawGroup, GvRendererGL2 renderer, int lightCount, boolean textured, int textureIndex) throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
+	{
+		for(int materialIndex=0; materialIndex<materials.size(); ++materialIndex)
+		{
+			GvMaterial material = materials.get(materialIndex);
+			
+			for(int primitiveIndex=0; primitiveIndex<GvPrimitive.PRIMITIVE_COUNT; ++primitiveIndex)
+			{
+				//render backface-culled geometry
+				GvBufferSetGL2 bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
+						textured,			//non-textured
+						textureIndex,				//non-textured
+						materialIndex,
+						primitiveIndex,
+						true); 			//culled geometry
+				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,true);
+				
+				//render non-backface-culled geometry
+				bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
+						textured,			//non-textured
+						textureIndex,				//non-textured
+						materialIndex,
+						primitiveIndex,
+						false); 		//un-culled geometry
+				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,false);
+			}
+		}
+	}
+	
+	private void traverseGroupsTextures(ArrayList<GvTexture2DGL2> textures, ArrayList<GvMaterial> materials, GvDrawGroup drawGroup, GvRendererGL2 renderer, int lightCount) throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
+	{
+		for(int textureIndex=0; textureIndex<textures.size(); ++textureIndex)
+		{
+			Texture texture = textures.get(textureIndex).getTexture();
+			texture.enable(lgl2);
+			texture.bind(lgl2);
+			
+			traverseGroupsMaterialsPrimitives(materials, drawGroup, renderer, lightCount, true, textureIndex);
 		}
 	}
 }

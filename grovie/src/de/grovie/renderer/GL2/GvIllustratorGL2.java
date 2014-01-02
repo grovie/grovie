@@ -176,6 +176,9 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 			lgl2.glWindowPos2i(5, 15);
 			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "FPS: " + 1.0/lFrameTime);
+			lgl2.glWindowPos2i(5, 25);
+			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Vertices: " + lRenderer.getIllustrator().getVertexCount());
 		}
 	}
 
