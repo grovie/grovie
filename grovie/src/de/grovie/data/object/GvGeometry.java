@@ -2,9 +2,9 @@ package de.grovie.data.object;
 
 public class GvGeometry {
 
-	private float[] lVertices;
-	private float[] lNormals;
-	private int lIndices[];
+	protected float[] lVertices;
+	protected float[] lNormals;
+	protected int lIndices[];
 	
 	public GvGeometry()
 	{

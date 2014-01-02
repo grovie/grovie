@@ -143,7 +143,13 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			vao.setSizeUv(0);
 		vao.setSizeIndices(indices.length * 4);
 		
+		//create VAO object (only wrapper object at CPU side, not allocated at GPU yet)
 		lVertexArrays.add(vao);
+		
+		//update memory usage of vbo and ibo wrapper objects
+		vbo.setSizeUsed(vbo.getSizeUsed()+vao.getSizeVertices()+vao.getSizeNormals()+vao.getSizeUv());
+		ibo.setSizeUsed(ibo.getSizeUsed()+vao.getSizeIndices());
+		
 	}
 	
 	private GvVertexBuffer sizeCheckVertexBuffer(float[] vertices, float[] normals, float[] uv, GvDevice device) 

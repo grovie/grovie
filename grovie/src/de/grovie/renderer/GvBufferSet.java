@@ -62,38 +62,6 @@ public abstract class GvBufferSet extends GvDrawGroup {
 		
 		//insert in element buffer
 		insertIntoElementBuffer(indices);
-		
-//		//flag to indicate if new buffers are necessary
-//		boolean allocateNewBuffers = false;
-//		
-//		//check if it is possible to insert vertices
-//		long sizeRequired = vertices.length * 4 + normals.length * 4 + uvcoords.length * 4;
-//		if(sizeRequired > 1048576)
-//			return;
-//		
-//		//check if vbo has sufficient mem
-//		GvVertexBuffer vbo = lVertexBuffers.get(lVertexBuffers.size()-1);
-//		long vboBytesFree = vbo.getSizeFree();
-//		if(sizeRequired > vboBytesFree) //TODO: get float byte size from resource file
-//			allocateNewBuffers = true;
-//		
-//		//check if it is possible to insert indices
-//		sizeRequired = indices.length * 4;
-//		if(sizeRequired > 1048576)
-//			return;
-//		
-//		//check if ibo has sufficient mem
-//		GvIndexBuffer ibo = lIndexBuffers.get(lIndexBuffers.size() - 1);
-//		long iboBytesFree = ibo.getSizeFree();
-//		if(sizeRequired > iboBytesFree)
-//			allocateNewBuffers = true;
-//		
-//		//allocate new buffers if necessary
-//		if(allocateNewBuffers)
-//		{
-//			addArrayBuffer(); //TODO: use thread msg queues to request this
-//			addElementBuffer();
-//		}
 	}
 	
 	public ArrayList<GvVertexArray> getVertexArrays()

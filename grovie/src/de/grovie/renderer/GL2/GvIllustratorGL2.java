@@ -14,6 +14,7 @@ import com.jogamp.opengl.util.gl2.GLUT;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
+import de.grovie.data.object.GvGeometryTex;
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
@@ -27,6 +28,7 @@ import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPrimitive;
+import de.grovie.test.engine.renderer.TestRendererTex;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
@@ -103,8 +105,10 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		rendererGL2.addMaterial(new GvMaterial());
 		
 		//Textures
+		//FOR DEBUG
 		InputStream stream = new FileInputStream("/Users/yongzhiong/Downloads/test.jpg");
 		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
+		//END DEBUG
 		
 		//Draw groups
 		rendererGL2.initDrawGroups();
@@ -121,12 +125,18 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		float vertices[] = geom.getVertices();
 		float normals[] = geom.getNormals();
 		
+		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
+		
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
+		GvBufferSet bufferSet;
 		//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
-		GvBufferSet bufferSet = drawGrpUpdate.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 		bufferSet.insertGeometry(vertices, normals, indices);
 		
+		bufferSet = drawGrpUpdate.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
+
 		//VBO/IBO - OpenGL server-side
 		//send geom to hardware buffers - simulate action 3 by foreign thread
 		//TODO: integrate this with previous geometry insertion step

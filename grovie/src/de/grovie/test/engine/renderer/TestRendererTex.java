@@ -17,6 +17,7 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
+import de.grovie.data.object.GvGeometryTex;
 import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GL2.GvRendererGL2;
@@ -248,6 +249,258 @@ public class TestRendererTex {
         }
 	}
 
+	public static GvGeometryTex getTexturedBox()
+	{
+		vertices = new float[72];
+		normals = new float[72];
+		indices = new int[36];
+		uv = new float[48];
+
+		//init normals
+		float norm[] = {0,0,0};
+		for (int i=0; i< 6; ++i)
+		{
+			if(i==0){
+				norm[0] = -1.0f;
+				norm[1] =  0.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==1){
+				norm[0] =  0.0f;
+				norm[1] =  1.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==2){
+				norm[0] =  1.0f;
+				norm[1] =  0.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==3){
+				norm[0] =  0.0f;
+				norm[1] = -1.0f;
+				norm[2] =  0.0f;
+			}
+			if(i==4){
+				norm[0] =  0.0f;
+				norm[1] =  0.0f;
+				norm[2] = -1.0f;
+			}
+			if(i==5){
+				norm[0] =  0.0f;
+				norm[1] =  0.0f;
+				norm[2] =  1.0f;
+			}
+			for(int j=0; j<4; ++j)
+			{
+				for(int k=0; k<3; ++k)
+				{
+					normals[(i*4*3)+(j*3)+k] = norm[k];
+				}
+			}
+		}
+
+		//vertex 0 - face 1
+		vertices[0] = -1.0f;
+		vertices[1] = -1.0f;
+		vertices[2] =  1.0f;
+		//vertex 1 - face 1
+		vertices[3] = -1.0f;
+		vertices[4] = -1.0f;
+		vertices[5] = -1.0f;
+		//vertex 2 - face 1
+		vertices[6] = -1.0f;
+		vertices[7] =  1.0f;
+		vertices[8] = -1.0f;
+		//vertex 3 - face 1
+		vertices[9] = -1.0f;
+		vertices[10] =  1.0f;
+		vertices[11] =  1.0f;
+
+		//vertex 4 - face 2
+		vertices[12] = -1.0f;
+		vertices[13] =  1.0f;
+		vertices[14] =  1.0f;
+		//vertex 5 - face 2
+		vertices[15] = -1.0f;
+		vertices[16] =  1.0f;
+		vertices[17] = -1.0f;
+		//vertex 6 - face 2
+		vertices[18] =  1.0f;
+		vertices[19] =  1.0f;
+		vertices[20] = -1.0f;
+		//vertex 7 - face 2
+		vertices[21] =  1.0f;
+		vertices[22] =  1.0f;
+		vertices[23] =  1.0f;
+
+		//vertex 8 - face 3
+		vertices[24] =  1.0f;
+		vertices[25] =  1.0f;
+		vertices[26] =  1.0f;
+		//vertex 9 - face 3
+		vertices[27] =  1.0f;
+		vertices[28] =  1.0f;
+		vertices[29] = -1.0f;
+		//vertex 10 - face 3
+		vertices[30] =  1.0f;
+		vertices[31] = -1.0f;
+		vertices[32] = -1.0f;
+		//vertex 11 - face 3
+		vertices[33] =  1.0f;
+		vertices[34] = -1.0f;
+		vertices[35] =  1.0f;
+
+		//vertex 12 - face 4
+		vertices[36] =  1.0f;
+		vertices[37] = -1.0f;
+		vertices[38] =  1.0f;
+		//vertex 13 - face 4
+		vertices[39] =  1.0f;
+		vertices[40] = -1.0f;
+		vertices[41] = -1.0f;
+		//vertex 14 - face 4
+		vertices[42] = -1.0f;
+		vertices[43] = -1.0f;
+		vertices[44] = -1.0f;
+		//vertex 15 - face 4
+		vertices[45] = -1.0f;
+		vertices[46] = -1.0f;
+		vertices[47] =  1.0f;
+
+		//vertex 16 - face 5
+		vertices[48] =  1.0f;
+		vertices[49] = -1.0f;
+		vertices[50] = -1.0f;
+		//vertex 17 - face 5
+		vertices[51] =  1.0f;
+		vertices[52] =  1.0f;
+		vertices[53] = -1.0f;
+		//vertex 18 - face 5
+		vertices[54] = -1.0f;
+		vertices[55] =  1.0f;
+		vertices[56] = -1.0f;
+		//vertex 19 - face 5
+		vertices[57] = -1.0f;
+		vertices[58] = -1.0f;
+		vertices[59] = -1.0f;
+
+		//vertex 20 - face 6
+		vertices[60] =  1.0f;
+		vertices[61] =  1.0f;
+		vertices[62] =  1.0f;
+		//vertex 21 - face 6
+		vertices[63] =  1.0f;
+		vertices[64] = -1.0f;
+		vertices[65] =  1.0f;
+		//vertex 22 - face 6
+		vertices[66] = -1.0f;
+		vertices[67] = -1.0f;
+		vertices[68] =  1.0f;
+		//vertex 23 - face 6
+		vertices[69] = -1.0f;
+		vertices[70] =  1.0f;
+		vertices[71] =  1.0f;
+
+		indices[0]=2;
+		indices[1]=1;
+		indices[2]=0;
+		indices[3]=0;
+		indices[4]=3;
+		indices[5]=2;
+
+		indices[6]=6;
+		indices[7]=5;
+		indices[8]=4;
+		indices[9]=4;
+		indices[10]=7;
+		indices[11]=6;
+
+		indices[12]=10;
+		indices[13]=9;
+		indices[14]=8;
+		indices[15]=8;
+		indices[16]=11;
+		indices[17]=10;
+
+		indices[18]=14;
+		indices[19]=13;
+		indices[20]=12;
+		indices[21]=12;
+		indices[22]=15;
+		indices[23]=14;
+
+		indices[24]=18;
+		indices[25]=17;
+		indices[26]=16;
+		indices[27]=16;
+		indices[28]=19;
+		indices[29]=18;
+
+		indices[30]=22;
+		indices[31]=21;
+		indices[32]=20;
+		indices[33]=20;
+		indices[34]=23;
+		indices[35]=22;
+		
+		uv[0] = 1.0f;
+		uv[1] = 0.0f;
+		uv[2] = 0.0f;
+		uv[3] = 0.0f;
+		uv[4] = 0.0f;
+		uv[5] = 1.0f;
+		uv[6] = 1.0f;
+		uv[7] = 1.0f;
+		
+		uv[8] = 1.0f;
+		uv[9] = 0.0f;
+		uv[10] = 0.0f;
+		uv[11] = 0.0f;
+		uv[12] = 0.0f;
+		uv[13] = 1.0f;
+		uv[14] = 1.0f;
+		uv[15] = 1.0f;
+		
+		uv[16] = 1.0f;
+		uv[17] = 0.0f;
+		uv[18] = 0.0f;
+		uv[19] = 0.0f;
+		uv[20] = 0.0f;
+		uv[21] = 1.0f;
+		uv[22] = 1.0f;
+		uv[23] = 1.0f;
+		
+		uv[24] = 1.0f;
+		uv[25] = 0.0f;
+		uv[26] = 0.0f;
+		uv[27] = 0.0f;
+		uv[28] = 0.0f;
+		uv[29] = 1.0f;
+		uv[30] = 1.0f;
+		uv[31] = 1.0f;
+		
+		uv[32] = 1.0f;
+		uv[33] = 0.0f;
+		uv[34] = 0.0f;
+		uv[35] = 0.0f;
+		uv[36] = 0.0f;
+		uv[37] = 1.0f;
+		uv[38] = 1.0f;
+		uv[39] = 1.0f;
+		
+		uv[40] = 1.0f;
+		uv[41] = 0.0f;
+		uv[42] = 0.0f;
+		uv[43] = 0.0f;
+		uv[44] = 0.0f;
+		uv[45] = 1.0f;
+		uv[46] = 1.0f;
+		uv[47] = 1.0f;
+		
+		GvGeometryTex geom = new GvGeometryTex(vertices, normals, indices, uv);
+		return geom;
+	}
+	
 	private static void initVertexData()
 	{
 		/* Setup cube vertex data. */

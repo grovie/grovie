@@ -104,24 +104,24 @@ public class GvPassGL2 extends GvPass {
 					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
 							File.separator + "MaterialTriangleV.glsl");
 
-//			String srcTextureMaterialPointF = FileResource.getResourceAsString(
-//					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-//							File.separator + "TextureMaterialPointF.glsl");
-//			String srcTextureMaterialPointV = FileResource.getResourceAsString(
-//					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-//							File.separator + "TextureMaterialPointV.glsl");
-//			String srcTextureMaterialTriangleF = FileResource.getResourceAsString(
-//					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-//							File.separator + "TextureMaterialTriangleF.glsl");
-//			String srcTextureMaterialTriangleV = FileResource.getResourceAsString(
-//					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-//							File.separator + "TextureMaterialTriangleV.glsl");
+			String srcTextureMaterialPointF = FileResource.getResourceAsString(
+					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
+							File.separator + "TextureMaterialPointF.glsl");
+			String srcTextureMaterialPointV = FileResource.getResourceAsString(
+					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
+							File.separator + "TextureMaterialPointV.glsl");
+			String srcTextureMaterialTriangleF = FileResource.getResourceAsString(
+					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
+							File.separator + "TextureMaterialTriangleF.glsl");
+			String srcTextureMaterialTriangleV = FileResource.getResourceAsString(
+					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
+							File.separator + "TextureMaterialTriangleV.glsl");
 			
 			GvDevice device = lRenderer.getDevice();
 			lShaderMatPoint = device.createShaderProgram(srcMaterialPointV, srcMaterialPointF);
 			lShaderMatTri = device.createShaderProgram(srcMaterialTriangleV, srcMaterialTriangleF);
-//			lShaderTexMatPoint = device.createShaderProgram(srcTextureMaterialPointV, srcTextureMaterialPointF);
-//			lShaderTexMatTri = device.createShaderProgram(srcTextureMaterialTriangleV, srcTextureMaterialTriangleF);
+			lShaderTexMatPoint = device.createShaderProgram(srcTextureMaterialPointV, srcTextureMaterialPointF);
+			lShaderTexMatTri = device.createShaderProgram(srcTextureMaterialTriangleV, srcTextureMaterialTriangleF);
 
 		} catch (Exception e) {
 			throw new GvExRendererPassShaderResource("Error loading shader source");
@@ -287,7 +287,7 @@ public class GvPassGL2 extends GvPass {
 		}
 	}
 
-	private void executeBufferSet(GvBufferSetGL2 bufferSet, GvRendererGL2 renderer, GvMaterial material, int primitiveIndex, int lightCount, boolean culled) throws GvExRendererPassPrimitiveTypeUnknown
+	private void executeBufferSet(GvBufferSetGL2 bufferSet, GvRendererGL2 renderer, GvMaterial material, int primitiveIndex, int lightCount, boolean culled, boolean textured) throws GvExRendererPassPrimitiveTypeUnknown
 	{
 		ArrayList<GvVertexArray> vaos = bufferSet.getVertexArrays();
 		int vaoCount = vaos.size();
@@ -299,7 +299,7 @@ public class GvPassGL2 extends GvPass {
 				renderer.updateRenderState(lStateCullDisabled, lgl2);
 			
 			//select correct GL primitive type constant and shader program
-			selectProgramAndGLPrimitive(primitiveIndex,false);
+			selectProgramAndGLPrimitive(primitiveIndex,textured);
 			
 			//bind and use shader program
 			GL2 gl2 = ((GvIllustratorGL2)renderer.getIllustrator()).getGL2();
@@ -341,6 +341,18 @@ public class GvPassGL2 extends GvPass {
 		}
 	}
 	
+	/**
+	 * Loops through draw groups categorized by material and primitive types. Render the
+	 * geometry within.
+	 * @param materials
+	 * @param drawGroup
+	 * @param renderer
+	 * @param lightCount
+	 * @param textured
+	 * @param textureIndex
+	 * @throws GvExRendererDrawGroupRetrieval
+	 * @throws GvExRendererPassPrimitiveTypeUnknown
+	 */
 	private void traverseGroupsMaterialsPrimitives(ArrayList<GvMaterial> materials, GvDrawGroup drawGroup, GvRendererGL2 renderer, int lightCount, boolean textured, int textureIndex) throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
 	{
 		for(int materialIndex=0; materialIndex<materials.size(); ++materialIndex)
@@ -356,7 +368,7 @@ public class GvPassGL2 extends GvPass {
 						materialIndex,
 						primitiveIndex,
 						true); 			//culled geometry
-				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,true);
+				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,true,textured);
 				
 				//render non-backface-culled geometry
 				bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
@@ -365,11 +377,21 @@ public class GvPassGL2 extends GvPass {
 						materialIndex,
 						primitiveIndex,
 						false); 		//un-culled geometry
-				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,false);
+				executeBufferSet(bufferSet, renderer, material, primitiveIndex, lightCount,false,textured);
 			}
 		}
 	}
 	
+	/**
+	 * Loops through the textured draw groups and render geometry contained within.
+	 * @param textures
+	 * @param materials
+	 * @param drawGroup
+	 * @param renderer
+	 * @param lightCount
+	 * @throws GvExRendererDrawGroupRetrieval
+	 * @throws GvExRendererPassPrimitiveTypeUnknown
+	 */
 	private void traverseGroupsTextures(ArrayList<GvTexture2DGL2> textures, ArrayList<GvMaterial> materials, GvDrawGroup drawGroup, GvRendererGL2 renderer, int lightCount) throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
 	{
 		for(int textureIndex=0; textureIndex<textures.size(); ++textureIndex)
