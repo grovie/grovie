@@ -1,6 +1,7 @@
 package de.grovie.renderer;
 
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 import de.grovie.exception.GvExRendererPassShaderResource;
 
 /**
@@ -30,7 +31,7 @@ public abstract class GvPass {
 	public abstract void start();
 	
 	//rendering pass execution
-	public abstract void execute() throws GvExRendererDrawGroupRetrieval;
+	public abstract void execute() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown;
 	
 	//post-execution procedures
 	public abstract void stop();	

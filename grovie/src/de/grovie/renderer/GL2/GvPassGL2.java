@@ -8,6 +8,7 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.glu.GLU;
 
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 import de.grovie.exception.GvExRendererPassShaderResource;
 import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDevice;
@@ -131,7 +132,7 @@ public class GvPassGL2 extends GvPass {
 	}
 
 	@Override
-	public void execute() throws GvExRendererDrawGroupRetrieval {
+	public void execute() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown {
 		GvRendererGL2 renderer = (GvRendererGL2)lRenderer;
 
 		GvDrawGroup drawGroup = renderer.getDrawGroupRender();
@@ -149,14 +150,25 @@ public class GvPassGL2 extends GvPass {
 				{
 					renderer.updateRenderState(lStateCullEnabled, lgl2);
 					
-					GvMaterial material = materials.get(i);
 					GvShaderProgram program;
+					int glPrimitiveType;
 					if(j==GvPrimitive.PRIMITIVE_POINT)
+					{
 						program = lShaderMatPoint;
-					else if((j==GvPrimitive.PRIMITIVE_TRIANGLE)||(j==GvPrimitive.PRIMITIVE_TRIANGLE_STRIP))
+						glPrimitiveType = GL2.GL_POINTS;
+					}
+					else if(j==GvPrimitive.PRIMITIVE_TRIANGLE)
+					{
 						program = lShaderMatTri;
+						glPrimitiveType = GL2.GL_TRIANGLES;
+					}
+					else if(j==GvPrimitive.PRIMITIVE_TRIANGLE_STRIP)
+					{
+						program = lShaderMatTri;
+						glPrimitiveType = GL2.GL_TRIANGLE_STRIP;
+					}
 					else
-						program = lShaderMatTri;
+						throw new GvExRendererPassPrimitiveTypeUnknown("Unknown primitive type");
 					
 					GL2 gl2 = ((GvIllustratorGL2)renderer.getIllustrator()).getGL2();
 					int shaderProgramId = program.getId();
@@ -175,6 +187,7 @@ public class GvPassGL2 extends GvPass {
 					gl2.glUniform4f(idLightSpec,1.0f,1.0f,1.0f,1.0f);
 
 					//3. material ambient,diffuse,specular,shininess
+					GvMaterial material = materials.get(i);
 					int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
 					int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
 					int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
@@ -199,10 +212,10 @@ public class GvPassGL2 extends GvPass {
 						gl2.glBindVertexArray(vao.getId());
 						
 						gl2.glDrawElements(
-								GL2.GL_TRIANGLES,      // mode
-								vao.getSizeIndices()/4,    // count
-								GL2.GL_UNSIGNED_INT,   // type
-								vao.getIboOffset()           // element array buffer offset
+								glPrimitiveType,      		// mode
+								vao.getSizeIndices()/4,    	// count
+								GL2.GL_UNSIGNED_INT,   		// type
+								vao.getIboOffset()          // element array buffer offset
 								);
 						
 						gl2.glBindVertexArray(0);

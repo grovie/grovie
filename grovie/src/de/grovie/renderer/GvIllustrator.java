@@ -1,6 +1,7 @@
 package de.grovie.renderer;
 
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 import de.grovie.exception.GvExRendererPassShaderResource;
 
 public abstract class GvIllustrator{
@@ -36,7 +37,9 @@ public abstract class GvIllustrator{
 		}
 		catch(GvExRendererDrawGroupRetrieval e)
 		{
-			System.out.println("Error retrieving draw group category.");
+			System.out.println(e.getMessage());
+		} catch (GvExRendererPassPrimitiveTypeUnknown e) {
+			System.out.println(e.getMessage());
 		}
 		display2DOverlay();
 		displayEnd(); //finishing calls
@@ -53,7 +56,7 @@ public abstract class GvIllustrator{
 		}
 	}
 	
-	public void display3D() throws GvExRendererDrawGroupRetrieval
+	public void display3D() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
 	{
 		lPipeline.execute();
 	}

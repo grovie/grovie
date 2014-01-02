@@ -3,6 +3,7 @@ package de.grovie.renderer;
 import java.util.ArrayList;
 
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 
 public abstract class GvPipeline {
 
@@ -15,7 +16,7 @@ public abstract class GvPipeline {
 		this.lPasses = new ArrayList<GvPass>();
 	}
 	
-	public void execute() throws GvExRendererDrawGroupRetrieval
+	public void execute() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown
 	{
 		for(int i=0; i<lPasses.size(); ++i)
 		{
