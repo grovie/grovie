@@ -5,17 +5,19 @@ import de.grovie.exception.GvExRendererPassShaderResource;
 
 /**
  * An abstract representation of a rendering pass.
+ * A rendering pass signifies the sending of data into
+ * the 3D-to-2D (i.e. 3D geometry to screen color) conversion channel.
  * 
  * @author yong
  *
  */
 public abstract class GvPass {
 	
-	protected GvRenderer lRenderer;
+	protected GvRenderer lRenderer;						//reference to renderer
 	
 	public GvPass(GvRenderer renderer)
 	{
-		this.lRenderer = renderer;
+		lRenderer = renderer;
 	}
 	
 	//rendering pass initialization

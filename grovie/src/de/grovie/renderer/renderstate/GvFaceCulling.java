@@ -1,16 +1,16 @@
 package de.grovie.renderer.renderstate;
 
-public class GvScissorTest  implements GvRenderStateItem<GvScissorTest>{
+public class GvFaceCulling implements GvRenderStateItem<GvFaceCulling>{
 
 	public boolean lEnabled;
 	
-	public GvScissorTest()
+	public GvFaceCulling()
 	{
 		lEnabled = false;
 	}
 	
 	@Override
-	public boolean isDifferent(GvScissorTest item) {
+	public boolean isDifferent(GvFaceCulling item) {
 		if(this.lEnabled != item.lEnabled)
 			return true;
 		
@@ -18,7 +18,8 @@ public class GvScissorTest  implements GvRenderStateItem<GvScissorTest>{
 	}
 
 	@Override
-	public void set(GvScissorTest item) {
+	public void set(GvFaceCulling item) {
 		this.lEnabled = item.lEnabled;
 	}
+
 }

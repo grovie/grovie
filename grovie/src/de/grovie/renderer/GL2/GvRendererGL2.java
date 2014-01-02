@@ -13,9 +13,7 @@ import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvRenderer;
-import de.grovie.renderer.GvShaderProgram;
-import de.grovie.renderer.GvTexture2D;
-import de.grovie.renderer.GvVertexArray;
+import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
 /**
@@ -46,6 +44,8 @@ public class GvRendererGL2 extends GvRenderer{
 		
 		lDrawGroupRender = new GvDrawGroup();
 		lDrawGroupUpdate = new GvDrawGroup();
+		
+		lRenderState = new GvRenderStateGL2();
 	}
 
 	@Override
@@ -145,5 +145,8 @@ public class GvRendererGL2 extends GvRenderer{
 //		
 //	}
 
-	
+	@Override
+	public void updateRenderState(GvRenderState newState, Object context) {
+		lRenderState.update(newState, (GL2)context);
+	}
 }

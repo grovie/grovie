@@ -122,7 +122,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		}
 		
 		//bind last ibo
-		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, ibo.getId());
+		gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo.getId());
 		
 		//copy indices to ibo
 		IntBuffer indicesBuffer = IntBuffer.wrap(indices);

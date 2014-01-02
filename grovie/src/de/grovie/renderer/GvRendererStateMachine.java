@@ -1,6 +1,7 @@
 package de.grovie.renderer;
 
 
+
 /**
  * This class is a state machine providing access to entities
  * in the renderer that can be modified.
@@ -21,7 +22,8 @@ public class GvRendererStateMachine {
 		CAMERA_NEAR_CHANGE,
 		CAMERA_FAR_CHANGE,
 		SCREEN_DIMENSIONS_CHANGE,
-		OVERLAY_ON_CHANGE;
+		OVERLAY_ON_CHANGE,
+		RENDER_STATE_CHANGE;
 	}
 	
 	/** Renderer state is a state machine. 

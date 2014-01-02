@@ -9,16 +9,26 @@ package de.grovie.renderer.renderstate;
  * @author yong
  *
  */
-public class GvRenderState {
+public abstract class GvRenderState {
 
-	public GvPrimitiveRestart lPrimitiveRestart;
-	public GvFacetCulling lFacetCulling;
+	public GvFaceCulling lFaceCulling;
 	public GvRasterizationMode lRasterizationMode;
 	public GvScissorTest lScissorTest;
 	public GvStencilTest lStencilTest;
 	public GvDepthTest lDepthTest;
-	public GvDepthRange lDepthRange;
-	public GvBlending lBlending;
-	public GvColorMask lColorMask;
+	public GvLighting lLighting;
 	public boolean lDepthMask;
+	
+	public GvRenderState()
+	{
+		lFaceCulling = new GvFaceCulling();
+		lRasterizationMode = new GvRasterizationMode();
+		lScissorTest = new GvScissorTest();
+		lStencilTest = new GvStencilTest();
+		lDepthTest = new GvDepthTest();
+		lLighting = new GvLighting();
+		lDepthMask = true;
+	}
+
+	public abstract void update(GvRenderState newState, Object context);
 }

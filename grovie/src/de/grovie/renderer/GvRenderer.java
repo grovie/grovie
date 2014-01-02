@@ -1,5 +1,6 @@
 package de.grovie.renderer;
 
+import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
 /**
@@ -28,6 +29,9 @@ public abstract class GvRenderer implements Runnable {
 	//state machine that controls interaction with state of renderer
 	private GvRendererStateMachine lRendererStateMachine;
 	
+	//current settings of graphics API
+	protected GvRenderState lRenderState;	
+	
 	public GvRenderer(
 			GvWindowSystem windowSystem, 
 			String windowTitle, 
@@ -38,7 +42,7 @@ public abstract class GvRenderer implements Runnable {
 		lWindowTitle = windowTitle;
 		
 		lRendererStateMachine = new GvRendererStateMachine(windowWidth,windowHeight);
-
+		
 		lThread = new Thread(this, "GroViE Renderer");
 	}
 	
@@ -101,4 +105,6 @@ public abstract class GvRenderer implements Runnable {
 	public abstract GvContext createContext();
 	public abstract GvIllustrator createIllustrator();
 	public abstract GvAnimator createAnimator();
+	
+	public abstract void updateRenderState(GvRenderState newState, Object context);
 }
