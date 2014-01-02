@@ -14,19 +14,16 @@ vec4 diffuseColor;
 vec4 ambientColor;
 vec4 ambientColorGlobal;
 vec4 specularColor;
-vec3 lightDirWorld;
 float NdotL; 				//angle between world space normal and light direction
 float NdotHV; 				//cos angle between half vector and normal
 void main()
 {
     //convert normal from model space to world space
 	normal = gl_Normal;
-	lightDirWorld = vec4(lightDir,0.0).xyz; //should pre-compute this
-
-
+    
 	//compute cos of angle between normal and light direction (world space)
 	//that is the dot product of the two vectors. clamp result to [0,1].
-	NdotL = max(dot(normal,lightDirWorld), 0.0);
+	NdotL = max(dot(normal,lightDir), 0.0);
 
 	//result diffuse color from material diffuse and light diffuse colors
 	diffuseColor = materialDif * lightDif;
@@ -38,7 +35,7 @@ void main()
 	ambientColorGlobal = materialAmb * globalAmb;
 	
 	//half vector for specular term
-	halfVector = lightDirWorld + normalize(cameraPos-gl_Vertex.xyz);
+	halfVector = lightDir + normalize(cameraPos-gl_Vertex.xyz);
 
 	//computer specular term - blinn-phong
 	if(NdotL > 0.0)
@@ -52,5 +49,5 @@ void main()
 
 	//diffuse term + ambient term + global ambient + specular term
 	gl_FrontColor = NdotL * diffuseColor + ambientColor + ambientColorGlobal + specularColor;
-	gl_Position = ftransform(); //same as line above but optimized
+	gl_Position = ftransform(); // eq. to Proj * View * Model * gl_Vertex (in this order)
 }

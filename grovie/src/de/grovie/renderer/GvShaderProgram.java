@@ -20,6 +20,9 @@ public class GvShaderProgram {
 		this.lShaderFragment = shaderFragment;
 	}
 	
+	public GvShaderProgram() {
+	}
+
 	public int getId() {
 		return lId;
 	}

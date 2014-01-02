@@ -13,6 +13,7 @@ import de.grovie.exception.GvExRendererPassShaderResource;
 import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDevice;
 import de.grovie.renderer.GvDrawGroup;
+import de.grovie.renderer.GvLight;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPass;
 import de.grovie.renderer.GvPrimitive;
@@ -37,7 +38,18 @@ public class GvPassGL2 extends GvPass {
 
 	//container for copying camera info from renderer
 	private GvCamera lCameraCopy;
+	
+	//container for copying light info from renderer
+	private GvLight lLightCopy;
 
+	//container for selecting primitive type and shader program
+	private class GvShaderPrimitiveWrapper
+	{
+		int lGLShader;		//OpenGL shader program id
+		int lGLPrimitive;	//OpenGL primitive type constant
+	}
+	private GvShaderPrimitiveWrapper lShaderPrimitiveWrapper;
+	
 	//non-textured-material-primitive shaders
 	private GvShaderProgram lShaderMatPoint;
 	private GvShaderProgram lShaderMatTri;
@@ -56,7 +68,8 @@ public class GvPassGL2 extends GvPass {
 		this.lgl2 = gl2;
 		this.lglu = glu;
 		lCameraCopy = new GvCamera();
-		
+		lLightCopy = new GvLight();
+		lShaderPrimitiveWrapper = new GvShaderPrimitiveWrapper();
 		init();
 	}
 
@@ -133,96 +146,45 @@ public class GvPassGL2 extends GvPass {
 
 	@Override
 	public void execute() throws GvExRendererDrawGroupRetrieval, GvExRendererPassPrimitiveTypeUnknown {
+		
 		GvRendererGL2 renderer = (GvRendererGL2)lRenderer;
-
+		
+		//get reference to group of geometry for rendering
 		GvDrawGroup drawGroup = renderer.getDrawGroupRender();
 		
+		//get list of materials in scene
 		ArrayList<GvMaterial> materials = renderer.getMaterials();
 		
-		for(int i=0; i<materials.size(); ++i)
+		//get number of lights in scene
+		int lightCount = renderer.getRendererStateMachine().getLightCount();
+		
+		//render non-textured geometry
+		for(int materialIndex=0; materialIndex<materials.size(); ++materialIndex)
 		{
-			for(int j=0; j<GvPrimitive.PRIMITIVE_COUNT; ++j)
+			for(int primitiveIndex=0; primitiveIndex<GvPrimitive.PRIMITIVE_COUNT; ++primitiveIndex)
 			{
-				GvBufferSetGL2 bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(false, -1, i, j, true);
-				ArrayList<GvVertexArray> vaos = bufferSet.getVertexArrays();
-				int vaoCount = vaos.size();
-				if(vaoCount > 0)
-				{
-					renderer.updateRenderState(lStateCullEnabled, lgl2);
-					
-					GvShaderProgram program;
-					int glPrimitiveType;
-					if(j==GvPrimitive.PRIMITIVE_POINT)
-					{
-						program = lShaderMatPoint;
-						glPrimitiveType = GL2.GL_POINTS;
-					}
-					else if(j==GvPrimitive.PRIMITIVE_TRIANGLE)
-					{
-						program = lShaderMatTri;
-						glPrimitiveType = GL2.GL_TRIANGLES;
-					}
-					else if(j==GvPrimitive.PRIMITIVE_TRIANGLE_STRIP)
-					{
-						program = lShaderMatTri;
-						glPrimitiveType = GL2.GL_TRIANGLE_STRIP;
-					}
-					else
-						throw new GvExRendererPassPrimitiveTypeUnknown("Unknown primitive type");
-					
-					GL2 gl2 = ((GvIllustratorGL2)renderer.getIllustrator()).getGL2();
-					int shaderProgramId = program.getId();
-					gl2.glUseProgram(shaderProgramId);
-					
-					//1. lightDir - world space - directional light - direction from vertex to light source
-					int idLightDir = gl2.glGetUniformLocation(shaderProgramId,"lightDir");
-					gl2.glUniform3f(idLightDir,0.5773502f,0.5773502f,0.5773502f);
-
-					//2. light ambient,diffuse,specular
-					int idLightAmbi = gl2.glGetUniformLocation(shaderProgramId,"lightAmb");
-					int idLightDiff = gl2.glGetUniformLocation(shaderProgramId,"lightDif");
-					int idLightSpec = gl2.glGetUniformLocation(shaderProgramId,"lightSpe");
-					gl2.glUniform4f(idLightAmbi,1.0f,1.0f,1.0f,1.0f);
-					gl2.glUniform4f(idLightDiff,1.0f,1.0f,1.0f,1.0f);
-					gl2.glUniform4f(idLightSpec,1.0f,1.0f,1.0f,1.0f);
-
-					//3. material ambient,diffuse,specular,shininess
-					GvMaterial material = materials.get(i);
-					int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
-					int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
-					int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
-					int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
-					gl2.glUniform4f(idMaterialAmbi,material.lAmbient[0],material.lAmbient[1],material.lAmbient[2],material.lAmbient[3]);
-					gl2.glUniform4f(idMaterialDiff,material.lDiffuse[0],material.lDiffuse[1],material.lDiffuse[2],material.lDiffuse[3]);
-					gl2.glUniform4f(idMaterialSpec,material.lSpecular[0],material.lSpecular[1],material.lSpecular[2],material.lSpecular[3]);
-					gl2.glUniform1f(idMaterialShin, material.lShininess);
-
-					//4. global ambient
-					int idGlobalAmbi = gl2.glGetUniformLocation(shaderProgramId,"globalAmbi");
-					gl2.glUniform4f(idGlobalAmbi,0.1f,0.1f,0.1f,1.0f);
-
-					//5. camera position
-					int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
-					gl2.glUniform3f(idCameraPos,lCameraCopy.lPosition[0],lCameraCopy.lPosition[1],lCameraCopy.lPosition[2]);
-					
-					for(int k=0; k<vaoCount; ++k)
-					{
-						GvVertexArray vao = vaos.get(k);
-						
-						gl2.glBindVertexArray(vao.getId());
-						
-						gl2.glDrawElements(
-								glPrimitiveType,      		// mode
-								vao.getSizeIndices()/4,    	// count
-								GL2.GL_UNSIGNED_INT,   		// type
-								vao.getIboOffset()          // element array buffer offset
-								);
-						
-						gl2.glBindVertexArray(0);
-					}
-				}
+				//render backface-culled geometry
+				GvBufferSetGL2 bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
+						false,			//non-textured
+						-1,				//non-textured
+						materialIndex,
+						primitiveIndex,
+						true); 			//culled geometry
+				executeBufferSet(bufferSet, renderer, materials.get(materialIndex), primitiveIndex, lightCount,true);
+				
+				//render non-backface-culled geometry
+				bufferSet = (GvBufferSetGL2)drawGroup.getBufferSet(
+						false,			//non-textured
+						-1,				//non-textured
+						materialIndex,
+						primitiveIndex,
+						false); 		//un-culled geometry
+				executeBufferSet(bufferSet, renderer, materials.get(materialIndex), primitiveIndex, lightCount,false);
 			}
 		}
+		
+		//render textured geometry
+		
 	}
 
 	@Override
@@ -275,5 +237,113 @@ public class GvPassGL2 extends GvPass {
 		lStateCullDisabled.lFaceCulling.lEnabled = false;
 		lStateCullDisabled.lLighting.lEnabled = false;
 		lStateCullEnabled.lDepthTest.lEnabled = true;
+	}
+	
+	private void glslMaterial(GvMaterial material, GL2 gl2, int shaderProgramId)
+	{
+		int idMaterialAmbi = gl2.glGetUniformLocation(shaderProgramId,"materialAmb");
+		int idMaterialDiff = gl2.glGetUniformLocation(shaderProgramId,"materialDif");
+		int idMaterialSpec = gl2.glGetUniformLocation(shaderProgramId,"materialSpe");
+		int idMaterialShin = gl2.glGetUniformLocation(shaderProgramId,"materialShi");
+		gl2.glUniform4f(idMaterialAmbi,material.lAmbient[0],material.lAmbient[1],material.lAmbient[2],material.lAmbient[3]);
+		gl2.glUniform4f(idMaterialDiff,material.lDiffuse[0],material.lDiffuse[1],material.lDiffuse[2],material.lDiffuse[3]);
+		gl2.glUniform4f(idMaterialSpec,material.lSpecular[0],material.lSpecular[1],material.lSpecular[2],material.lSpecular[3]);
+		gl2.glUniform1f(idMaterialShin, material.lShininess);
+	}
+	
+	private void glslLights(int lightCount, GL2 gl2, int shaderProgramId)
+	{
+		int idLightCount = gl2.glGetUniformLocation(shaderProgramId,"lightCount");
+		gl2.glUniform1i(idLightCount, lightCount);
+		
+		int idLightDir,idLightAmb, idLightDif, idLightSpe;
+		for(int lightIndex=0; lightIndex<lightCount; lightIndex++)
+		{
+			lRenderer.getRendererStateMachine().getLight(lightIndex, lLightCopy);
+			
+			idLightDir = gl2.glGetUniformLocation(shaderProgramId,"lights["+lightIndex+"].lightDir");
+			idLightAmb = gl2.glGetUniformLocation(shaderProgramId,"lights["+lightIndex+"].lightAmb");
+			idLightDif = gl2.glGetUniformLocation(shaderProgramId,"lights["+lightIndex+"].lightDif");
+			idLightSpe = gl2.glGetUniformLocation(shaderProgramId,"lights["+lightIndex+"].lightSpe");
+			
+			gl2.glUniform3f(idLightDir,lLightCopy.lPosition[0],lLightCopy.lPosition[1],lLightCopy.lPosition[2]);
+			gl2.glUniform4f(idLightAmb,lLightCopy.lAmbient[0],lLightCopy.lAmbient[1],lLightCopy.lAmbient[2],lLightCopy.lAmbient[3]);
+			gl2.glUniform4f(idLightDif,lLightCopy.lDiffuse[0],lLightCopy.lDiffuse[1],lLightCopy.lDiffuse[2],lLightCopy.lDiffuse[3]);
+			gl2.glUniform4f(idLightSpe,lLightCopy.lSpecular[0],lLightCopy.lSpecular[1],lLightCopy.lSpecular[2],lLightCopy.lSpecular[3]);
+		}
+	}
+	
+	private void selectProgramAndGLPrimitive(int primitiveType) throws GvExRendererPassPrimitiveTypeUnknown
+	{
+		if(primitiveType==GvPrimitive.PRIMITIVE_POINT)
+		{
+			lShaderPrimitiveWrapper.lGLShader = lShaderMatPoint.getId();
+			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_POINTS;
+		}
+		else if(primitiveType==GvPrimitive.PRIMITIVE_TRIANGLE)
+		{
+			lShaderPrimitiveWrapper.lGLShader = lShaderMatTri.getId();
+			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_TRIANGLES;
+		}
+		else if(primitiveType==GvPrimitive.PRIMITIVE_TRIANGLE_STRIP)
+		{
+			lShaderPrimitiveWrapper.lGLShader = lShaderMatTri.getId();
+			lShaderPrimitiveWrapper.lGLPrimitive = GL2.GL_TRIANGLE_STRIP;
+		}
+		else
+			throw new GvExRendererPassPrimitiveTypeUnknown("Unknown primitive type");
+		
+	}
+	
+	private void executeBufferSet(GvBufferSetGL2 bufferSet, GvRendererGL2 renderer, GvMaterial material, int primitiveIndex, int lightCount, boolean culled) throws GvExRendererPassPrimitiveTypeUnknown
+	{
+		ArrayList<GvVertexArray> vaos = bufferSet.getVertexArrays();
+		int vaoCount = vaos.size();
+		if(vaoCount > 0)
+		{
+			if(culled)
+				renderer.updateRenderState(lStateCullEnabled, lgl2);
+			else
+				renderer.updateRenderState(lStateCullDisabled, lgl2);
+			
+			//select correct GL primitive type constant and shader program
+			selectProgramAndGLPrimitive(primitiveIndex);
+			
+			//bind and use shader program
+			GL2 gl2 = ((GvIllustratorGL2)renderer.getIllustrator()).getGL2();
+			int shaderProgramId = lShaderPrimitiveWrapper.lGLShader;
+			gl2.glUseProgram(shaderProgramId);
+			
+			//GLSL variables 1. Lights
+			glslLights(lightCount, gl2, shaderProgramId);
+			
+			//GLSL variables 2. material ambient,diffuse,specular,shininess
+			glslMaterial(material, gl2, shaderProgramId);
+
+			//GLSL variables 3. global ambient
+			int idGlobalAmbi = gl2.glGetUniformLocation(shaderProgramId,"globalAmbi");
+			gl2.glUniform4f(idGlobalAmbi,0.1f,0.1f,0.1f,1.0f);
+
+			//GLSL variables 4. camera position
+			int idCameraPos = gl2.glGetUniformLocation(shaderProgramId,"cameraPos");
+			gl2.glUniform3f(idCameraPos,lCameraCopy.lPosition[0],lCameraCopy.lPosition[1],lCameraCopy.lPosition[2]);
+			
+			//Draw geometry with VAOs
+			for(int k=0; k<vaoCount; ++k)
+			{
+				GvVertexArray vao = vaos.get(k);
+				
+				gl2.glBindVertexArray(vao.getId());
+				
+				gl2.glDrawElements(
+						lShaderPrimitiveWrapper.lGLPrimitive, // mode
+						vao.getSizeIndices()/4,    	// count
+						GL2.GL_UNSIGNED_INT,   		// type
+						vao.getIboOffset()          // element array buffer offset
+						);
+				
+				gl2.glBindVertexArray(0);
+			}
+		}
 	}
 }
