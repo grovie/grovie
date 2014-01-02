@@ -17,6 +17,7 @@ public abstract class GvRenderState {
 	public GvStencilTest lStencilTest;
 	public GvDepthTest lDepthTest;
 	public GvLighting lLighting;
+	public GvTexture lTexture;
 	public boolean lDepthMask;
 	
 	public GvRenderState()
@@ -27,6 +28,7 @@ public abstract class GvRenderState {
 		lStencilTest = new GvStencilTest();
 		lDepthTest = new GvDepthTest();
 		lLighting = new GvLighting();
+		lTexture = new GvTexture();
 		lDepthMask = true;
 	}
 

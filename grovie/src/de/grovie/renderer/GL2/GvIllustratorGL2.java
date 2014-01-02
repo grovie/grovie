@@ -28,6 +28,7 @@ import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPrimitive;
+import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.test.engine.renderer.TestRendererTex;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
@@ -37,12 +38,20 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	GLU lglu;
 	GLUT lglut;
 
+	private GvRenderState lStateOverlay2D;
+
 	public GvIllustratorGL2(GvRendererGL2 renderer)
 	{
 		super(renderer);
 
 		lglAutoDrawable = null;
 		lgl2 = null;
+
+
+		lStateOverlay2D = new GvRenderStateGL2();
+		lStateOverlay2D.lFaceCulling.lEnabled = false;
+		lStateOverlay2D.lDepthTest.lEnabled = false;
+		lStateOverlay2D.lTexture.lEnabled = false;
 	}
 
 	@Override
@@ -58,7 +67,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		lgl2 = glAutoDrawable.getGL().getGL2();
 		lglu = new GLU();
 		lglut = new GLUT();
-		
+
 		//Disable JOGL auto buffer swap to allow timing frame draw
 		lglAutoDrawable.setAutoSwapBufferMode(false);
 
@@ -87,7 +96,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	public void reshape(int x, int y, int width, int height) {
 		lPipeline.reshape(x,y,width,height);
 	}
-	
+
 	private void initPipeline() throws GvExRendererPassShaderResource
 	{
 		//Assign pipeline - check if multi-color attachment FBOs are supported.
@@ -96,23 +105,23 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		//else
 		lPipeline = new GvPipelineGL2(lRenderer, lglAutoDrawable, lgl2, lglu);
 	}
-	
+
 	private void initRenderer() throws GvExRendererVertexBuffer, GvExRendererIndexBuffer, GvExRendererVertexArray, FileNotFoundException, GvExRendererTexture2D, GvExRendererDrawGroup, GvExRendererBufferSet, GvExRendererDrawGroupRetrieval
 	{
 		GvRendererGL2 rendererGL2 = (GvRendererGL2)lRenderer;
 
 		//Materials
 		rendererGL2.addMaterial(new GvMaterial());
-		
+
 		//Textures
 		//FOR DEBUG
 		InputStream stream = new FileInputStream("/Users/yongzhiong/Downloads/test.jpg");
 		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
 		//END DEBUG
-		
+
 		//Draw groups
 		rendererGL2.initDrawGroups();
-		
+
 		//FOR DEBUG
 		//Test update scenario
 		GvDrawGroup drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
@@ -124,16 +133,16 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		int indices[] = geom.getIndices();
 		float vertices[] = geom.getVertices();
 		float normals[] = geom.getNormals();
-		
+
 		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
-		
+
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
 		GvBufferSet bufferSet;
 		//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
 		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 		bufferSet.insertGeometry(vertices, normals, indices);
-		
+
 		bufferSet = drawGrpUpdate.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
 
@@ -141,24 +150,24 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		//send geom to hardware buffers - simulate action 3 by foreign thread
 		//TODO: integrate this with previous geometry insertion step
 		drawGrpUpdate.update(rendererGL2);
-		
+
 		//MESSAGE sent to rendering thread to swap buffers
-		
+
 		//VAOs - OpenGL client-side - 
 		//rendering thread action, action 1 after receiving msg to swap VBOs
 		drawGrpUpdate.updateVAO(rendererGL2);
-		
+
 		//VBO swap buffers - 
 		//rendering thread action, action 2 after receiving msg to swap VBOs
 		rendererGL2.swapBuffers();
-		
+
 		drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
 		//MESSAGE sent to data thread to clear and update buffer
-		
+
 		//clear update buffers - simulate action 1 by foreign thread after receiving
 		//msg to update buufers
 		drawGrpUpdate.clear(rendererGL2);
-				
+
 		//END DEBUG
 	}
 
@@ -180,6 +189,8 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	public void display2DOverlay() {
 		if(lRenderer.getRendererStateMachine().getOverlayOn())
 		{
+			lRenderer.updateRenderState(this.lStateOverlay2D, lgl2);
+
 			lgl2.glWindowPos2i(5, 5);
 			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frame time: " + lFrameTime);

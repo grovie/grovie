@@ -65,8 +65,10 @@ public class GvPassGL2 extends GvPass {
 	private GvShaderProgram lShaderTexMatTri;
 	
 	//render states
-	private GvRenderState lStateCullEnabled;
-	private GvRenderState lStateCullDisabled;
+	private GvRenderState lStateCullEnabledTexDisabled;
+	private GvRenderState lStateCullDisabledTexDisabled;
+	private GvRenderState lStateCullEnabledTexEnabled;
+	private GvRenderState lStateCullDisabledTexEnabled;
 
 	public GvPassGL2(GLAutoDrawable glAutoDrawable, GL2 gl2, GLU glu, GvRenderer renderer) throws GvExRendererPassShaderResource
 	{
@@ -172,7 +174,6 @@ public class GvPassGL2 extends GvPass {
 		int lightCount = renderer.getRendererStateMachine().getLightCount();
 		
 		//render non-textured geometry
-		lgl2.glBindTexture(GL2.GL_TEXTURE_2D, 0);
 		traverseGroupsMaterialsPrimitives(materials, drawGroup, renderer, lightCount,false,-1);
 		//render textured geometry
 		traverseGroupsTextures(textures, materials, drawGroup, renderer, lightCount);
@@ -221,15 +222,25 @@ public class GvPassGL2 extends GvPass {
 	 */
 	private void initRenderStates()
 	{
-		lStateCullEnabled = new GvRenderStateGL2();
-		lStateCullEnabled.lFaceCulling.lEnabled = true;
-		lStateCullEnabled.lLighting.lEnabled = false;
-		lStateCullEnabled.lDepthTest.lEnabled = true;
+		lStateCullEnabledTexDisabled = new GvRenderStateGL2();
+		lStateCullEnabledTexDisabled.lFaceCulling.lEnabled = true;
+		lStateCullEnabledTexDisabled.lDepthTest.lEnabled = true;
+		lStateCullEnabledTexDisabled.lTexture.lEnabled = false;
 		
-		lStateCullDisabled = new GvRenderStateGL2();
-		lStateCullDisabled.lFaceCulling.lEnabled = false;
-		lStateCullDisabled.lLighting.lEnabled = false;
-		lStateCullEnabled.lDepthTest.lEnabled = true;
+		lStateCullDisabledTexDisabled = new GvRenderStateGL2();
+		lStateCullDisabledTexDisabled.lFaceCulling.lEnabled = false;
+		lStateCullDisabledTexDisabled.lDepthTest.lEnabled = true;
+		lStateCullDisabledTexDisabled.lTexture.lEnabled = false;
+		
+		lStateCullEnabledTexEnabled = new GvRenderStateGL2();
+		lStateCullEnabledTexEnabled.lFaceCulling.lEnabled = true;
+		lStateCullEnabledTexEnabled.lDepthTest.lEnabled = true;
+		lStateCullEnabledTexEnabled.lTexture.lEnabled = true;
+		
+		lStateCullDisabledTexEnabled = new GvRenderStateGL2();
+		lStateCullDisabledTexEnabled.lFaceCulling.lEnabled = false;
+		lStateCullDisabledTexEnabled.lDepthTest.lEnabled = true;
+		lStateCullDisabledTexEnabled.lTexture.lEnabled = true;
 	}
 	
 	private void glslMaterial(GvMaterial material, GL2 gl2, int shaderProgramId)
@@ -293,10 +304,14 @@ public class GvPassGL2 extends GvPass {
 		int vaoCount = vaos.size();
 		if(vaoCount > 0)
 		{
-			if(culled)
-				renderer.updateRenderState(lStateCullEnabled, lgl2);
-			else
-				renderer.updateRenderState(lStateCullDisabled, lgl2);
+			if(culled && textured)
+				renderer.updateRenderState(lStateCullEnabledTexEnabled, lgl2);
+			else if (culled && !textured)
+				renderer.updateRenderState(lStateCullEnabledTexDisabled, lgl2);
+			else if(!culled && !textured)
+				renderer.updateRenderState(lStateCullDisabledTexDisabled, lgl2);
+			else if(!culled && textured)
+				renderer.updateRenderState(lStateCullDisabledTexEnabled, lgl2);
 			
 			//select correct GL primitive type constant and shader program
 			selectProgramAndGLPrimitive(primitiveIndex,textured);
@@ -338,6 +353,8 @@ public class GvPassGL2 extends GvPass {
 				
 				lVertexCount += vao.getSizeVertices();
 			}
+			
+			gl2.glUseProgram(0);
 		}
 	}
 	

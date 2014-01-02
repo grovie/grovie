@@ -30,6 +30,9 @@ public class GvRenderStateGL2 extends GvRenderState {
 		if(this.lStencilTest.isDifferent(newState.lStencilTest))
 			updateStencilTest(gl2,newState);
 		
+		if(this.lTexture.isDifferent(newState.lTexture))
+			updateTexture(gl2,newState);
+		
 		if(this.lDepthMask != newState.lDepthMask)
 			updateDepthMask(gl2,newState);
 	}
@@ -70,6 +73,15 @@ public class GvRenderStateGL2 extends GvRenderState {
 			gl2.glEnable(GL2.GL_CULL_FACE);
 		else
 			gl2.glDisable(GL2.GL_CULL_FACE);
+	}
+	
+	private void updateTexture(GL2 gl2, GvRenderState newState)
+	{
+		lTexture.set(newState.lTexture);
+		if(lTexture.lEnabled)
+			gl2.glEnable(GL2.GL_TEXTURE_2D);
+		else
+			gl2.glDisable(GL2.GL_TEXTURE_2D);
 	}
 	
 	private void updateRasterizationMode(GL2 gl2, GvRenderState newState)
