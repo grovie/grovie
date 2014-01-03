@@ -1,39 +1,90 @@
 package de.grovie.renderer.GL2;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+
 import javax.media.opengl.GL2;
 
-import de.grovie.renderer.renderstate.GvDepthTest;
 import de.grovie.renderer.renderstate.GvRasterizationMode;
 import de.grovie.renderer.renderstate.GvRenderState;
 
 public class GvRenderStateGL2 extends GvRenderState {
 	
+	static byte[] resultByte;
+	static ByteBuffer resultByteBuffer;
+	static int[] resultIntx2;
+	static IntBuffer resultIntBufferx2;
+	
+	public GvRenderStateGL2()
+	{
+		super();
+		
+		resultByte = new byte[1];
+		resultByteBuffer = ByteBuffer.wrap(resultByte);
+		
+		resultIntx2 = new int[2];
+		resultIntBufferx2 = IntBuffer.wrap(resultIntx2);
+		
+	}
+	
+	private boolean isDiff(int glConstant, boolean newState, GL2 gl2)
+	{
+		if(gl2.glIsEnabled(glConstant) != newState)
+			return true;
+		
+		return false;
+	}
+	
+	private boolean isDiffRasterizationMode(GvRasterizationMode rasterMode, GL2 gl2)
+	{
+		gl2.glGetIntegerv(GL2.GL_POLYGON_MODE, resultIntBufferx2);
+		if((resultIntx2[0]==GL2.GL_FRONT)&&(rasterMode.lFace!=GvRasterizationMode.GvRasterFace.FRONT))
+			return true;
+		if((resultIntx2[0]==GL2.GL_FRONT_AND_BACK)&&(rasterMode.lFace!=GvRasterizationMode.GvRasterFace.FRONT_AND_BACK))
+			return true;
+		if((resultIntx2[0]==GL2.GL_BACK)&&(rasterMode.lFace!=GvRasterizationMode.GvRasterFace.BACK))
+			return true;
+		
+		if((resultIntx2[1]==GL2.GL_FILL)&&(rasterMode.lMode!=GvRasterizationMode.GvRasterMode.FILL))
+			return true;
+		if((resultIntx2[1]==GL2.GL_LINE)&&(rasterMode.lMode!=GvRasterizationMode.GvRasterMode.LINE))
+			return true;
+		if((resultIntx2[1]==GL2.GL_POINT)&&(rasterMode.lMode!=GvRasterizationMode.GvRasterMode.POINT))
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Checks current OpenGL states against required state. Update if different.
+	 */
 	@Override
 	public void update(GvRenderState newState, Object context) {
 		GL2 gl2 = (GL2)context;
 		
-		if(lFaceCulling.isDifferent(newState.lFaceCulling))
+		if(isDiff(GL2.GL_CULL_FACE,newState.lFaceCulling.lEnabled,gl2))
 			updateFaceCulling(gl2,newState);
 		
-		if(lRasterizationMode.isDifferent(newState.lRasterizationMode))
+		if(isDiffRasterizationMode(newState.lRasterizationMode, gl2))
 			updateRasterizationMode(gl2,newState);
 		
-		if(lDepthTest.isDifferent(newState.lDepthTest))
+		if(isDiff(GL2.GL_DEPTH_TEST,newState.lDepthTest.lEnabled,gl2))
 			updateDepthTest(gl2,newState);
 		
-		if(lLighting.isDifferent(newState.lLighting))
+		if(isDiff(GL2.GL_LIGHTING,newState.lLighting.lEnabled,gl2))
 			updateLighting(gl2,newState);
 		
-		if(lScissorTest.isDifferent(newState.lScissorTest))
+		if(isDiff(GL2.GL_SCISSOR_TEST,newState.lScissorTest.lEnabled,gl2))
 			updateScissorTest(gl2,newState);
 		
-		if(this.lStencilTest.isDifferent(newState.lStencilTest))
+		if(isDiff(GL2.GL_STENCIL_TEST,newState.lStencilTest.lEnabled,gl2))
 			updateStencilTest(gl2,newState);
 		
-		if(this.lTexture.isDifferent(newState.lTexture))
+		if(isDiff(GL2.GL_TEXTURE_2D,newState.lTexture.lEnabled,gl2))
 			updateTexture(gl2,newState);
 		
-		if(this.lDepthMask != newState.lDepthMask)
+		gl2.glGetBooleanv(GL2.GL_DEPTH_WRITEMASK, resultByteBuffer);
+		if((resultByte[0]==1)!=lDepthMask)
 			updateDepthMask(gl2,newState);
 	}
 	
@@ -116,25 +167,25 @@ public class GvRenderStateGL2 extends GvRenderState {
 		else
 			gl2.glDisable(GL2.GL_DEPTH_TEST);
 		
-		int func;
-		
-		if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS_THAN_OR_EQUAL)
-			func = GL2.GL_LEQUAL;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS)
-			func = GL2.GL_LESS;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.ALWAYS)
-			func = GL2.GL_ALWAYS;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.EQUAL)
-			func = GL2.GL_EQUAL;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER)
-			func = GL2.GL_GREATER;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER_THAN_OR_EQUAL)
-			func = GL2.GL_GEQUAL;
-		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.NEVER)
-			func = GL2.GL_NEVER;
-		else
-			func = GL2.GL_NOTEQUAL;
-		
-		gl2.glDepthFunc(func);
+//		int func;
+//		
+//		if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS_THAN_OR_EQUAL)
+//			func = GL2.GL_LEQUAL;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS)
+//			func = GL2.GL_LESS;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.ALWAYS)
+//			func = GL2.GL_ALWAYS;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.EQUAL)
+//			func = GL2.GL_EQUAL;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER)
+//			func = GL2.GL_GREATER;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER_THAN_OR_EQUAL)
+//			func = GL2.GL_GEQUAL;
+//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.NEVER)
+//			func = GL2.GL_NEVER;
+//		else
+//			func = GL2.GL_NOTEQUAL;
+//		
+//		gl2.glDepthFunc(func);
 	}
 }

@@ -39,4 +39,9 @@ public class FileResource {
         
         return resultString;
 	}
+	
+	public static InputStream getResource(String resourceFileUrl)
+	{
+		return FileResource.get().getClass().getResourceAsStream(resourceFileUrl);
+	}
 }

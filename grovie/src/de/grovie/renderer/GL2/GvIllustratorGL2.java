@@ -1,6 +1,6 @@
 package de.grovie.renderer.GL2;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
@@ -30,6 +30,7 @@ import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.test.engine.renderer.TestRendererTex;
+import de.grovie.util.file.FileResource;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
@@ -46,7 +47,6 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 		lglAutoDrawable = null;
 		lgl2 = null;
-
 
 		lStateOverlay2D = new GvRenderStateGL2();
 		lStateOverlay2D.lFaceCulling.lEnabled = false;
@@ -115,7 +115,15 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 		//Textures
 		//FOR DEBUG
-		InputStream stream = new FileInputStream("/Users/yongzhiong/Downloads/test.jpg");
+		InputStream stream = FileResource.getResource(
+				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
+						File.separator + "test.jpg");
+		
+		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
+		
+		stream = FileResource.getResource(
+				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
+						File.separator + "BarkDecidious0164_5_thumbhuge.jpg");
 		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
 		//END DEBUG
 
@@ -135,7 +143,8 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		float normals[] = geom.getNormals();
 
 		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
-
+		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
 		GvBufferSet bufferSet;
@@ -146,6 +155,13 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		bufferSet = drawGrpUpdate.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
 
+		bufferSet = drawGrpUpdate.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+		bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
+		//bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices());
+		
+		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+		
 		//VBO/IBO - OpenGL server-side
 		//send geom to hardware buffers - simulate action 3 by foreign thread
 		//TODO: integrate this with previous geometry insertion step
@@ -190,15 +206,16 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		if(lRenderer.getRendererStateMachine().getOverlayOn())
 		{
 			lRenderer.updateRenderState(this.lStateOverlay2D, lgl2);
-
+			
+			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f); //color must be set before windowPos
+			
 			lgl2.glWindowPos2i(5, 5);
-			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frame time: " + lFrameTime);
+			
 			lgl2.glWindowPos2i(5, 15);
-			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "FPS: " + 1.0/lFrameTime);
+			
 			lgl2.glWindowPos2i(5, 25);
-			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Vertices: " + lRenderer.getIllustrator().getVertexCount());
 		}
 	}
