@@ -112,6 +112,11 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 		//Materials
 		rendererGL2.addMaterial(new GvMaterial());
+		GvMaterial greenMaterial = new GvMaterial();
+		greenMaterial.lDiffuse[0] = 0.0f;
+		greenMaterial.lDiffuse[1] = 1.0f;
+		greenMaterial.lDiffuse[2] = 0.0f;
+		rendererGL2.addMaterial(greenMaterial);
 
 		//Textures
 		//FOR DEBUG
@@ -144,6 +149,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
 		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		GvGeometryTex geomPoints = TestRendererTex.getPoints(1000);
 		
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
@@ -157,7 +163,9 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 
 		bufferSet = drawGrpUpdate.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 		bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
-		//bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices());
+		
+		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
+		bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
 		
 		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
 		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);

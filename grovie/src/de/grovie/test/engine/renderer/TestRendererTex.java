@@ -249,6 +249,34 @@ public class TestRendererTex {
         }
 	}
 	
+	public static GvGeometryTex getPoints(int num)
+	{
+		float[] vertices = new float[num * 3];
+		float[] normals = new float[num * 3];
+		int[] indices = new int[num];
+		float[] uv = null;
+		
+		for(int i=0; i< num; ++i)
+		{
+			int indexOffset = i * 3;
+			int indexOffset1 = indexOffset+1;
+			int indexOffset2 = indexOffset+2;
+			
+			vertices[indexOffset] = (float) (Math.random() * 10);
+			vertices[indexOffset1] = (float) (Math.random() * 10);
+			vertices[indexOffset2] = (float) (Math.random() * 10 - 5);
+			
+			normals[indexOffset] = 0;
+			normals[indexOffset1] = 1.0f;
+			normals[indexOffset2] = 0;
+			
+			indices[i] = i;
+		}
+		
+		GvGeometryTex geom = new GvGeometryTex(vertices, normals, indices, uv);
+		return geom;
+	}
+	
 	public static GvGeometryTex getTube(float radius, float length, float detailDegrees, float detailLength)
 	{
 		int numVerticesBase = (int)(360.0f / detailDegrees);
