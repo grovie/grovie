@@ -32,7 +32,7 @@ public abstract class GvIllustrator{
 		lDrawStart = System.nanoTime();
 		
 		//Inter-thread message queue handling
-		processMessages();
+		lRenderer.processMessages();
 		
 		//draw 3d and 2d-overlay
 		try{
@@ -80,5 +80,4 @@ public abstract class GvIllustrator{
 	public abstract void display2DOverlay();
 	public abstract void displayEnd();
 	public abstract void dispose();
-	public abstract void processMessages();
 }

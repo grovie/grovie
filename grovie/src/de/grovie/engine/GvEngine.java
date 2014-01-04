@@ -1,6 +1,7 @@
 package de.grovie.engine;
 
 import de.grovie.data.GvData;
+import de.grovie.data.GvDataGL2;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThreadManager;
@@ -24,14 +25,14 @@ import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
  */
 public class GvEngine extends GvThreadManager{
 
-	public enum GvWindowSystemClass
+	public enum GvWindowSystemLibrary
 	{
-		AWT_GL;
+		AWT_OPEN_GL;
 	}
 	
-	public enum GvRendererClass
+	public enum GvGraphicsAPI
 	{
-		GL2;
+		OPEN_GL_2_0;
 	}
 	
 	public enum GvEngineMode
@@ -44,8 +45,8 @@ public class GvEngine extends GvThreadManager{
 	private static GvEngine lInstance;	//singleton instance of engine
 	
 	private GvEngineMode lMode;
-	private GvWindowSystemClass lWindowSystemClass;
-	private GvRendererClass lRendererClass;
+	private GvWindowSystemLibrary lWindowSystemClass;
+	private GvGraphicsAPI lRendererClass;
 	private String lWindowTitle;
 	
 	private GvRenderer lRenderer; 	//renderer
@@ -59,8 +60,8 @@ public class GvEngine extends GvThreadManager{
 	private GvMsgQueue<GvDb> lQueueDb;
 
 	private GvEngine(GvEngineMode mode,
-			GvWindowSystemClass windowSystemClass,
-			GvRendererClass rendererClass,
+			GvWindowSystemLibrary windowSystemClass,
+			GvGraphicsAPI rendererClass,
 			int windowWidth,
 			int windowHeight,
 			String windowTitle)
@@ -85,8 +86,8 @@ public class GvEngine extends GvThreadManager{
 	} 
 
 	public static GvEngine getInstance(
-			GvWindowSystemClass windowSystemClass,
-			GvRendererClass rendererClass,
+			GvWindowSystemLibrary windowSystemClass,
+			GvGraphicsAPI rendererClass,
 			int windowWidth,
 			int windowHeight,
 			String windowTitle) 
@@ -104,8 +105,8 @@ public class GvEngine extends GvThreadManager{
 
 	public static GvEngine getInstance(
 			GvEngineMode mode, 
-			GvWindowSystemClass windowSystemClass, 
-			GvRendererClass rendererClass,
+			GvWindowSystemLibrary windowSystemClass, 
+			GvGraphicsAPI rendererClass,
 			int windowWidth,
 			int windowHeight,
 			String windowTitle) 
@@ -148,9 +149,9 @@ public class GvEngine extends GvThreadManager{
 		//lThreadPool.execute(lDb);
 	}
 	
-	private GvWindowSystem getWindowSystem(GvWindowSystemClass winSysClass)
+	private GvWindowSystem getWindowSystem(GvWindowSystemLibrary winSysClass)
 	{
-		if(winSysClass == GvEngine.GvWindowSystemClass.AWT_GL)
+		if(winSysClass == GvEngine.GvWindowSystemLibrary.AWT_OPEN_GL)
 			return new GvWindowSystemAWTGL();
 		
 		return null;
@@ -160,7 +161,7 @@ public class GvEngine extends GvThreadManager{
 			int windowWidth,
 			int windowHeight)
 	{
-		if(lRendererClass == GvEngine.GvRendererClass.GL2)
+		if(lRendererClass == GvEngine.GvGraphicsAPI.OPEN_GL_2_0)
 		{
 			return new GvRendererGL2(getWindowSystem(lWindowSystemClass),
 					lWindowTitle,
@@ -175,9 +176,13 @@ public class GvEngine extends GvThreadManager{
 	
 	private GvData getData()
 	{
-		return new GvData(getWindowSystem(lWindowSystemClass),
-				lQueueData,
-				lQueueRenderer,
-				lQueueDb);
+		if(lRendererClass == GvEngine.GvGraphicsAPI.OPEN_GL_2_0)
+		{
+			return new GvDataGL2(getWindowSystem(lWindowSystemClass),
+					lQueueData,
+					lQueueRenderer,
+					lQueueDb);
+		}
+		return null;
 	}
 }

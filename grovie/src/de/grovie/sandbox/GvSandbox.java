@@ -14,8 +14,8 @@ public class GvSandbox {
 		
 		//create GroViE vis. engine
 		GvEngine engine = GvEngine.getInstance(
-				GvEngine.GvWindowSystemClass.AWT_GL,
-				GvEngine.GvRendererClass.GL2,
+				GvEngine.GvWindowSystemLibrary.AWT_OPEN_GL,
+				GvEngine.GvGraphicsAPI.OPEN_GL_2_0,
 				kWindowWidth,
 				kWindowHeight,
 				"GroViE Sandbox"); //uses embedded db by default

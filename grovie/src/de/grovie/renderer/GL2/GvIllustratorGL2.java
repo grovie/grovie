@@ -264,10 +264,4 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	public void setGL2(GL2 gl2) {
 		this.lgl2 = gl2;
 	}
-
-	@Override
-	public void processMessages() {
-		// TODO check message queues and process messages
-
-	}
 }

@@ -2,6 +2,7 @@ package de.grovie.renderer;
 
 import java.util.ArrayList;
 
+import de.grovie.engine.concurrent.GvMsgDataNewBufferSet;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
@@ -14,7 +15,7 @@ import de.grovie.exception.GvExRendererVertexBuffer;
  * 
  * @author yong
  */
-public abstract class GvBufferSet extends GvDrawGroup {
+public abstract class GvBufferSet extends GvDrawGroup implements GvMsgDataNewBufferSet {
 	
 	public static long VBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file
 	public static long IBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file

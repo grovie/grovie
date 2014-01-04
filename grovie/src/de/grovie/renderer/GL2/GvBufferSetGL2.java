@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
+import de.grovie.data.GvData;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
@@ -279,5 +280,11 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			
 			gl2.glBindVertexArray(0); // Disable VAO 
 		}
+	}
+
+	@Override
+	public void process(GvData target) {
+		target.receiveBufferSet(this);
+		
 	}
 }

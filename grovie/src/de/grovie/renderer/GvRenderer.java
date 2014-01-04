@@ -1,7 +1,8 @@
 package de.grovie.renderer;
 
 import de.grovie.data.GvData;
-import de.grovie.data.message.GvMsgDataNewContext;
+import de.grovie.engine.concurrent.GvMsg;
+import de.grovie.engine.concurrent.GvMsgDataNewContext;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
@@ -115,6 +116,17 @@ public abstract class GvRenderer extends GvThread {
 	public void sendSharedContext(Object context)
 	{
 		lQueueOutData.offer(new GvMsgDataNewContext(context));
+	}
+	
+	public void processMessages() 
+	{
+		int msgCount = lQueueIn.size();
+		
+		for(int i=0; i<msgCount; ++i)
+		{
+			GvMsg<GvRenderer> msg = lQueueIn.poll();
+			msg.process(this);
+		}
 	}
 	
 	public abstract GvDevice createDevice();

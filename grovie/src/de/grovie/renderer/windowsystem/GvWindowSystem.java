@@ -49,7 +49,7 @@ public abstract class GvWindowSystem {
 		this.lIOListener = IOListener;
 	}
 	
-	public abstract GvWindowSystem getInstance(Object sharedContext);
+	public abstract GvWindowSystem getInstanceInvisible(Object sharedContext);
 	
 	public abstract GvWindowSystem getInstance(GvRenderer renderer);
 }

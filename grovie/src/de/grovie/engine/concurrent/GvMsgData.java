@@ -1,7 +1,6 @@
-package de.grovie.data.message;
+package de.grovie.engine.concurrent;
 
 import de.grovie.data.GvData;
-import de.grovie.engine.concurrent.GvMsg;
 
 public interface GvMsgData extends GvMsg<GvData> {
 

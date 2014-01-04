@@ -1,4 +1,4 @@
-package de.grovie.data.message;
+package de.grovie.engine.concurrent;
 
 import de.grovie.data.GvData;
 
@@ -14,5 +14,6 @@ public class GvMsgDataNewContext implements GvMsgData {
 	@Override
 	public void process(GvData target) {
 		target.setupContext(lSharedContext);
+		target.sendRenderBegin();
 	}
 }

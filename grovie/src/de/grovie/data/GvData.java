@@ -1,10 +1,10 @@
 package de.grovie.data;
-
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsg;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
+import de.grovie.renderer.GvBufferSet;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
@@ -16,17 +16,15 @@ import de.grovie.renderer.windowsystem.GvWindowSystem;
  * @author yong
  *
  */
-public class GvData extends GvThread {
-
-	private Object lContextRenderer;
+public abstract class GvData extends GvThread {
 	
 	//window system
-	private GvWindowSystem lWindowSystem;
+	protected GvWindowSystem lWindowSystem;
 		
 	//message queues - for communication with other threads
-	GvMsgQueue<GvData> lQueueIn;
-	GvMsgQueue<GvRenderer> lQueueOutRenderer;
-	GvMsgQueue<GvDb> lQueueDb;
+	protected GvMsgQueue<GvData> lQueueIn;
+	protected GvMsgQueue<GvRenderer> lQueueOutRenderer;
+	protected GvMsgQueue<GvDb> lQueueDb;
 	
 	public GvData() {
 	}
@@ -68,9 +66,9 @@ public class GvData extends GvThread {
 		}
 	}
 	
-	public void setupContext(Object contextRenderer)
-	{
-		lContextRenderer = contextRenderer;
-		lWindowSystem.getInstance(lContextRenderer);
-	}
+	public abstract void setupContext(Object contextRenderer);
+	
+	public abstract void sendRenderBegin();
+	
+	public abstract void receiveBufferSet(GvBufferSet bufferSet);
 }

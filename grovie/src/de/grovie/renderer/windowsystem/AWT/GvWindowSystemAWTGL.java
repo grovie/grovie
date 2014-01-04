@@ -3,7 +3,6 @@ package de.grovie.renderer.windowsystem.AWT;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.awt.GLCanvas;
@@ -45,14 +44,13 @@ public class GvWindowSystemAWTGL extends GvWindowSystem {
 	}
 
 	@Override
-	public GvWindowSystem getInstance(Object sharedContext) 
+	public GvWindowSystem getInstanceInvisible(Object sharedContext) 
 	{
 		GLProfile glprofile = GLProfile.getDefault();
 		GLCapabilities glcapabilities = new GLCapabilities( glprofile );
 
+		//create invisible canvas
 		lCanvas = new GvCanvasAWTGL( glcapabilities );
-		
-		//create new context with shared context
 		
 		return this;
 	}
