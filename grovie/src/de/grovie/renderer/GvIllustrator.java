@@ -4,7 +4,7 @@ import de.grovie.exception.GvExRendererDrawGroupRetrieval;
 import de.grovie.exception.GvExRendererPassPrimitiveTypeUnknown;
 import de.grovie.exception.GvExRendererPassShaderResource;
 
-public abstract class GvIllustrator{
+public abstract class GvIllustrator {
 
 	protected Object lSharedContext;
 	protected GvRenderer lRenderer;	//reference to owner(GvRenderer)

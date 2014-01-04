@@ -52,6 +52,20 @@ public class GvWindowSystemAWTGL extends GvWindowSystem {
 		//create invisible canvas
 		lCanvas = new GvCanvasAWTGL( glcapabilities );
 		
+		lWindow = new GvWindowAWT("");
+		lWindow.setCanvas( lCanvas );
+		final GvWindowAWT lWindowAWT = (GvWindowAWT)lWindow;
+		lWindowAWT.addWindowListener( new WindowAdapter() {
+			public void windowClosing( WindowEvent windowevent ) {
+				lWindowAWT.remove( (GLCanvas)lCanvas );
+				lWindowAWT.dispose();
+				System.exit( 0 );
+			}
+		});
+
+		lWindowAWT.setSize( 1,1);
+		lWindowAWT.setVisible( true );
+		
 		return this;
 	}
 }

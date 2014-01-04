@@ -25,8 +25,7 @@ import de.grovie.renderer.windowsystem.GvWindowSystem;
 
 public class GvDeviceGL2 extends GvDevice{
 	
-	public GvDeviceGL2(GvRenderer renderer) {
-		super(renderer);
+	public GvDeviceGL2() {
 	}
 
 	@Override
@@ -43,10 +42,11 @@ public class GvDeviceGL2 extends GvDevice{
 
 	@Override
 	public GvShaderProgram createShaderProgram(String vertexShaderSource,
-			String fragmentShaderSource) throws GvExRendererShaderProgram  {
+			String fragmentShaderSource,
+			Object libraryAPI) throws GvExRendererShaderProgram  {
 		try{
 			//get reference to jogl gl2
-			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			GL2 gl2 = (GL2)libraryAPI;
 				
 			//create shaders
 			int shaderVId = gl2.glCreateShader(GL2.GL_VERTEX_SHADER);
@@ -87,10 +87,11 @@ public class GvDeviceGL2 extends GvDevice{
 	}
 
 	@Override
-	public GvVertexBuffer createVertexBuffer(long sizeInBytes) throws GvExRendererVertexBuffer {
+	public GvVertexBuffer createVertexBuffer(long sizeInBytes,
+			Object libraryAPI) throws GvExRendererVertexBuffer {
 		try{
 			//get reference to jogl gl2
-			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			GL2 gl2 = (GL2)libraryAPI;
 			
 			//generate vertex buffer id
 			int vboId[] = new int[1];
@@ -152,11 +153,12 @@ public class GvDeviceGL2 extends GvDevice{
 	}
 
 	@Override
-	public GvIndexBuffer createIndexBuffer(long sizeInBytes)
+	public GvIndexBuffer createIndexBuffer(long sizeInBytes,
+			Object libraryAPI)
 			throws GvExRendererIndexBuffer {
 		try{
 			//get reference to jogl gl2
-			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			GL2 gl2 = (GL2)libraryAPI;
 			
 			//generate vertex buffer id
 			int iboId[] = new int[1];
@@ -185,11 +187,12 @@ public class GvDeviceGL2 extends GvDevice{
 	}
 
 	@Override
-	public GvTexture2D createTexture2D(InputStream inputStream, String dataType)
+	public GvTexture2D createTexture2D(InputStream inputStream, String dataType,
+			Object libraryAPI)
 			throws GvExRendererTexture2D {
 		try {
 			//get reference to jogl gl2
-			GL2 gl2 = ((GvIllustratorGL2)lRenderer.getIllustrator()).getGL2();
+			GL2 gl2 = (GL2)libraryAPI;
 			
 			//create texture using jogl's utility methods
             TextureData texData = TextureIO.newTextureData(gl2.getGLProfile(),

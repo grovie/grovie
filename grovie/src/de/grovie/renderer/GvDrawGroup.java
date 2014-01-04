@@ -2,8 +2,10 @@ package de.grovie.renderer;
 
 import java.util.ArrayList;
 
-import de.grovie.exception.GvExRendererDrawGroup;
+import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgDataNewBufferSet;
 import de.grovie.exception.GvExRendererBufferSet;
+import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
@@ -18,7 +20,7 @@ import de.grovie.exception.GvExRendererVertexBuffer;
  * @author yong
  *
  */
-public class GvDrawGroup {
+public class GvDrawGroup implements GvMsgDataNewBufferSet {
 
 	public static final int GROUP_NON_TEXTURED			= 0;
 	public static final int GROUP_TEXTURED 				= 1;
@@ -27,11 +29,11 @@ public class GvDrawGroup {
 	public static final int GROUP_BACKFACE_CULLED		= 1;
 	
 	
-	private ArrayList<GvDrawGroup> lGroups;
+	protected ArrayList<GvDrawGroup > lGroups;
 	
 	public GvDrawGroup()
 	{
-		lGroups = new ArrayList<GvDrawGroup>();
+		lGroups = new ArrayList<GvDrawGroup >();
 	}
 	
 	public GvDrawGroup addGroup(GvDrawGroup drawGroup)
@@ -198,11 +200,11 @@ public class GvDrawGroup {
 	/**
 	 * Recursive call to clear buffers
 	 */
-	public void clear(GvRenderer renderer)
+	public void clear(Object libraryAPI)
 	{
 		for(int i=0; i<lGroups.size(); ++i)
 		{
-			lGroups.get(i).clear(renderer);
+			lGroups.get(i).clear(libraryAPI);
 		}
 	}
 	
@@ -212,11 +214,11 @@ public class GvDrawGroup {
 	 * @throws GvExRendererVertexBuffer 
 	 * @throws GvExRendererIndexBuffer 
 	 */
-	public void update(GvRenderer renderer) throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
+	public void update(Object libraryAPI, GvDevice device) throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
 		for(int i=0; i<lGroups.size(); ++i)
 		{
-			lGroups.get(i).update(renderer);
+			lGroups.get(i).update(libraryAPI, device);
 		}
 	}
 	
@@ -231,5 +233,11 @@ public class GvDrawGroup {
 		{
 			lGroups.get(i).updateVAO(renderer);
 		}
+	}
+
+	@Override
+	public void process(GvData target) {
+		target.receiveBufferSet(this);
+		target.sendBufferSwap();
 	}
 }

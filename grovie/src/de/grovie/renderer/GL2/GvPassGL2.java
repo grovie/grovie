@@ -120,10 +120,10 @@ public class GvPassGL2 extends GvPass {
 							File.separator + "TextureMaterialTriangleV.glsl");
 			
 			GvDevice device = lRenderer.getDevice();
-			lShaderMatPoint = device.createShaderProgram(srcMaterialPointV, srcMaterialPointF);
-			lShaderMatTri = device.createShaderProgram(srcMaterialTriangleV, srcMaterialTriangleF);
-			lShaderTexMatPoint = device.createShaderProgram(srcTextureMaterialPointV, srcTextureMaterialPointF);
-			lShaderTexMatTri = device.createShaderProgram(srcTextureMaterialTriangleV, srcTextureMaterialTriangleF);
+			lShaderMatPoint = device.createShaderProgram(srcMaterialPointV, srcMaterialPointF,lgl2);
+			lShaderMatTri = device.createShaderProgram(srcMaterialTriangleV, srcMaterialTriangleF,lgl2);
+			lShaderTexMatPoint = device.createShaderProgram(srcTextureMaterialPointV, srcTextureMaterialPointF,lgl2);
+			lShaderTexMatTri = device.createShaderProgram(srcTextureMaterialTriangleV, srcTextureMaterialTriangleF,lgl2);
 
 		} catch (Exception e) {
 			throw new GvExRendererPassShaderResource("Error loading shader source");

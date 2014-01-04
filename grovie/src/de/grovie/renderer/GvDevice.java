@@ -16,12 +16,9 @@ import de.grovie.renderer.windowsystem.GvWindowSystem;
  *
  */
 public abstract class GvDevice {
-
-	protected GvRenderer lRenderer;
 	
-	public GvDevice(GvRenderer renderer)
+	public GvDevice()
 	{
-		lRenderer = renderer;
 	}
 	
 	public abstract GvGraphicsWindow createWindow(
@@ -29,14 +26,18 @@ public abstract class GvDevice {
 			GvRenderer renderer);
 	
 	public abstract GvShaderProgram createShaderProgram(String vertexShaderSource, 
-			String fragmentShaderSource) throws GvExRendererShaderProgram;
+			String fragmentShaderSource,
+			Object libraryAPI) throws GvExRendererShaderProgram;
 	
-	public abstract GvVertexBuffer createVertexBuffer(long sizeInBytes) 
+	public abstract GvVertexBuffer createVertexBuffer(long sizeInBytes,
+			Object libraryAPI) 
 			throws GvExRendererVertexBuffer;
 	
-	public abstract GvIndexBuffer createIndexBuffer(long sizeInBytes) 
+	public abstract GvIndexBuffer createIndexBuffer(long sizeInBytes,
+			Object libraryAPI) 
 			throws GvExRendererIndexBuffer;
 	
-	public abstract GvTexture2D createTexture2D(InputStream inputStream, String dataType) 
+	public abstract GvTexture2D createTexture2D(InputStream inputStream, String dataType,
+			Object libraryAPI) 
 			throws GvExRendererTexture2D;
 }

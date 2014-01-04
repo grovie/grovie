@@ -1,21 +1,23 @@
 package de.grovie.data;
 
-import javax.media.opengl.GLContext;
-import javax.media.opengl.awt.GLCanvas;
-
+import de.grovie.data.importer.obj.GvImporterObj;
+import de.grovie.data.object.GvGeometry;
+import de.grovie.data.object.GvGeometryTex;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
-import de.grovie.engine.concurrent.GvMsgRenderBegin;
+import de.grovie.exception.GvExRendererDrawGroupRetrieval;
+import de.grovie.exception.GvExRendererIndexBuffer;
+import de.grovie.exception.GvExRendererVertexArray;
+import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.GvBufferSet;
+import de.grovie.renderer.GvDrawGroup;
+import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.GvRenderer;
-import de.grovie.renderer.GL2.GvBufferSetGL2;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
+import de.grovie.test.engine.renderer.TestRendererTex;
 
 public class GvDataGL2 extends GvData {
 
-	protected GLContext lContext;
-	private GvBufferSet lBufferSet;
-	
 	public GvDataGL2(GvWindowSystem windowSystem,
 			GvMsgQueue<GvData> lQueueData,
 			GvMsgQueue<GvRenderer> lQueueRenderer, GvMsgQueue<GvDb> lQueueDb) 
@@ -24,29 +26,49 @@ public class GvDataGL2 extends GvData {
 	}
 
 	@Override
-	public void setupContext(Object contextRenderer) 
-	{
-		setupContext((GLContext)contextRenderer);
-	}
-	
-	private void setupContext(GLContext contextRenderer)
-	{
-		lWindowSystem.getInstanceInvisible(contextRenderer);
-		
-		//create new context on this thread that shares VBO/IBO with 
-		//renderer thread's context
-		GLCanvas canvas = (GLCanvas)lWindowSystem.getCanvas();
-		lContext = canvas.createContext(contextRenderer);
-		lContext.makeCurrent();
+	public void receiveBufferSet(GvDrawGroup drawGroup) {
+		lDrawGroup = drawGroup;
+
+		//FOR DEBUG
+		try
+		{
+			insertTestGeometry();
+		}
+		catch(Exception e)
+		{
+			System.out.println("error inserting test geometry");
+		}
+		//END DEBUG
 	}
 
-	@Override
-	public void sendRenderBegin() {
-		lQueueOutRenderer.offer(new GvMsgRenderBegin());
-	}
+	private void insertTestGeometry() throws GvExRendererDrawGroupRetrieval, GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
+	{
+		//Test geometry
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
+		GvGeometry geom = new GvGeometry();
+		GvImporterObj.load(path, geom);
+		int indices[] = geom.getIndices();
+		float vertices[] = geom.getVertices();
+		float normals[] = geom.getNormals();
 
-	@Override
-	public void receiveBufferSet(GvBufferSet bufferSet) {
-		lBufferSet = bufferSet;
+		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
+		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		GvGeometryTex geomPoints = TestRendererTex.getPoints(1000);
+
+		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
+		//msg to update buufers
+		GvBufferSet bufferSet;
+		//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
+		bufferSet = lDrawGroup.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+		bufferSet.insertGeometry(vertices, normals, indices);
+
+		bufferSet = lDrawGroup.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
+
+		bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+		bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
+
+		bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
+		bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());		
 	}
 }

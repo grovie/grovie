@@ -12,9 +12,6 @@ import javax.media.opengl.glu.GLU;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
 
-import de.grovie.data.importer.obj.GvImporterObj;
-import de.grovie.data.object.GvGeometry;
-import de.grovie.data.object.GvGeometryTex;
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
@@ -23,13 +20,9 @@ import de.grovie.exception.GvExRendererPassShaderResource;
 import de.grovie.exception.GvExRendererTexture2D;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
-import de.grovie.renderer.GvBufferSet;
-import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.GvMaterial;
-import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.renderstate.GvRenderState;
-import de.grovie.test.engine.renderer.TestRendererTex;
 import de.grovie.util.file.FileResource;
 
 public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
@@ -124,75 +117,79 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
 						File.separator + "test.jpg");
 		
-		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
+		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg",lgl2));
 		
 		stream = FileResource.getResource(
 				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
 						File.separator + "BarkDecidious0164_5_thumbhuge.jpg");
-		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg"));
+		rendererGL2.addTexture2D((GvTexture2DGL2)lRenderer.getDevice().createTexture2D(stream, "jpg",lgl2));
 		//END DEBUG
 
 		//Draw groups
 		rendererGL2.initDrawGroups();
-
-		//FOR DEBUG
-		//Test update scenario
-		GvDrawGroup drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
-
-		//Test geometry
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
-		GvGeometry geom = new GvGeometry();
-		GvImporterObj.load(path, geom);
-		int indices[] = geom.getIndices();
-		float vertices[] = geom.getVertices();
-		float normals[] = geom.getNormals();
-
-		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
-		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
-		GvGeometryTex geomPoints = TestRendererTex.getPoints(1000);
 		
-		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
-		//msg to update buufers
-		GvBufferSet bufferSet;
-		//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
-		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
-		bufferSet.insertGeometry(vertices, normals, indices);
-
-		bufferSet = drawGrpUpdate.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
-		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
-
-		bufferSet = drawGrpUpdate.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-		bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
-		
-		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
-		bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
-		
+		//textures always in repeat wrapping mode
 		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
 		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-		
-		//VBO/IBO - OpenGL server-side
-		//send geom to hardware buffers - simulate action 3 by foreign thread
-		//TODO: integrate this with previous geometry insertion step
-		drawGrpUpdate.update(rendererGL2);
 
-		//MESSAGE sent to rendering thread to swap buffers
-
-		//VAOs - OpenGL client-side - 
-		//rendering thread action, action 1 after receiving msg to swap VBOs
-		drawGrpUpdate.updateVAO(rendererGL2);
-
-		//VBO swap buffers - 
-		//rendering thread action, action 2 after receiving msg to swap VBOs
-		rendererGL2.swapBuffers();
-
-		drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
-		//MESSAGE sent to data thread to clear and update buffer
-
-		//clear update buffers - simulate action 1 by foreign thread after receiving
-		//msg to update buufers
-		drawGrpUpdate.clear(rendererGL2);
-
-		//END DEBUG
+//		//FOR DEBUG
+//		//Test update scenario
+//		GvDrawGroup drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
+//
+//		//Test geometry
+//		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
+//		GvGeometry geom = new GvGeometry();
+//		GvImporterObj.load(path, geom);
+//		int indices[] = geom.getIndices();
+//		float vertices[] = geom.getVertices();
+//		float normals[] = geom.getNormals();
+//
+//		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
+//		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+//		GvGeometryTex geomPoints = TestRendererTex.getPoints(1000);
+//		
+//		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
+//		//msg to update buufers
+//		GvBufferSet bufferSet;
+//		//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
+//		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+//		bufferSet.insertGeometry(vertices, normals, indices);
+//
+//		bufferSet = drawGrpUpdate.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+//		bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv());
+//
+//		bufferSet = drawGrpUpdate.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+//		bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
+//		
+//		bufferSet = drawGrpUpdate.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
+//		bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
+//		
+//		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+//		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+//		
+//		//VBO/IBO - OpenGL server-side
+//		//send geom to hardware buffers - simulate action 3 by foreign thread
+//		//TODO: integrate this with previous geometry insertion step
+//		drawGrpUpdate.update(lgl2, rendererGL2.getDevice());
+//
+//		//MESSAGE sent to rendering thread to swap buffers
+//
+//		//VAOs - OpenGL client-side - 
+//		//rendering thread action, action 1 after receiving msg to swap VBOs
+//		drawGrpUpdate.updateVAO(rendererGL2);
+//
+//		//VBO swap buffers - 
+//		//rendering thread action, action 2 after receiving msg to swap VBOs
+//		rendererGL2.swapBuffers();
+//
+//		drawGrpUpdate = rendererGL2.getDrawGroupUpdate();
+//		//MESSAGE sent to data thread to clear and update buffer
+//
+//		//clear update buffers - simulate action 1 by foreign thread after receiving
+//		//msg to update buufers
+//		drawGrpUpdate.clear(lgl2);
+//
+//		//END DEBUG
 	}
 
 	@Override
@@ -200,15 +197,13 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	{
 		try
 		{
-			//establish shared rendering context with data thread
-			//this is necessary for the data thread to perform work for the rendering thread
-			lRenderer.sendSharedContext(lglAutoDrawable.getContext());
-			
 			//select rendering 3D pipeline 
 			initPipeline();
 			
-			
+			//TODO: modify message pipeline to take over this method calls
+			//to obtain textures and materials from database before sending update buffer
 			initRenderer();
+			this.lRenderer.sendUpdateBuffer();
 		}
 		catch(Exception e)
 		{

@@ -2,7 +2,6 @@ package de.grovie.renderer;
 
 import java.util.ArrayList;
 
-import de.grovie.engine.concurrent.GvMsgDataNewBufferSet;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
@@ -15,7 +14,7 @@ import de.grovie.exception.GvExRendererVertexBuffer;
  * 
  * @author yong
  */
-public abstract class GvBufferSet extends GvDrawGroup implements GvMsgDataNewBufferSet {
+public abstract class GvBufferSet extends GvDrawGroup{
 	
 	public static long VBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file
 	public static long IBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file
@@ -31,6 +30,9 @@ public abstract class GvBufferSet extends GvDrawGroup implements GvMsgDataNewBuf
 	protected ArrayList<float[]> lNormals;
 	protected ArrayList<int[]> lIndices;
 	protected ArrayList<float[]> lUv;
+	
+	//Messages
+	
 	
 	public GvBufferSet()
 	{	
@@ -97,7 +99,7 @@ public abstract class GvBufferSet extends GvDrawGroup implements GvMsgDataNewBuf
 	 * @param context
 	 */
 	@Override
-	public abstract void clear(GvRenderer renderer);
+	public abstract void clear(Object libraryAPI);
 	
 	/**
 	 * Called by data or updating thread to update/load GPU-server-side buffer objects 
@@ -105,7 +107,7 @@ public abstract class GvBufferSet extends GvDrawGroup implements GvMsgDataNewBuf
 	 * @param context
 	 */
 	@Override
-	public abstract void update(GvRenderer renderer) 
+	public abstract void update(Object libraryAPI, GvDevice device) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer;
 	
 	/**

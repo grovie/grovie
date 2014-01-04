@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
-import de.grovie.data.GvData;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
@@ -19,7 +18,7 @@ import de.grovie.renderer.GvVertexArray;
 import de.grovie.renderer.GvVertexBuffer;
 
 public class GvBufferSetGL2 extends GvBufferSet {
-	
+
 	public GvBufferSetGL2() {
 	}
 
@@ -32,7 +31,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		insertIntoArrayBuffers(vertices, normals);
 		lUv.add(uvcoords);
 	}
-	
+
 	/**
 	 * Inserts geometry info (vertices, normals) into lists
 	 */
@@ -57,22 +56,23 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	 * @throws GvExRendererIndexBuffer 
 	 */
 	@Override
-	public void update(GvRenderer renderer) 
+	public void update(Object libraryAPI, GvDevice device) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer 
-	{
+			{
+
+		GL2 gl2 = (GL2)libraryAPI;
+		GvDeviceGL2 devicegl2 = (GvDeviceGL2)device; 
 		
 		if(lVertices.size() == 0)
 			return;
-		
-		GvDevice device = renderer.getDevice();
-		
+
 		//TODO: check if creation of initial VBO and IBO can be outside update method.
 		if(lVertexBuffers.size()==0)
-			lVertexBuffers.add(device.createVertexBuffer(GvBufferSet.VBO_BLOCK_SIZE));
-		
+			lVertexBuffers.add(device.createVertexBuffer(GvBufferSet.VBO_BLOCK_SIZE,gl2));
+
 		if(lIndexBuffers.size()==0)
-			lIndexBuffers.add(device.createIndexBuffer(GvBufferSet.VBO_BLOCK_SIZE));
-		
+			lIndexBuffers.add(device.createIndexBuffer(GvBufferSet.VBO_BLOCK_SIZE,gl2));
+
 		//loop through CPU-side geometry lists
 		for(int i=0; i<lVertices.size(); ++i)
 		{
@@ -80,55 +80,53 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			update(lVertices.get(i),
 					lNormals.get(i),
 					(lUv.size()==0)?null:lUv.get(i),
-					lIndices.get(i),
-					renderer);
+							lIndices.get(i),
+							gl2,
+							devicegl2);
 		}
-	}
-	
-	private void update(float[] vertices, float[] normals, float[] uv, int[] indices, GvRenderer renderer) 
+			}
+
+	private void update(float[] vertices, float[] normals, float[] uv, int[] indices, GL2 gl2, GvDeviceGL2 device) 
 			throws GvExRendererVertexBuffer, GvExRendererIndexBuffer
-	{
-		GvIllustratorGL2 illustrator = (GvIllustratorGL2)renderer.getIllustrator();
-		GL2 gl2 = illustrator.getGL2();
-		GvDevice device = renderer.getDevice();
-		
+			{
+
 		//ensure current vbo has sufficient memory for vertex,normal and uv list
-		GvVertexBuffer vbo = sizeCheckVertexBuffer(vertices,normals,uv, device);
-		
+		GvVertexBuffer vbo = sizeCheckVertexBuffer(vertices,normals,uv, device,gl2);
+
 		//ensure current ibo has sufficient memory for polygon indices
-		GvIndexBuffer ibo = sizeCheckIndexBuffer(indices, device);
-		
+		GvIndexBuffer ibo = sizeCheckIndexBuffer(indices, device,gl2);
+
 		//remember offsets
 		int vboIndex = lVertexBuffers.size()-1;
 		long vboOffset = vbo.getSizeUsed();
 		int iboIndex = lIndexBuffers.size()-1;
 		long iboOffset = ibo.getSizeUsed();
-		
+
 		//bind last vbo
 		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo.getId());
-		
+
 		//copy vertex coords to vbo
 		FloatBuffer verticesBuffer = FloatBuffer.wrap(vertices);
 		gl2.glBufferSubData(GL2.GL_ARRAY_BUFFER, vboOffset, vertices.length*4, verticesBuffer);
-		
+
 		//copy normals to vbo
 		FloatBuffer normalsBuffer = FloatBuffer.wrap(normals);
 		gl2.glBufferSubData(GL2.GL_ARRAY_BUFFER, vboOffset + vertices.length*4, normals.length*4, normalsBuffer);
-		
+
 		//copy uv coordinates to vbo
 		if(uv!=null)
 		{
 			FloatBuffer uvBuffer = FloatBuffer.wrap(uv);
 			gl2.glBufferSubData(GL2.GL_ARRAY_BUFFER, vboOffset +  vertices.length*4 + normals.length*4, uv.length*4, uvBuffer);
 		}
-		
+
 		//bind last ibo
 		gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo.getId());
-		
+
 		//copy indices to ibo
 		IntBuffer indicesBuffer = IntBuffer.wrap(indices);
 		gl2.glBufferSubData(GL2.GL_ELEMENT_ARRAY_BUFFER, iboOffset, indices.length*4, indicesBuffer);
-		
+
 		//create container to remember index of vbo,ibo and offsets for 
 		//creation of VAO at renderer thread later
 		GvVertexArray vao = new GvVertexArray(-1);
@@ -143,91 +141,94 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		else
 			vao.setSizeUv(0);
 		vao.setSizeIndices(indices.length * 4);
-		
+
 		//create VAO object (only wrapper object at CPU side, not allocated at GPU yet)
 		lVertexArrays.add(vao);
-		
+
 		//update memory usage of vbo and ibo wrapper objects
 		vbo.setSizeUsed(vbo.getSizeUsed()+vao.getSizeVertices()+vao.getSizeNormals()+vao.getSizeUv());
 		ibo.setSizeUsed(ibo.getSizeUsed()+vao.getSizeIndices());
-		
-	}
-	
-	private GvVertexBuffer sizeCheckVertexBuffer(float[] vertices, float[] normals, float[] uv, GvDevice device) 
+
+			}
+
+	private GvVertexBuffer sizeCheckVertexBuffer(float[] vertices, float[] normals, float[] uv, GvDevice device, GL2 gl2) 
 			throws GvExRendererVertexBuffer
-	{
+			{
 		long sizeRequired = vertices.length * 4 + 
 				normals.length * 4 + 
 				((uv==null)?0:uv.length * 4);
-		
+
 		//size of geometry exceeds usual allocated block size
 		//allocate custom size vbo
 		if(sizeRequired > GvBufferSet.VBO_BLOCK_SIZE)
-			this.lVertexBuffers.add(device.createVertexBuffer(sizeRequired));
-		
+			this.lVertexBuffers.add(device.createVertexBuffer(sizeRequired,gl2));
+
 		GvVertexBuffer vbo = lVertexBuffers.get(lVertexBuffers.size()-1);
 		if(vbo.getSizeFree() < sizeRequired)
 		{
-			this.lVertexBuffers.add(device.createVertexBuffer(GvBufferSet.VBO_BLOCK_SIZE));
+			this.lVertexBuffers.add(device.createVertexBuffer(GvBufferSet.VBO_BLOCK_SIZE,gl2));
 			vbo = lVertexBuffers.get(lVertexBuffers.size()-1);
 		}
-		
+
 		return vbo;
-	}
-	
-	private GvIndexBuffer sizeCheckIndexBuffer(int[] indices, GvDevice device) throws GvExRendererIndexBuffer 
+			}
+
+	private GvIndexBuffer sizeCheckIndexBuffer(int[] indices, GvDevice device, GL2 gl2) throws GvExRendererIndexBuffer 
 	{
 		long sizeRequired = indices.length * 4;
-		
+
 		//size of geometry exceeds usual allocated block size
 		//allocate custom size vbo
 		if(sizeRequired > GvBufferSet.IBO_BLOCK_SIZE)
-			this.lIndexBuffers.add(device.createIndexBuffer(sizeRequired));
-		
+			this.lIndexBuffers.add(device.createIndexBuffer(sizeRequired,gl2));
+
 		GvIndexBuffer ibo = lIndexBuffers.get(lIndexBuffers.size()-1);
 		if(ibo.getSizeFree() < sizeRequired)
 		{
-			this.lIndexBuffers.add(device.createIndexBuffer(GvBufferSet.IBO_BLOCK_SIZE));
+			this.lIndexBuffers.add(device.createIndexBuffer(GvBufferSet.IBO_BLOCK_SIZE,gl2));
 			ibo = lIndexBuffers.get(lIndexBuffers.size()-1);
 		}
-		
+
 		return ibo;
 	}
-	
+
 	@Override
-	public void clear(GvRenderer renderer)
+	public void clear(Object libraryAPI)
 	{
-		GvIllustratorGL2 illustrator = (GvIllustratorGL2)renderer.getIllustrator();
-		GL2 gl2 = illustrator.getGL2();
-		
+		clear((GL2)libraryAPI);
+
+	}
+
+	private void clear(GL2 gl2)
+	{
 		//clear geometry data lists
 		lVertices.clear();
 		lNormals.clear();
 		lUv.clear();
 		lIndices.clear();
-		
+
 		//clear VBOs
 		for(int i=0; i<lVertexBuffers.size(); ++i)
 		{
 			GvVertexBuffer vbo = lVertexBuffers.get(i);
 			vbo.setSizeUsed(0);	//reset usage counter
 			gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vbo.getId()); //bind
-			
+
 			//clear memory - TODO: check if this is necessary
 			gl2.glBufferData(GL2.GL_ARRAY_BUFFER, vbo.getSize(), null, GL2.GL_STATIC_DRAW); 
 		}
-		
+
 		//clear IBOs
 		for(int i=0; i<lIndexBuffers.size(); ++i)
 		{
 			GvIndexBuffer ibo = lIndexBuffers.get(i);		
 			ibo.setSizeUsed(0);	//reset usage counter
 			gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo.getId()); //bind
-			
+
 			//clear memory - TODO: check if this is necessary
 			gl2.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, ibo.getSize(), null, GL2.GL_STATIC_DRAW);
 		}
-		
+
 		//swap set of vertex arrays
 		//NOTE: unable to delete them from foreign thread (VAOs are not shared across contexts)
 		//      therefore, obsolete VAOs are retained and only deleted when rendering thread
@@ -235,7 +236,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		ArrayList<GvVertexArray> temp = lVertexArraysToDelete;
 		lVertexArraysToDelete = lVertexArrays;
 		lVertexArrays = temp;
-		
+
 		//clear vertex array list
 		lVertexArrays.clear();
 	}
@@ -244,7 +245,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	public void updateVAO(GvRenderer renderer) throws GvExRendererVertexArray {
 		GvIllustratorGL2 illustrator = (GvIllustratorGL2)renderer.getIllustrator();
 		GL2 gl2 = illustrator.getGL2();
-		
+
 		//delete and release old VAO ids
 		for(int i=0; i<this.lVertexArraysToDelete.size(); ++i)
 		{
@@ -252,17 +253,17 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			IntBuffer vaoId = IntBuffer.wrap(new int[]{vaoObsolete.getId()});
 			gl2.glDeleteVertexArrays(1, vaoId);
 		}
-		
+
 		//create new VAOs for rendering
 		GvContext context = renderer.getContext();
 		for(int j=0; j<this.lVertexArrays.size(); ++j)
 		{
 			GvVertexArray vao = lVertexArrays.get(j);
 			context.createVertexArray(vao); //create opengl id for VAO
-			
+
 			//bind vao
 			gl2.glBindVertexArray(vao.getId());
-			
+
 			//set VAO details
 			//set buffers to bind
 			gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, this.lVertexBuffers.get(vao.getVboIndex()).getId());
@@ -277,14 +278,8 @@ public class GvBufferSetGL2 extends GvBufferSet {
 				gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY); 
 				gl2.glTexCoordPointer(2,GL2.GL_FLOAT, 0, vao.getVboOffset() + vao.getSizeVertices() + vao.getSizeNormals());
 			}
-			
+
 			gl2.glBindVertexArray(0); // Disable VAO 
 		}
-	}
-
-	@Override
-	public void process(GvData target) {
-		target.receiveBufferSet(this);
-		
 	}
 }

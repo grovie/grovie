@@ -2,9 +2,11 @@ package de.grovie.data;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsg;
 import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.engine.concurrent.GvMsgRenderSwap;
 import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
-import de.grovie.renderer.GvBufferSet;
+import de.grovie.renderer.GvDevice;
+import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
@@ -24,7 +26,13 @@ public abstract class GvData extends GvThread {
 	//message queues - for communication with other threads
 	protected GvMsgQueue<GvData> lQueueIn;
 	protected GvMsgQueue<GvRenderer> lQueueOutRenderer;
-	protected GvMsgQueue<GvDb> lQueueDb;
+	protected GvMsgQueue<GvDb > lQueueDb;
+	
+	//messages (reusable)
+	private GvMsgRenderSwap lMsgRenderSwap;
+	
+	protected GvDrawGroup lDrawGroup;
+	protected GvDevice lDevice;
 	
 	public GvData() {
 	}
@@ -39,13 +47,16 @@ public abstract class GvData extends GvThread {
 		lQueueIn = queueData;
 		lQueueOutRenderer = queueRenderer;
 		lQueueDb = queueDb;
+		
+		//draw group is null until it arrives in message queue from renderer thread 
+		lDrawGroup = null;
+		
+		lMsgRenderSwap = new GvMsgRenderSwap();
 	}
 
 	@Override
 	public void runThread() throws InterruptedException, GvExEngineConcurrentThreadInitFail 
 	{	
-//		int count = 0;
-		
 		//thread loop
 		for(;;)
 		{
@@ -55,8 +66,6 @@ public abstract class GvData extends GvThread {
 			//if no messages, continue check
 			if(msg==null)
 			{
-//				System.out.println(count);
-//				count++;
 				continue;
 			}
 			else
@@ -66,9 +75,11 @@ public abstract class GvData extends GvThread {
 		}
 	}
 	
-	public abstract void setupContext(Object contextRenderer);
+	//standard out-going messages
+	public void sendBufferSwap() {
+		lQueueOutRenderer.offer(lMsgRenderSwap);
+	}
 	
-	public abstract void sendRenderBegin();
-	
-	public abstract void receiveBufferSet(GvBufferSet bufferSet);
+	//incoming msg handlers
+	public abstract void receiveBufferSet(GvDrawGroup gvDrawGroup);
 }

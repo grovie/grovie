@@ -8,6 +8,9 @@ import de.grovie.data.GvData;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroup;
+import de.grovie.exception.GvExRendererIndexBuffer;
+import de.grovie.exception.GvExRendererVertexArray;
+import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.GvAnimator;
 import de.grovie.renderer.GvContext;
 import de.grovie.renderer.GvDevice;
@@ -54,7 +57,7 @@ public class GvRendererGL2 extends GvRenderer{
 
 	@Override
 	public GvDevice createDevice() {
-		return new GvDeviceGL2(this);
+		return new GvDeviceGL2();
 	}
 
 	@Override
@@ -106,8 +109,31 @@ public class GvRendererGL2 extends GvRenderer{
 		return lDrawGroupUpdate;
 	}
 	
+	@Override
 	public void swapBuffers()
 	{
+		try {
+			
+			//update VBOs and IBOs
+			lDrawGroupUpdate.update(((GvIllustratorGL2)getIllustrator()).getGL2(), lDevice);
+			
+			//update VAOs
+			lDrawGroupUpdate.updateVAO(this);
+			
+			//clean current rendering draw groups
+			lDrawGroupRender.clear(((GvIllustratorGL2)getIllustrator()).getGL2());
+			
+		} catch (GvExRendererVertexArray e) {
+			System.out.println("Error updating buffers before draw group swap.");
+			return;
+		} catch (GvExRendererVertexBuffer e) {
+			System.out.println("Error updating buffers before draw group swap.");
+			return;
+		} catch (GvExRendererIndexBuffer e) {
+			System.out.println("Error updating buffers before draw group swap.");
+			return;
+		}
+		
 		GvDrawGroup tempDrawGrp = lDrawGroupRender;
 		lDrawGroupRender = lDrawGroupUpdate;
 		lDrawGroupUpdate = tempDrawGrp;
@@ -132,5 +158,10 @@ public class GvRendererGL2 extends GvRenderer{
 	@Override
 	public void updateRenderState(GvRenderState newState, Object context) {
 		lRenderState.update(newState, (GL2)context);
+	}
+
+	@Override
+	public void sendUpdateBuffer() {
+		lQueueOutData.offer(lDrawGroupUpdate);
 	}
 }

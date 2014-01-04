@@ -2,7 +2,6 @@ package de.grovie.renderer;
 
 import de.grovie.data.GvData;
 import de.grovie.engine.concurrent.GvMsg;
-import de.grovie.engine.concurrent.GvMsgDataNewContext;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
@@ -20,8 +19,8 @@ import de.grovie.renderer.windowsystem.GvWindowSystem;
 public abstract class GvRenderer extends GvThread {
 	
 	//message queues - for communication with other threads
-	GvMsgQueue<GvRenderer> lQueueIn;
-	GvMsgQueue<GvData> lQueueOutData;
+	protected GvMsgQueue<GvRenderer > lQueueIn;
+	protected GvMsgQueue<GvData> lQueueOutData;
 	
 	//window system
 	private GvWindowSystem lWindowSystem;
@@ -45,7 +44,7 @@ public abstract class GvRenderer extends GvThread {
 			String windowTitle, 
 			int windowWidth, 
 			int windowHeight,
-			GvMsgQueue<GvRenderer> queueIn,
+			GvMsgQueue<GvRenderer > queueIn,
 			GvMsgQueue<GvData> queueOutData)
 	{	
 		lWindowSystem = windowSystem;
@@ -113,18 +112,13 @@ public abstract class GvRenderer extends GvThread {
 		return lContext;
 	}
 	
-	public void sendSharedContext(Object context)
-	{
-		lQueueOutData.offer(new GvMsgDataNewContext(context));
-	}
-	
 	public void processMessages() 
 	{
 		int msgCount = lQueueIn.size();
 		
 		for(int i=0; i<msgCount; ++i)
 		{
-			GvMsg<GvRenderer> msg = lQueueIn.poll();
+			GvMsg<GvRenderer > msg = lQueueIn.poll();
 			msg.process(this);
 		}
 	}
@@ -135,4 +129,8 @@ public abstract class GvRenderer extends GvThread {
 	public abstract GvAnimator createAnimator();
 	
 	public abstract void updateRenderState(GvRenderState newState, Object context);
+
+	public abstract void sendUpdateBuffer();
+	
+	public abstract void swapBuffers();
 }
