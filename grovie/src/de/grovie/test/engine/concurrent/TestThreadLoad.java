@@ -1,14 +1,14 @@
 package de.grovie.test.engine.concurrent;
 
-import de.grovie.engine.concurrent.GvMessage;
-import de.grovie.engine.concurrent.GvMessageQueue;
+import de.grovie.engine.concurrent.GvMsg;
+import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThread;
 
 public class TestThreadLoad extends GvThread {
 
-	GvMessageQueue lQueueLoad;
-	GvMessageQueue lQueueRequest;
-	GvMessageQueue lQueueDone;
+	GvMsgQueue lQueueLoad;
+	GvMsgQueue lQueueRequest;
+	GvMsgQueue lQueueDone;
 	
 	public TestThreadLoad() {
 		super();
@@ -16,9 +16,9 @@ public class TestThreadLoad extends GvThread {
 	}
 
 	public TestThreadLoad(
-			GvMessageQueue queueLoad,
-			GvMessageQueue queueRequest, 
-			GvMessageQueue queueDone) {
+			GvMsgQueue queueLoad,
+			GvMsgQueue queueRequest, 
+			GvMsgQueue queueDone) {
 		super();
 		lQueueLoad = queueLoad;
 		lQueueRequest = queueRequest;
@@ -30,7 +30,7 @@ public class TestThreadLoad extends GvThread {
 		//int loadCount = 0;
 		for(;;)
 		{
-			GvMessage msg = lQueueLoad.poll();
+			GvMsg msg = lQueueLoad.poll();
 			if(msg==null)
 				continue;
 			else

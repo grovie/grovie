@@ -2,8 +2,6 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
-import de.grovie.renderer.GL2.GvRendererGL2;
-import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
 
 public class GvSandbox {
 
@@ -12,27 +10,20 @@ public class GvSandbox {
 	
 	public static void main(String[] args)
 	{
-		//start splash screen
-		
 		//get absolute path to database location
 		
 		//create GroViE vis. engine
-		GvEngine engine = GvEngine.getInstance(); //uses embedded db by default
-		
-		//create windowing system - Java AWT
-		GvWindowSystemAWTGL windowSystem = new GvWindowSystemAWTGL();
-		
-		//create renderer to use
-		GvRendererGL2 gvRenderer = new GvRendererGL2(
-				windowSystem,
-				"GroViE Sandbox",
+		GvEngine engine = GvEngine.getInstance(
+				GvEngine.GvWindowSystemClass.AWT_GL,
+				GvEngine.GvRendererClass.GL2,
 				kWindowWidth,
-				kWindowHeight);
+				kWindowHeight,
+				"GroViE Sandbox"); //uses embedded db by default
 		
 		//start the visualization engine
 		if(engine.getMode() == GvEngineMode.EMBEDDED)
 		{
-			engine.start("C:\\Users\\yong\\db", gvRenderer); //TODO: replace with path obtained from pop up dialog
+			engine.start("C:\\Users\\yong\\db"); //TODO: replace with path obtained from pop up dialog
 		}
 		
 		//obtain graph db from engine. 

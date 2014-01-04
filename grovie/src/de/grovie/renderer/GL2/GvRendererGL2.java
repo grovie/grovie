@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
 
+import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExRendererBufferSet;
 import de.grovie.exception.GvExRendererDrawGroup;
 import de.grovie.renderer.GvAnimator;
@@ -35,9 +37,11 @@ public class GvRendererGL2 extends GvRenderer{
 			GvWindowSystem windowSystem, 
 			String windowTitle, 
 			int windowWidth, 
-			int windowHeight) {
+			int windowHeight,
+			GvMsgQueue<GvRenderer> queueIn,
+			GvMsgQueue<GvData> queueOutData) {
 		
-		super(windowSystem,windowTitle,windowWidth,windowHeight);
+		super(windowSystem,windowTitle,windowWidth,windowHeight,queueIn,queueOutData);
 		
 		lTextures = new ArrayList<GvTexture2DGL2>();
 		lMaterials = new ArrayList<GvMaterial>();
@@ -124,26 +128,6 @@ public class GvRendererGL2 extends GvRenderer{
 	public void setMaterials(ArrayList<GvMaterial> materials) {
 		this.lMaterials = materials;
 	}
-	
-//	protected void drawPoints(int shaderId)
-//	{
-//		
-//	}
-//	
-//	protected void drawTexturePoints(int shaderId)
-//	{
-//		
-//	}
-//	
-//	protected void drawTriangles(int shaderId)
-//	{
-//		
-//	}
-//	
-//	protected void drawTextureTriangles(int shaderId)
-//	{
-//		
-//	}
 
 	@Override
 	public void updateRenderState(GvRenderState newState, Object context) {

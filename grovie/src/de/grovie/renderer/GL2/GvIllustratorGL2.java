@@ -200,7 +200,14 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	{
 		try
 		{
+			//establish shared rendering context with data thread
+			//this is necessary for the data thread to perform work for the rendering thread
+			lRenderer.sendSharedContext(lglAutoDrawable.getContext());
+			
+			//select rendering 3D pipeline 
 			initPipeline();
+			
+			
 			initRenderer();
 		}
 		catch(Exception e)

@@ -9,8 +9,6 @@ public abstract class GvWindowSystem {
 	
 	protected GvIOListener lIOListener;
 	
-	public abstract GvWindowSystem getInstance(GvRenderer renderer);
-	
 	public GvCanvas getCanvas() {
 		return lCanvas;
 	}
@@ -50,4 +48,8 @@ public abstract class GvWindowSystem {
 	public void setIOListener(GvIOListener IOListener) {
 		this.lIOListener = IOListener;
 	}
+	
+	public abstract GvWindowSystem getInstance(Object sharedContext);
+	
+	public abstract GvWindowSystem getInstance(GvRenderer renderer);
 }

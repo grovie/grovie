@@ -2,7 +2,12 @@ package de.grovie.engine;
 
 import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
+import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.engine.concurrent.GvThreadManager;
 import de.grovie.renderer.GvRenderer;
+import de.grovie.renderer.GL2.GvRendererGL2;
+import de.grovie.renderer.windowsystem.GvWindowSystem;
+import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
 
 /**
  * This class is the main class representing the visualization engine.
@@ -17,8 +22,18 @@ import de.grovie.renderer.GvRenderer;
  * @author yong
  *
  */
-public class GvEngine {
+public class GvEngine extends GvThreadManager{
 
+	public enum GvWindowSystemClass
+	{
+		AWT_GL;
+	}
+	
+	public enum GvRendererClass
+	{
+		GL2;
+	}
+	
 	public enum GvEngineMode
 	{
 		IN_MEM,		//visualization engine without database 
@@ -27,34 +42,76 @@ public class GvEngine {
 	}
 
 	private static GvEngine lInstance;	//singleton instance of engine
+	
+	private GvEngineMode lMode;
+	private GvWindowSystemClass lWindowSystemClass;
+	private GvRendererClass lRendererClass;
+	private String lWindowTitle;
+	
+	private GvRenderer lRenderer; 	//renderer
+	private GvData lData;			//data acceleration layer
+	private GvDb lDb;				//graph database
+	
+	
+	//communication queues between threads
+	private GvMsgQueue<GvRenderer> lQueueRenderer;
+	private GvMsgQueue<GvData> lQueueData;
+	private GvMsgQueue<GvDb> lQueueDb;
 
-	private final GvEngineMode lMode;
-	
-	private GvDb lDb;		//graph database
-	private GvData lData;	//scene graph
-	
-	private GvEngine()
+	private GvEngine(GvEngineMode mode,
+			GvWindowSystemClass windowSystemClass,
+			GvRendererClass rendererClass,
+			int windowWidth,
+			int windowHeight,
+			String windowTitle)
 	{
-		lMode = GvEngineMode.EMBEDDED;
+		//3 threads
+		super(3);
+		
+		//member variables in engine
+		lMode = mode;
+		lWindowSystemClass = windowSystemClass;
+		lRendererClass = rendererClass;
+		lWindowTitle = windowTitle;
+		
+		//message queues
+		lQueueRenderer = new GvMsgQueue<GvRenderer>();
+		lQueueData = new GvMsgQueue<GvData>();
+		lQueueDb = new GvMsgQueue<GvDb>();
+		
+		//engine components
+		lRenderer = getRenderer(windowWidth,windowHeight);
+		lData = getData();
 	} 
 
-	private GvEngine(GvEngineMode mode)
+	public static GvEngine getInstance(
+			GvWindowSystemClass windowSystemClass,
+			GvRendererClass rendererClass,
+			int windowWidth,
+			int windowHeight,
+			String windowTitle) 
 	{
-		this.lMode = mode;
-	} 
-
-	public static synchronized GvEngine getInstance() {
 		if (lInstance == null) {
-			lInstance = new GvEngine(GvEngineMode.EMBEDDED);
+			lInstance = new GvEngine(GvEngineMode.EMBEDDED,
+					windowSystemClass,
+					rendererClass,
+					windowWidth, 
+					windowHeight,
+					windowTitle);
 		}
 		return lInstance;
 	}
 
-	public static synchronized GvEngine getInstance(GvEngineMode mode) {
-		if (lInstance == null) {
-			lInstance = new GvEngine(mode);
-		}
-		return lInstance;
+	public static GvEngine getInstance(
+			GvEngineMode mode, 
+			GvWindowSystemClass windowSystemClass, 
+			GvRendererClass rendererClass,
+			int windowWidth,
+			int windowHeight,
+			String windowTitle) 
+	{
+		return GvEngine.getInstance(GvEngineMode.EMBEDDED,
+				windowSystemClass, rendererClass, windowWidth, windowHeight, windowTitle);
 	}
 	
 	public GvEngineMode getMode()
@@ -66,9 +123,9 @@ public class GvEngine {
 	 * Starts and initializes entire visualization engine.
 	 * @throws GvExceptionEngineNoEventListener 
 	 */
-	public void start(String dbPathAbs, GvRenderer renderer)
+	public void start(String dbPathAbs)
 	{
-		renderer.start();
+		start();
 	}
 	
 	/**
@@ -76,6 +133,51 @@ public class GvEngine {
 	 */
 	public void stop()
 	{
+		shutdownAndAwaitTermination();
+	}
+
+	@Override
+	public void start() {
+		//start renderer thread service
+		lThreadPool.execute(lRenderer);
 		
+		//start data thread service
+		lThreadPool.execute(lData);
+		
+		//start database thread
+		//lThreadPool.execute(lDb);
+	}
+	
+	private GvWindowSystem getWindowSystem(GvWindowSystemClass winSysClass)
+	{
+		if(winSysClass == GvEngine.GvWindowSystemClass.AWT_GL)
+			return new GvWindowSystemAWTGL();
+		
+		return null;
+	}
+	
+	private GvRenderer getRenderer(
+			int windowWidth,
+			int windowHeight)
+	{
+		if(lRendererClass == GvEngine.GvRendererClass.GL2)
+		{
+			return new GvRendererGL2(getWindowSystem(lWindowSystemClass),
+					lWindowTitle,
+					windowWidth,
+					windowHeight,
+					lQueueRenderer,
+					lQueueData
+					);
+		}
+		return null;
+	}
+	
+	private GvData getData()
+	{
+		return new GvData(getWindowSystem(lWindowSystemClass),
+				lQueueData,
+				lQueueRenderer,
+				lQueueDb);
 	}
 }

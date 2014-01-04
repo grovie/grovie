@@ -155,11 +155,11 @@ public class TestRenderer {
 		GvWindowSystemAWTGL windowSystem = new GvWindowSystemAWTGL();
 
 		//create renderer to use - OpenGL 3x
-		GvRendererGL2 gvRenderer = new GvRendererGL2(
-				windowSystem,
-				"Test VBO",
-				640,
-				480);
+//		GvRendererGL2 gvRenderer = new GvRendererGL2(
+//				windowSystem,
+//				"Test VBO",
+//				640,
+//				480);
 		
 		//test drawing cube
 		initVertexData();
@@ -167,7 +167,7 @@ public class TestRenderer {
 		//test draw obj file
 		//initObj();
 
-		gvRenderer.start();
+		//gvRenderer.start();
 
 	}
 

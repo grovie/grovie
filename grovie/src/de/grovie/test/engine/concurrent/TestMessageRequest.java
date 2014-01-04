@@ -1,8 +1,8 @@
 package de.grovie.test.engine.concurrent;
 
-import de.grovie.engine.concurrent.GvMessage;
+import de.grovie.engine.concurrent.GvMsg;
 
-public class TestMessageRequest implements GvMessage{
+public class TestMessageRequest implements GvMsg{
 
 	public double lNum ;
 	
@@ -10,11 +10,13 @@ public class TestMessageRequest implements GvMessage{
 	{
 		lNum = num;
 	}
-	
+
 	@Override
-	public void run() {
+	public void process(Object target) {
 		// TODO Auto-generated method stub
 		
 	}
+	
+
 
 }

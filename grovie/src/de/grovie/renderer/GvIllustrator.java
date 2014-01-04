@@ -6,6 +6,7 @@ import de.grovie.exception.GvExRendererPassShaderResource;
 
 public abstract class GvIllustrator{
 
+	protected Object lSharedContext;
 	protected GvRenderer lRenderer;	//reference to owner(GvRenderer)
 	protected GvPipeline lPipeline;	//3D pipeline
 	
@@ -73,7 +74,8 @@ public abstract class GvIllustrator{
 		return lVertexCount;
 	}
 	
-	public abstract void init() throws GvExRendererPassShaderResource;	//initialize rendering, init 3D-pipeline
+	//initialize rendering, init 3D-pipeline
+	public abstract void init() throws GvExRendererPassShaderResource;
 	public abstract void reshape(int x, int y, int width, int height);
 	public abstract void display2DOverlay();
 	public abstract void displayEnd();

@@ -1,5 +1,10 @@
 package de.grovie.renderer;
 
+import de.grovie.data.GvData;
+import de.grovie.data.message.GvMsgDataNewContext;
+import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.engine.concurrent.GvThread;
+import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
 import de.grovie.renderer.renderstate.GvRenderState;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 
@@ -11,9 +16,11 @@ import de.grovie.renderer.windowsystem.GvWindowSystem;
  * @author yong
  *
  */
-public abstract class GvRenderer implements Runnable {
-
-	Thread lThread;
+public abstract class GvRenderer extends GvThread {
+	
+	//message queues - for communication with other threads
+	GvMsgQueue<GvRenderer> lQueueIn;
+	GvMsgQueue<GvData> lQueueOutData;
 	
 	//window system
 	private GvWindowSystem lWindowSystem;
@@ -36,23 +43,28 @@ public abstract class GvRenderer implements Runnable {
 			GvWindowSystem windowSystem, 
 			String windowTitle, 
 			int windowWidth, 
-			int windowHeight)
-	{
+			int windowHeight,
+			GvMsgQueue<GvRenderer> queueIn,
+			GvMsgQueue<GvData> queueOutData)
+	{	
 		lWindowSystem = windowSystem;
 		lWindowTitle = windowTitle;
 		
 		lRendererStateMachine = new GvRendererStateMachine(windowWidth,windowHeight);
 		
-		lThread = new Thread(this, "GroViE Renderer");
-	}
-	
-	public void start()
-	{
-		lThread.start();
+		lQueueIn = queueIn;
+		lQueueOutData = queueOutData;
 	}
 	
 	@Override
-	public void run() {
+	public void runThread() throws GvExEngineConcurrentThreadInitFail {
+		
+		//check if message queues have been set
+		if((lQueueIn == null) || (lQueueOutData==null))
+		{
+			throw new GvExEngineConcurrentThreadInitFail("Message queues for renderer absent.");
+		}
+		
 		lDevice = createDevice();
 		lContext = createContext();
 		lIllustrator = createIllustrator();
@@ -60,7 +72,6 @@ public abstract class GvRenderer implements Runnable {
 		lGraphicsWindow = lDevice.createWindow(
 				lWindowSystem,
 				this);
-		
 	}
 	
 	public GvRendererStateMachine getRendererStateMachine()
@@ -99,6 +110,11 @@ public abstract class GvRenderer implements Runnable {
 	public GvContext getContext()
 	{
 		return lContext;
+	}
+	
+	public void sendSharedContext(Object context)
+	{
+		lQueueOutData.offer(new GvMsgDataNewContext(context));
 	}
 	
 	public abstract GvDevice createDevice();

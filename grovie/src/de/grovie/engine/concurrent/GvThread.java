@@ -1,5 +1,7 @@
 package de.grovie.engine.concurrent;
 
+import de.grovie.exception.GvExEngineConcurrentThreadInitFail;
+
 public abstract class GvThread implements Runnable{
 	
 	public GvThread()
@@ -11,10 +13,11 @@ public abstract class GvThread implements Runnable{
 		try {
 			runThread();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GvExEngineConcurrentThreadInitFail e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public abstract void runThread() throws InterruptedException;
+	public abstract void runThread() throws InterruptedException, GvExEngineConcurrentThreadInitFail;
 }

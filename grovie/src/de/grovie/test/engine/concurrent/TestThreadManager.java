@@ -3,16 +3,16 @@ package de.grovie.test.engine.concurrent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import de.grovie.engine.concurrent.GvMessageQueue;
+import de.grovie.engine.concurrent.GvMsgQueue;
 
 public class TestThreadManager {
 
 	
 	public static void main(String[] args) throws InterruptedException {
 		
-		GvMessageQueue qLoad = new GvMessageQueue();
-		GvMessageQueue qRequest = new GvMessageQueue();
-		GvMessageQueue qDone = new GvMessageQueue();
+		GvMsgQueue qLoad = new GvMsgQueue();
+		GvMsgQueue qRequest = new GvMsgQueue();
+		GvMsgQueue qDone = new GvMsgQueue();
 		
 		ExecutorService lThreadPool = Executors.newFixedThreadPool(3);
 		

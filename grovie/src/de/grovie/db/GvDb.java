@@ -3,6 +3,9 @@ package de.grovie.db;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
+import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 /**
@@ -12,7 +15,7 @@ import de.grovie.exception.GvExDbUnrecognizedImpl;
  * 
  * @author yong
  */
-public class GvDb {
+public class GvDb extends GvThread {
 
 	//types of database implementation (implementing Blueprints API)
 	public enum GvDbImpl
@@ -29,6 +32,10 @@ public class GvDb {
 	private static GvDbImpl lGrovieDbImpl;	//database implementation (e.g. Neo4j, Titan, etc.)
 	
 	private Graph lGraph; //instance of database graph
+	
+	//message queues - for communication with other threads
+	GvMsgQueue<GvDb> lQueueIn;
+	GvMsgQueue<GvData> lQueueOutData;
 	
 	/**
 	 * Constructor
@@ -114,5 +121,17 @@ public class GvDb {
 	public Graph getGraph()
 	{
 		return lGraph;
+	}
+	
+	public void setQueues(GvMsgQueue<GvDb> queueDb, GvMsgQueue<GvData> queueData) 
+	{
+		lQueueIn = queueDb;
+		lQueueOutData= queueData;
+	}
+
+	@Override
+	public void runThread() {
+		// TODO Auto-generated method stub
+		
 	}
 }
