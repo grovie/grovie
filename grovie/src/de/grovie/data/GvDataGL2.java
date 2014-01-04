@@ -22,12 +22,15 @@ public class GvDataGL2 extends GvData {
 
 	//FOR DEBUG
 	int indices[];
+	float vcopy[];
 	float vertices[];
 	float normals[];
 
 	GvGeometryTex geomBoxTex;
 	GvGeometryTex geomTube;
 	GvGeometryTex geomPoints;
+	
+	int move;
 	//END DEBUG
 	
 	public GvDataGL2(GvWindowSystem windowSystem,
@@ -46,7 +49,15 @@ public class GvDataGL2 extends GvData {
 
 		 geomBoxTex = TestRendererTex.getTexturedBox();
 		 geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		 
+		 vcopy = new float[geomTube.getVertices().length];
+		 for(int i=0; i<geomTube.getVertices().length; ++i)
+		 {
+			 vcopy[i] = geomTube.getVertices()[i];
+		 }
 		 geomPoints = TestRendererTex.getPoints(1000);
+		 
+		 move = 0;
 	}
 
 	@Override
@@ -74,6 +85,13 @@ public class GvDataGL2 extends GvData {
 	
 	private void computeGeometry() throws GvExRendererDrawGroupRetrieval, GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
+		int numVertices = geomTube.getVertices().length/3;
+		for(int i=0; i<numVertices; ++i)
+		{
+			int indexOffset = i*3;
+			geomTube.setVertexValue(indexOffset+2, vcopy[indexOffset+2]-move*5.0f);
+		}
+		
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
 		GvBufferSet bufferSet;
@@ -93,14 +111,9 @@ public class GvDataGL2 extends GvData {
 
 	@Override
 	public void receiveSceneUpdate(GvDbInteger integer) {
-		float[] vertices = geomTube.getVertices();
-		int numVertices = vertices.length/3;
-		for(int i=0; i<numVertices; ++i)
-		{
-			int indexOffset = i*3;
-			geomTube.setVertexValue(indexOffset+2, vertices[indexOffset+2]-1);
-		}
 		
+		move = integer.getInt();
+		System.out.println(move);
 	}
 
 }
