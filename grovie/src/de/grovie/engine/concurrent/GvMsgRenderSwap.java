@@ -9,7 +9,7 @@ public class GvMsgRenderSwap implements GvMsgRender {
 		
 		target.swapBuffers();
 	
-		//target.sendUpdateBuffer();
+		target.sendUpdateBuffer();
 	}
 
 }

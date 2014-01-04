@@ -5,6 +5,7 @@ import de.grovie.data.GvDataGL2;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThreadManager;
+import de.grovie.exception.GvExDbUnrecognizedImpl;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GL2.GvRendererGL2;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
@@ -66,8 +67,8 @@ public class GvEngine extends GvThreadManager{
 			int windowHeight,
 			String windowTitle)
 	{
-		//3 threads
-		super(3);
+		//2 threads - for renderer and data
+		super(2);
 		
 		//member variables in engine
 		lMode = mode;
@@ -122,11 +123,23 @@ public class GvEngine extends GvThreadManager{
 	
 	/**
 	 * Starts and initializes entire visualization engine.
+	 * @throws GvExDbUnrecognizedImpl 
 	 * @throws GvExceptionEngineNoEventListener 
 	 */
-	public void start(String dbPathAbs)
+	public void start(String dbPathAbs) throws GvExDbUnrecognizedImpl
 	{
+		//get instance of graph database using database path
+		lDb = GvDb.getInstance(dbPathAbs);
+		
+		//provide the database class with thread communication message queues
+		lDb.setQueues(lQueueDb, lQueueData);
+		
+		//start the renderer and data-accel threads
 		start();
+		
+		//FOR DEBUG
+		lDb.testAnimation();
+		//END DEBUG
 	}
 	
 	/**
@@ -144,9 +157,6 @@ public class GvEngine extends GvThreadManager{
 		
 		//start data thread service
 		lThreadPool.execute(lData);
-		
-		//start database thread
-		//lThreadPool.execute(lDb);
 	}
 	
 	private GvWindowSystem getWindowSystem(GvWindowSystemLibrary winSysClass)

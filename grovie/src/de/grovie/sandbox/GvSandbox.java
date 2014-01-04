@@ -2,6 +2,7 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
+import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 public class GvSandbox {
 
@@ -23,7 +24,13 @@ public class GvSandbox {
 		//start the visualization engine
 		if(engine.getMode() == GvEngineMode.EMBEDDED)
 		{
-			engine.start("C:\\Users\\yong\\db"); //TODO: replace with path obtained from pop up dialog
+			try {
+				//engine.start("C:\\Users\\yong\\db");
+				engine.start("/Users/yongzhiong/Desktop/testdb");
+			} catch (GvExDbUnrecognizedImpl e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} //TODO: replace with path obtained from pop up dialog
 		}
 		
 		//obtain graph db from engine. 

@@ -4,12 +4,14 @@ import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
 import de.grovie.data.object.GvGeometryTex;
 import de.grovie.db.GvDb;
+import de.grovie.db.GvDbInteger;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExRendererDrawGroupRetrieval;
 import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.GvBufferSet;
+import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.GvRenderer;
@@ -18,11 +20,33 @@ import de.grovie.test.engine.renderer.TestRendererTex;
 
 public class GvDataGL2 extends GvData {
 
+	//FOR DEBUG
+	int indices[];
+	float vertices[];
+	float normals[];
+
+	GvGeometryTex geomBoxTex;
+	GvGeometryTex geomTube;
+	GvGeometryTex geomPoints;
+	//END DEBUG
+	
 	public GvDataGL2(GvWindowSystem windowSystem,
 			GvMsgQueue<GvData> lQueueData,
 			GvMsgQueue<GvRenderer> lQueueRenderer, GvMsgQueue<GvDb> lQueueDb) 
 	{
 		super(windowSystem, lQueueData, lQueueRenderer, lQueueDb);
+		
+		//Test geometry
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
+		GvGeometry geom = new GvGeometry();
+		GvImporterObj.load(path, geom);
+		 indices = geom.getIndices();
+		 vertices = geom.getVertices();
+		 normals = geom.getNormals();
+
+		 geomBoxTex = TestRendererTex.getTexturedBox();
+		 geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		 geomPoints = TestRendererTex.getPoints(1000);
 	}
 
 	@Override
@@ -32,29 +56,24 @@ public class GvDataGL2 extends GvData {
 		//FOR DEBUG
 		try
 		{
-			insertTestGeometry();
+			computeGeometry();
 		}
 		catch(Exception e)
 		{
 			System.out.println("error inserting test geometry");
 		}
 		//END DEBUG
+		
+		lDrawGroup = null; //set reference to draw-group null, wait for new reference from rendering thread
 	}
 
-	private void insertTestGeometry() throws GvExRendererDrawGroupRetrieval, GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
+	@Override
+	public void receiveCameraUpdate(GvCamera camera) {
+		lCamera = camera;
+	}
+	
+	private void computeGeometry() throws GvExRendererDrawGroupRetrieval, GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
-		//Test geometry
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";		
-		GvGeometry geom = new GvGeometry();
-		GvImporterObj.load(path, geom);
-		int indices[] = geom.getIndices();
-		float vertices[] = geom.getVertices();
-		float normals[] = geom.getNormals();
-
-		GvGeometryTex geomBoxTex = TestRendererTex.getTexturedBox();
-		GvGeometryTex geomTube = TestRendererTex.getTube(1, 20, 10, 1);
-		GvGeometryTex geomPoints = TestRendererTex.getPoints(1000);
-
 		//send geom CPU buffers - simulate action 2 by foreign thread after receiving
 		//msg to update buufers
 		GvBufferSet bufferSet;
@@ -71,4 +90,17 @@ public class GvDataGL2 extends GvData {
 		bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
 		bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());		
 	}
+
+	@Override
+	public void receiveSceneUpdate(GvDbInteger integer) {
+		float[] vertices = geomTube.getVertices();
+		int numVertices = vertices.length/3;
+		for(int i=0; i<numVertices; ++i)
+		{
+			int indexOffset = i*3;
+			geomTube.setVertexValue(indexOffset+2, vertices[indexOffset+2]-1);
+		}
+		
+	}
+
 }

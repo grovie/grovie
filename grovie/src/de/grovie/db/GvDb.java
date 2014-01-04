@@ -5,7 +5,6 @@ import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 import de.grovie.data.GvData;
 import de.grovie.engine.concurrent.GvMsgQueue;
-import de.grovie.engine.concurrent.GvThread;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 /**
@@ -15,7 +14,7 @@ import de.grovie.exception.GvExDbUnrecognizedImpl;
  * 
  * @author yong
  */
-public class GvDb extends GvThread {
+public class GvDb {
 
 	//types of database implementation (implementing Blueprints API)
 	public enum GvDbImpl
@@ -37,6 +36,9 @@ public class GvDb extends GvThread {
 	GvMsgQueue<GvDb> lQueueIn;
 	GvMsgQueue<GvData> lQueueOutData;
 	
+	//message reusable
+	GvDbInteger lInteger;
+	
 	/**
 	 * Constructor
 	 * @param dbPathAbs
@@ -46,6 +48,10 @@ public class GvDb extends GvThread {
 	{
 		lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 		lGrovieDbImpl = lGrovieDbImplDefault;
+		
+		//FOR DEBUG
+		lInteger = new GvDbInteger();
+		//END DEBUG
 	}
 
 	/**
@@ -128,10 +134,21 @@ public class GvDb extends GvThread {
 		lQueueIn = queueDb;
 		lQueueOutData= queueData;
 	}
-
-	@Override
-	public void runThread() {
-		// TODO Auto-generated method stub
-		
+	
+	//FOR DEBUG
+	public void testAnimation()
+	{
+		while(true)
+		{
+			lInteger.increment();
+			lQueueOutData.offer(lInteger); //inform data thread of increment
+			try {
+				Thread.sleep(1000);	//wait for 1 second
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
+	//END DEBUG
 }

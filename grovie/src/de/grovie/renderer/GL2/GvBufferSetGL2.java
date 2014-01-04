@@ -196,7 +196,6 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	public void clear(Object libraryAPI)
 	{
 		clear((GL2)libraryAPI);
-
 	}
 
 	private void clear(GL2 gl2)

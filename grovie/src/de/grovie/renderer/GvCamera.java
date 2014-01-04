@@ -2,7 +2,10 @@ package de.grovie.renderer;
 
 import org.apache.commons.math3.complex.Quaternion;
 
-public class GvCamera {
+import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgDataCameraUpdate;
+
+public class GvCamera implements GvMsgDataCameraUpdate{
 
 	
 	public static final float[] DEFAULT_POSITION = new float[]{0,0,5.0f};
@@ -175,6 +178,12 @@ public class GvCamera {
 		}
 		
 		return rotateCameraView(floatArray, angle, x, y, z);
+	}
+
+	@Override
+	public void process(GvData target) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	
