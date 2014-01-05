@@ -39,6 +39,9 @@ public abstract class GvRenderer extends GvThread {
 	//current settings of graphics API
 	protected GvRenderState lRenderState;	
 	
+	//camera copy for holding camera info 
+	private GvCamera lCameraInfo;
+	
 	public GvRenderer(
 			GvWindowSystem windowSystem, 
 			String windowTitle, 
@@ -54,6 +57,9 @@ public abstract class GvRenderer extends GvThread {
 		
 		lQueueIn = queueIn;
 		lQueueOutData = queueOutData;
+		
+		//camera info container for getting and sending camera data out
+		lCameraInfo = new GvCamera();
 	}
 	
 	@Override
@@ -130,7 +136,16 @@ public abstract class GvRenderer extends GvThread {
 	
 	public abstract void updateRenderState(GvRenderState newState, Object context);
 
+	//incoming msg handler methods
+	public abstract void swapBuffers();
+	
+	//outgoing msg handler methods
+	public void sendCamera() 
+	{
+		lRendererStateMachine.getCamera(lCameraInfo);
+		lQueueOutData.offer(lCameraInfo);
+	}
+	
 	public abstract void sendUpdateBuffer();
 	
-	public abstract void swapBuffers();
 }

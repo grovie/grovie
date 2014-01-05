@@ -1,7 +1,6 @@
 package de.grovie.engine;
 
 import de.grovie.data.GvData;
-import de.grovie.data.GvDataGL2;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThreadManager;
@@ -138,7 +137,7 @@ public class GvEngine extends GvThreadManager{
 		start();
 		
 		//FOR DEBUG
-		lDb.testAnimation();
+		//lDb.testAnimation();
 		//END DEBUG
 	}
 	
@@ -188,11 +187,16 @@ public class GvEngine extends GvThreadManager{
 	{
 		if(lRendererClass == GvEngine.GvGraphicsAPI.OPEN_GL_2_0)
 		{
-			return new GvDataGL2(getWindowSystem(lWindowSystemClass),
+			return new GvData(
 					lQueueData,
 					lQueueRenderer,
 					lQueueDb);
 		}
 		return null;
+	}
+	
+	public void simulationStep(int stepId)
+	{
+		lDb.simulationStep(stepId);
 	}
 }

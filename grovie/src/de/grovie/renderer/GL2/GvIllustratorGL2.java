@@ -204,6 +204,7 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 			//to obtain textures and materials from database before sending update buffer
 			initRenderer();
 			this.lRenderer.sendUpdateBuffer();
+			this.lRenderer.sendCamera();
 		}
 		catch(Exception e)
 		{

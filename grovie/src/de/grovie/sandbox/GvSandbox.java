@@ -28,7 +28,7 @@ public class GvSandbox {
 				//engine.start("C:\\Users\\yong\\db");
 				engine.start("/Users/yongzhiong/Desktop/testdb");
 			} catch (GvExDbUnrecognizedImpl e) {
-				// TODO Auto-generated catch block
+				
 				e.printStackTrace();
 			} //TODO: replace with path obtained from pop up dialog
 		}

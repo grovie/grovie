@@ -77,6 +77,34 @@ public class GvCamera implements GvMsgDataCameraUpdate{
 		anotherCamera.lNear = lNear;
 		anotherCamera.lFar = lFar;
 	}
+	
+	/**
+	 * Compares this camera with the input-specified camera.
+	 * 
+	 * @param anotherCamera
+	 * @return true if cameras are the same, false otherwise.
+	 */
+	public boolean compare(GvCamera anotherCamera)
+	{
+		if(
+		(anotherCamera.lPosition[0] != lPosition[0])||	
+		(anotherCamera.lPosition[1] != lPosition[1])||
+		(anotherCamera.lPosition[2] != lPosition[2])||
+		(anotherCamera.lUp[0] != lUp[0])||
+		(anotherCamera.lUp[1] != lUp[1])||
+		(anotherCamera.lUp[2] != lUp[2])||
+		(anotherCamera.lView[0] != lView[0])||
+		(anotherCamera.lView[1] != lView[1])||
+		(anotherCamera.lView[2] != lView[2])||
+		(anotherCamera.lFov != lFov)||
+		(anotherCamera.lAspect != lAspect)||
+		(anotherCamera.lNear != lNear)||
+		(anotherCamera.lFar != lFar)
+			)
+			return false;
+		
+		return true;
+	}
 
 	public void setView(float x, float y, float z)
 	{
@@ -182,9 +210,6 @@ public class GvCamera implements GvMsgDataCameraUpdate{
 
 	@Override
 	public void process(GvData target) {
-		// TODO Auto-generated method stub
-		
+		target.receiveCameraUpdate(this);
 	}
-
-	
 }

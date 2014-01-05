@@ -4,6 +4,7 @@ import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgDataSceneUpdate;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 
@@ -37,7 +38,7 @@ public class GvDb {
 	GvMsgQueue<GvData> lQueueOutData;
 	
 	//message reusable
-	GvDbInteger lInteger;
+//	GvDbInteger lInteger;
 	
 	/**
 	 * Constructor
@@ -50,7 +51,7 @@ public class GvDb {
 		lGrovieDbImpl = lGrovieDbImplDefault;
 		
 		//FOR DEBUG
-		lInteger = new GvDbInteger();
+//		lInteger = new GvDbInteger();
 		//END DEBUG
 	}
 
@@ -135,20 +136,25 @@ public class GvDb {
 		lQueueOutData= queueData;
 	}
 	
-	//FOR DEBUG
-	public void testAnimation()
+	public void simulationStep(int stepId)
 	{
-		while(true)
-		{
-			lInteger.increment();
-			lQueueOutData.offer(lInteger); //inform data thread of increment
-			try {
-				Thread.sleep(1000);	//wait for 1 second
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		lQueueOutData.offer(new GvMsgDataSceneUpdate(stepId, lGraph));
 	}
-	//END DEBUG
+	
+//	//FOR DEBUG
+//	public void testAnimation()
+//	{
+//		while(true)
+//		{
+//			lInteger.increment();
+//			lQueueOutData.offer(lInteger); //inform data thread of increment
+//			try {
+//				Thread.sleep(1000);	//wait for 1 second
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+//	//END DEBUG
 }
