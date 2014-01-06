@@ -25,16 +25,24 @@ public class GvSandbox {
 		if(engine.getMode() == GvEngineMode.EMBEDDED)
 		{
 			try {
-				//engine.start("C:\\Users\\yong\\db");
-				engine.start("/Users/yongzhiong/Desktop/testdb");
+				engine.start("C:\\Users\\yong\\db");
+				//engine.start("/Users/yongzhiong/Desktop/testdb");
 			} catch (GvExDbUnrecognizedImpl e) {
 				
 				e.printStackTrace();
 			} //TODO: replace with path obtained from pop up dialog
 		}
 		
-		//obtain graph db from engine. 
-		//if multi thread, create worker threads. give threads reference to db.
+		for(int i=1; i< 1000; ++i)
+		{
+			engine.simulationStep(i);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		//begin scene modifications on db (changes should be seen on the rendering window)
 		

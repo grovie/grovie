@@ -1,12 +1,19 @@
 package de.grovie.db;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 import de.grovie.data.GvData;
+import de.grovie.engine.concurrent.GvMsgDataSceneStaticData;
 import de.grovie.engine.concurrent.GvMsgDataSceneUpdate;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
+import de.grovie.renderer.GvMaterial;
+import de.grovie.util.file.FileResource;
 
 /**
  * This class provides database access to the package de.grovie.data.
@@ -37,9 +44,6 @@ public class GvDb {
 	GvMsgQueue<GvDb> lQueueIn;
 	GvMsgQueue<GvData> lQueueOutData;
 	
-	//message reusable
-//	GvDbInteger lInteger;
-	
 	/**
 	 * Constructor
 	 * @param dbPathAbs
@@ -49,10 +53,6 @@ public class GvDb {
 	{
 		lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 		lGrovieDbImpl = lGrovieDbImplDefault;
-		
-		//FOR DEBUG
-//		lInteger = new GvDbInteger();
-		//END DEBUG
 	}
 
 	/**
@@ -141,20 +141,51 @@ public class GvDb {
 		lQueueOutData.offer(new GvMsgDataSceneUpdate(stepId, lGraph));
 	}
 	
-//	//FOR DEBUG
-//	public void testAnimation()
-//	{
-//		while(true)
-//		{
-//			lInteger.increment();
-//			lQueueOutData.offer(lInteger); //inform data thread of increment
-//			try {
-//				Thread.sleep(1000);	//wait for 1 second
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
-//	}
-//	//END DEBUG
+	public void initScene()
+	{
+		sendSceneStaticData();
+		
+		//send initial step id and graph reference to data layer
+		lQueueOutData.offer(new GvMsgDataSceneUpdate(0, lGraph));
+	}
+
+	public void sendSceneStaticData() {
+		ArrayList<GvMaterial> materials = new ArrayList<GvMaterial>();
+		ArrayList<InputStream> textures = new ArrayList<InputStream>();
+		ArrayList<String> textureFileExts = new ArrayList<String>();
+		
+		//FOR DEBUG
+
+		//Materials
+		GvMaterial materialDefault = new GvMaterial();
+		GvMaterial greenMaterial = new GvMaterial();
+		greenMaterial.lDiffuse[0] = 0.0f;
+		greenMaterial.lDiffuse[1] = 1.0f;
+		greenMaterial.lDiffuse[2] = 0.0f;
+
+		//Textures
+		InputStream streamColors = FileResource.getResource(
+				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
+						File.separator + "test.jpg");
+		
+		InputStream streamBark = FileResource.getResource(
+				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
+						File.separator + "BarkDecidious0164_5_thumbhuge.jpg");
+		
+		materials.add(materialDefault);
+		materials.add(greenMaterial);
+		textures.add(streamColors);
+		textureFileExts.add("jpg");
+		textures.add(streamBark);
+		textureFileExts.add("jpg");
+		//END DEBUG
+		
+		//load materials from database
+		
+		//load textures and file extensions  from database
+		
+		
+		//send to data layer
+		lQueueOutData.offer(new GvMsgDataSceneStaticData(materials, textures, textureFileExts));
+	}
 }

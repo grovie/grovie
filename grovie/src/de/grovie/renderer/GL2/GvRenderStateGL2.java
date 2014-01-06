@@ -80,7 +80,7 @@ public class GvRenderStateGL2 extends GvRenderState {
 		if(isDiff(GL2.GL_STENCIL_TEST,newState.lStencilTest.lEnabled,gl2))
 			updateStencilTest(gl2,newState);
 		
-		if(isDiff(GL2.GL_TEXTURE_2D,newState.lTexture.lEnabled,gl2))
+		//if(isDiff(GL2.GL_TEXTURE_2D,newState.lTexture.lEnabled,gl2))
 			updateTexture(gl2,newState);
 		
 		gl2.glGetBooleanv(GL2.GL_DEPTH_WRITEMASK, resultByteBuffer);
@@ -130,7 +130,11 @@ public class GvRenderStateGL2 extends GvRenderState {
 	{
 		lTexture.set(newState.lTexture);
 		if(lTexture.lEnabled)
+		{
 			gl2.glEnable(GL2.GL_TEXTURE_2D);
+			gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
+			gl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
+		}
 		else
 			gl2.glDisable(GL2.GL_TEXTURE_2D);
 	}
@@ -166,26 +170,5 @@ public class GvRenderStateGL2 extends GvRenderState {
 			gl2.glEnable(GL2.GL_DEPTH_TEST);
 		else
 			gl2.glDisable(GL2.GL_DEPTH_TEST);
-		
-//		int func;
-//		
-//		if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS_THAN_OR_EQUAL)
-//			func = GL2.GL_LEQUAL;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.LESS)
-//			func = GL2.GL_LESS;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.ALWAYS)
-//			func = GL2.GL_ALWAYS;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.EQUAL)
-//			func = GL2.GL_EQUAL;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER)
-//			func = GL2.GL_GREATER;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.GREATER_THAN_OR_EQUAL)
-//			func = GL2.GL_GEQUAL;
-//		else if(lDepthTest.lFunction == GvDepthTest.GvDepthTestFunction.NEVER)
-//			func = GL2.GL_NEVER;
-//		else
-//			func = GL2.GL_NOTEQUAL;
-//		
-//		gl2.glDepthFunc(func);
 	}
 }

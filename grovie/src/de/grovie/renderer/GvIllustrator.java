@@ -74,8 +74,7 @@ public abstract class GvIllustrator {
 		return lVertexCount;
 	}
 	
-	//initialize rendering, init 3D-pipeline
-	public abstract void init() throws GvExRendererPassShaderResource;
+	public abstract void init() throws GvExRendererPassShaderResource; //initialize rendering, init 3D-pipeline
 	public abstract void reshape(int x, int y, int width, int height);
 	public abstract void display2DOverlay();
 	public abstract void displayEnd();

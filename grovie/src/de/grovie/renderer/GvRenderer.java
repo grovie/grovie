@@ -1,5 +1,8 @@
 package de.grovie.renderer;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+
 import de.grovie.data.GvData;
 import de.grovie.engine.concurrent.GvMsg;
 import de.grovie.engine.concurrent.GvMsgQueue;
@@ -137,6 +140,10 @@ public abstract class GvRenderer extends GvThread {
 	public abstract void updateRenderState(GvRenderState newState, Object context);
 
 	//incoming msg handler methods
+	public abstract void initSceneStaticData(
+			ArrayList<GvMaterial> materials,
+			ArrayList<InputStream> textures,
+			ArrayList<String> textureFileExts);
 	public abstract void swapBuffers();
 	
 	//outgoing msg handler methods
@@ -147,5 +154,7 @@ public abstract class GvRenderer extends GvThread {
 	}
 	
 	public abstract void sendUpdateBuffer();
+
+	
 	
 }

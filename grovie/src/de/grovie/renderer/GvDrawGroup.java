@@ -238,6 +238,13 @@ public class GvDrawGroup implements GvMsgDataNewBufferSet {
 	@Override
 	public void process(GvData target) {
 		target.receiveBufferSet(this);
-		target.sendBufferSwap();
+	}
+	
+	public boolean isEmpty()
+	{
+		if(lGroups.size()==0)
+			return true;
+		
+		return false;
 	}
 }

@@ -24,7 +24,7 @@ public class FileResource {
 	
 	public static String getResourceAsString(String resourceFileUrl) throws IOException
 	{
-		InputStream inputStream = FileResource.get().getClass().getResourceAsStream(resourceFileUrl);
+		InputStream inputStream = FileResource.get().getClass().getClassLoader().getResourceAsStream(resourceFileUrl);
 		InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 		
@@ -42,6 +42,6 @@ public class FileResource {
 	
 	public static InputStream getResource(String resourceFileUrl)
 	{
-		return FileResource.get().getClass().getResourceAsStream(resourceFileUrl);
+		return FileResource.get().getClass().getClassLoader().getResourceAsStream(resourceFileUrl);
 	}
 }

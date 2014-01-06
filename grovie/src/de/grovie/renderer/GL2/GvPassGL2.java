@@ -164,6 +164,10 @@ public class GvPassGL2 extends GvPass {
 		//get reference to group of geometry for rendering
 		GvDrawGroup drawGroup = renderer.getDrawGroupRender();
 		
+		//check if draw groups have been initialized or are empty
+		if(drawGroup.isEmpty())
+			return;
+		
 		//get list of materials in scene
 		ArrayList<GvMaterial> materials = renderer.getMaterials();
 		

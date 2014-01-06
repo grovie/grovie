@@ -135,10 +135,6 @@ public class GvEngine extends GvThreadManager{
 		
 		//start the renderer and data-accel threads
 		start();
-		
-		//FOR DEBUG
-		//lDb.testAnimation();
-		//END DEBUG
 	}
 	
 	/**
@@ -156,6 +152,9 @@ public class GvEngine extends GvThreadManager{
 		
 		//start data thread service
 		lThreadPool.execute(lData);
+		
+		//initialize static scene data, e.g. textures and materials
+		lDb.initScene();
 	}
 	
 	private GvWindowSystem getWindowSystem(GvWindowSystemLibrary winSysClass)
