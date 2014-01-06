@@ -1,9 +1,14 @@
 package de.grovie.sandbox;
 
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
+
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
 import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
+import de.grovie.util.graph.GvGraphUtil;
 
 public class GvSandbox {
 
@@ -38,8 +43,40 @@ public class GvSandbox {
 			}
 		}
 
+		//FOR DEBUG
+		TransactionalGraph graph = engine.getGraph();
+		
+		//clear graph
+		GvGraphUtil.clear(graph);
+
+		//add test graph
+		Vertex firstNode;
+		Vertex secondNode;
+		Vertex thirdNode;
+		Edge edge;
+		Edge edge2;
+		
+		firstNode = graph.addVertex(null);
+		firstNode.setProperty( "Type", "Scene" );
+		
+		secondNode = graph.addVertex(null);
+		secondNode.setProperty( "Type", "Step" );
+		secondNode.setProperty( "Step", new Integer(0) );
+		
+		thirdNode = graph.addVertex(null);
+		thirdNode.setProperty( "Type", "Tube" );
+		thirdNode.setProperty( "Length", new Float(13.0f) );
+		thirdNode.setProperty( "Radius", new Float(0.5f) );
+
+		edge = graph.addEdge(null, firstNode, secondNode, "Refinement");
+		edge2 = graph.addEdge(null, secondNode, thirdNode, "Refinement");
+
+		graph.commit();
+
 		for(int i=1; i< 1000; ++i)
 		{
+			
+			
 			engine.simulationStep(i);
 			try {
 				Thread.sleep(1000);
@@ -49,6 +86,8 @@ public class GvSandbox {
 			}
 		}
 
+		//END DEBUG
+		
 		//begin scene modifications on db (changes should be seen on the rendering window)
 
 		//prevent sandbox application from closing until <Return> key is pressed

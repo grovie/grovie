@@ -3,9 +3,7 @@ package de.grovie.db;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -18,6 +16,7 @@ import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.util.file.FileResource;
+import de.grovie.util.graph.GvGraphUtil;
 
 /**
  * This class provides database access to the package de.grovie.data.
@@ -60,7 +59,7 @@ public class GvDb {
 		lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 		lGrovieDbImpl = lGrovieDbImplDefault;
 		
-		lVertexScene = getVertexScene();
+		lVertexScene = GvGraphUtil.getVertexScene(lGraph);
 	}
 
 	/**
@@ -75,16 +74,15 @@ public class GvDb {
 		try{
 			lGraph = createDb(dbPathAbs, impl);
 			lGrovieDbImpl = impl;
-			
-			lVertexScene = getVertexScene();
+			lVertexScene = GvGraphUtil.getVertexScene(lGraph);
 		}
 		catch(GvExDbUnrecognizedImpl err)
 		{
 			lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 			lGrovieDbImpl = lGrovieDbImplDefault;
-			
-			lVertexScene = getVertexScene();
 		}
+		
+		
 	}
 	
 	/**
@@ -140,7 +138,7 @@ public class GvDb {
 		return lGrovieDbImpl;
 	}
 	
-	public Graph getGraph()
+	public TransactionalGraph getGraph()
 	{
 		return lGraph;
 	}
@@ -204,24 +202,5 @@ public class GvDb {
 		
 		//send to data layer
 		lQueueOutData.offer(new GvMsgDataSceneStaticData(materials, textures, textureFileExts));
-	}
-	
-	private Vertex getVertexScene() throws GvExDbSceneDuplicated
-	{
-		Iterable<Vertex> vertexSceneList = lGraph.getVertices("Type", "Scene");
-		Iterator<Vertex> vertexSceneIterator = vertexSceneList.iterator();
-		if(vertexSceneIterator.hasNext())
-		{
-			Vertex scene = vertexSceneIterator.next();
-			
-			if(vertexSceneIterator.hasNext())
-			{
-				throw new GvExDbSceneDuplicated("More than one scene in database");
-			}
-			
-			return scene;
-		}
-		
-		return null;
 	}
 }

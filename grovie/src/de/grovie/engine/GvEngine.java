@@ -1,5 +1,7 @@
 package de.grovie.engine;
 
+import com.tinkerpop.blueprints.TransactionalGraph;
+
 import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
@@ -199,5 +201,10 @@ public class GvEngine extends GvThreadManager{
 	public void simulationStep(int stepId)
 	{
 		lDb.simulationStep(stepId);
+	}
+	
+	public TransactionalGraph getGraph()
+	{
+		return lDb.getGraph();
 	}
 }

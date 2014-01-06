@@ -1,8 +1,10 @@
 package de.grovie.data;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
 
 import de.grovie.data.importer.obj.GvImporterObj;
 import de.grovie.data.object.GvGeometry;
@@ -21,6 +23,7 @@ import de.grovie.renderer.GvMaterial;
 import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.test.engine.renderer.TestRendererTex;
+import de.grovie.util.graph.GvGraphUtil;
 
 /**
  * This class performs CPU tasks that prepare data for visualization.
@@ -47,7 +50,7 @@ public class GvData extends GvThread {
 
 	//latest simulation step and graph database reference
 	private int lStepId;
-	private Graph lGraph;
+	private TransactionalGraph lGraph;
 
 	//latest set of processed data sent to renderer
 	private int lLatestStepId;
@@ -146,7 +149,7 @@ public class GvData extends GvThread {
 		sendGeometry(); //TODO: need to use time buffer at msg queue handling to prevent flooding
 	}
 
-	public void receiveSceneUpdate(int stepId, Graph graph)
+	public void receiveSceneUpdate(int stepId, TransactionalGraph graph)
 	{
 		lStepId = stepId;
 		lGraph = graph;
@@ -188,7 +191,32 @@ public class GvData extends GvThread {
 		
 		try{
 			//TODO: acceleration structure updates, geometry generation and insertion
+			
 			//FOR DEBUG
+			Vertex sceneVertex = GvGraphUtil.getVertexScene(lGraph);
+			if(sceneVertex != null)
+			{
+	
+				Vertex stepVertex = GvGraphUtil.getVertexStep(sceneVertex, lStepId);
+				
+				if(stepVertex!=null)
+				{
+					Vertex vertexInternode = null;
+					
+					Iterable<Vertex> internodeVertices = GvGraphUtil.getVerticesRefine(stepVertex);
+					Iterator<Vertex> internodeVertexIter = internodeVertices.iterator();
+					
+					GvVisitorDraw visitorDraw = new GvVisitorDraw(lDrawGroup);
+					
+					while(internodeVertexIter.hasNext())
+					{
+						vertexInternode = internodeVertexIter.next();
+						GvGraphUtil.traverseDepthFirst(vertexInternode, "Branch", visitorDraw);
+					}
+				}
+			}
+			
+			
 			GvBufferSet bufferSet;
 			//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
 			bufferSet = lDrawGroup.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
@@ -202,6 +230,7 @@ public class GvData extends GvThread {
 			
 			bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
 			bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
+			
 			
 			//END DEBUG
 			
