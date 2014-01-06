@@ -21,6 +21,7 @@ import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 
 import de.grovie.db.GvDb;
+import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 
@@ -46,7 +47,12 @@ public class TestArchitect2 {
 		System.out.println("TestArchitect Main");
 
 		System.out.println("Test Neo4j");
-		createDB();
+		try {
+			createDB();
+		} catch (GvExDbSceneDuplicated e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		testDB();
 		System.out.println("Test Neo4j End");
 
@@ -71,7 +77,12 @@ public class TestArchitect2 {
 		System.out.println("TestArchitect Main");
 
 		System.out.println("Test Neo4j");
-		createDB();
+		try {
+			createDB();
+		} catch (GvExDbSceneDuplicated e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		testDB();
 		System.out.println("Test Neo4j End");
 
@@ -89,7 +100,7 @@ public class TestArchitect2 {
 		}
 	}
 
-	private static void createDB() throws GvExDbUnrecognizedImpl
+	private static void createDB() throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated
 	{
 		graphDb = GvDb.getInstance(DB_PATH);
 		graph = graphDb.getGraph();

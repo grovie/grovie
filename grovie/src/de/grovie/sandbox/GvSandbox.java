@@ -2,17 +2,18 @@ package de.grovie.sandbox;
 
 import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
+import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 
 public class GvSandbox {
 
 	public static final int kWindowWidth = 640;
 	public static final int kWindowHeight = 480;
-	
+
 	public static void main(String[] args)
 	{
 		//get absolute path to database location
-		
+
 		//create GroViE vis. engine
 		GvEngine engine = GvEngine.getInstance(
 				GvEngine.GvWindowSystemLibrary.AWT_OPEN_GL,
@@ -20,7 +21,7 @@ public class GvSandbox {
 				kWindowWidth,
 				kWindowHeight,
 				"GroViE Sandbox"); //uses embedded db by default
-		
+
 		//start the visualization engine
 		if(engine.getMode() == GvEngineMode.EMBEDDED)
 		{
@@ -28,11 +29,15 @@ public class GvSandbox {
 				engine.start("C:\\Users\\yong\\db");
 				//engine.start("/Users/yongzhiong/Desktop/testdb");
 			} catch (GvExDbUnrecognizedImpl e) {
-				
+
 				e.printStackTrace();
 			} //TODO: replace with path obtained from pop up dialog
+			catch (GvExDbSceneDuplicated e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		
+
 		for(int i=1; i< 1000; ++i)
 		{
 			engine.simulationStep(i);
@@ -43,9 +48,9 @@ public class GvSandbox {
 				e.printStackTrace();
 			}
 		}
-		
+
 		//begin scene modifications on db (changes should be seen on the rendering window)
-		
+
 		//prevent sandbox application from closing until <Return> key is pressed
 		/*try {
 			System.in.read();

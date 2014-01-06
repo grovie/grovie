@@ -4,6 +4,7 @@ import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.engine.concurrent.GvThreadManager;
+import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GL2.GvRendererGL2;
@@ -123,9 +124,10 @@ public class GvEngine extends GvThreadManager{
 	/**
 	 * Starts and initializes entire visualization engine.
 	 * @throws GvExDbUnrecognizedImpl 
+	 * @throws GvExDbSceneDuplicated 
 	 * @throws GvExceptionEngineNoEventListener 
 	 */
-	public void start(String dbPathAbs) throws GvExDbUnrecognizedImpl
+	public void start(String dbPathAbs) throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated
 	{
 		//get instance of graph database using database path
 		lDb = GvDb.getInstance(dbPathAbs);

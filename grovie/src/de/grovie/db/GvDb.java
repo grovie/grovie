@@ -3,14 +3,18 @@ package de.grovie.db;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.TransactionalGraph;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
 
 import de.grovie.data.GvData;
 import de.grovie.engine.concurrent.GvMsgDataSceneStaticData;
 import de.grovie.engine.concurrent.GvMsgDataSceneUpdate;
 import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 import de.grovie.renderer.GvMaterial;
 import de.grovie.util.file.FileResource;
@@ -38,7 +42,8 @@ public class GvDb {
 	private static GvDb lInstance;			//singleton instance of GrovieDb
 	private static GvDbImpl lGrovieDbImpl;	//database implementation (e.g. Neo4j, Titan, etc.)
 	
-	private Graph lGraph; //instance of database graph
+	private TransactionalGraph lGraph; //instance of database graph
+	private Vertex lVertexScene;
 	
 	//message queues - for communication with other threads
 	GvMsgQueue<GvDb> lQueueIn;
@@ -48,11 +53,14 @@ public class GvDb {
 	 * Constructor
 	 * @param dbPathAbs
 	 * @throws GvExDbUnrecognizedImpl
+	 * @throws GvExDbSceneDuplicated 
 	 */
-	private GvDb(String dbPathAbs) throws GvExDbUnrecognizedImpl
+	private GvDb(String dbPathAbs) throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated
 	{
 		lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 		lGrovieDbImpl = lGrovieDbImplDefault;
+		
+		lVertexScene = getVertexScene();
 	}
 
 	/**
@@ -60,17 +68,22 @@ public class GvDb {
 	 * @param dbPathAbs
 	 * @param impl
 	 * @throws GvExDbUnrecognizedImpl
+	 * @throws GvExDbSceneDuplicated 
 	 */
-	private GvDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
+	private GvDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated
 	{
 		try{
 			lGraph = createDb(dbPathAbs, impl);
 			lGrovieDbImpl = impl;
+			
+			lVertexScene = getVertexScene();
 		}
 		catch(GvExDbUnrecognizedImpl err)
 		{
 			lGraph = createDb(dbPathAbs, lGrovieDbImplDefault);
 			lGrovieDbImpl = lGrovieDbImplDefault;
+			
+			lVertexScene = getVertexScene();
 		}
 	}
 	
@@ -81,7 +94,7 @@ public class GvDb {
 	 * @return instance of graph database
 	 * @throws GvExDbUnrecognizedImpl
 	 */
-	private Graph createDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
+	private TransactionalGraph createDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
 	{
 		if(impl==GvDbImpl.NEO4J)
 			return new Neo4jGraph(dbPathAbs);
@@ -94,8 +107,9 @@ public class GvDb {
 	 * @param dbPathAbs
 	 * @return
 	 * @throws GvExDbUnrecognizedImpl
+	 * @throws GvExDbSceneDuplicated 
 	 */
-	public static GvDb getInstance(String dbPathAbs) throws GvExDbUnrecognizedImpl {
+	public static GvDb getInstance(String dbPathAbs) throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated {
 		if (lInstance == null) {
 			lInstance = new GvDb(dbPathAbs);
 		}
@@ -108,8 +122,9 @@ public class GvDb {
 	 * @param impl
 	 * @return instance of GrovieDb
 	 * @throws GvExDbUnrecognizedImpl
+	 * @throws GvExDbSceneDuplicated 
 	 */
-	public static GvDb getInstance(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl {
+	public static GvDb getInstance(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl, GvExDbSceneDuplicated {
 		if (lInstance == null) {
 			lInstance = new GvDb(dbPathAbs, impl);
 		}
@@ -182,10 +197,31 @@ public class GvDb {
 		
 		//load materials from database
 		
+		
+		
 		//load textures and file extensions  from database
 		
 		
 		//send to data layer
 		lQueueOutData.offer(new GvMsgDataSceneStaticData(materials, textures, textureFileExts));
+	}
+	
+	private Vertex getVertexScene() throws GvExDbSceneDuplicated
+	{
+		Iterable<Vertex> vertexSceneList = lGraph.getVertices("Type", "Scene");
+		Iterator<Vertex> vertexSceneIterator = vertexSceneList.iterator();
+		if(vertexSceneIterator.hasNext())
+		{
+			Vertex scene = vertexSceneIterator.next();
+			
+			if(vertexSceneIterator.hasNext())
+			{
+				throw new GvExDbSceneDuplicated("More than one scene in database");
+			}
+			
+			return scene;
+		}
+		
+		return null;
 	}
 }

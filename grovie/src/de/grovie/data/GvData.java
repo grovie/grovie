@@ -204,6 +204,8 @@ public class GvData extends GvThread {
 			bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
 			
 			//END DEBUG
+			
+			
 			//if geometry was inserted and sent to renderer,
 			//set reference to draw-group null, wait for new reference from rendering thread
 			lDrawGroup = null; 
