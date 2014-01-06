@@ -9,6 +9,7 @@ import com.tinkerpop.blueprints.Vertex;
 
 import de.grovie.exception.GvExDbSceneDuplicated;
 
+//FOR DEBUG
 public class GvGraphUtil {
 
 	public static Vertex getVertexScene(TransactionalGraph graph) throws GvExDbSceneDuplicated
@@ -71,11 +72,22 @@ public class GvGraphUtil {
 	{
 		return vertex.getVertices(Direction.OUT, "Refinement");
 	}
+	
+	public static Iterable<Vertex> getVerticesBranch(Vertex vertex)
+	{
+		return vertex.getVertices(Direction.OUT, "Branch");
+	}
 
 	public static Iterable<Vertex> getVertices(Vertex vertex, String edgeLabel)
 	{
 		return vertex.getVertices(Direction.OUT, edgeLabel);
 	}
+	
+	public static Iterable<Edge> getEdges(Vertex vertex, String edgeLabel)
+	{
+		return vertex.getEdges(Direction.OUT, edgeLabel);
+	}
+	
 
 	public static void traverseDepthFirst(Vertex vertex, String edgeLabel, GvVisitor visitor)
 	{
@@ -91,4 +103,80 @@ public class GvGraphUtil {
 			traverseDepthFirst(vertexCurr, edgeLabel, visitor);
 		}
 	}
+	
+	private static void copyDepthFirst(long oldVertexId, GvVisitorCopy visitor)
+	{
+		Vertex oldVertex = visitor.getGraph().getVertex(oldVertexId);
+		
+		visitor.visit(oldVertex);
+
+		Iterable<Edge> edgesIterable = oldVertex.getEdges(Direction.OUT,"Refinement");
+		Iterator<Edge> edgesIter = edgesIterable.iterator();
+		
+		while(edgesIter.hasNext())
+		{
+			Edge edgeCurr = edgesIter.next();
+			Vertex vertexCurr = edgeCurr.getVertex(Direction.IN);
+			
+			Vertex vertexNew = visitor.getGraph().addVertex(null);
+			visitor.getGraph().addEdge(null, visitor.getVertexCopy(), vertexNew, edgeCurr.getLabel());
+			
+			visitor.setVertexCopy(vertexNew.getId());
+			
+			copyDepthFirst((long)vertexCurr.getId(), visitor);
+		}
+		
+		edgesIterable = oldVertex.getEdges(Direction.OUT,"Branch");
+		edgesIter = edgesIterable.iterator();
+		
+		while(edgesIter.hasNext())
+		{
+			Edge edgeCurr = edgesIter.next();
+			Vertex vertexCurr = edgeCurr.getVertex(Direction.IN);
+			
+			Vertex vertexNew = visitor.getGraph().addVertex(null);
+			visitor.getGraph().addEdge(null, visitor.getVertexCopy(), vertexNew, edgeCurr.getLabel());
+			
+			visitor.setVertexCopy(vertexNew.getId());
+			
+			copyDepthFirst((long)vertexCurr.getId(), visitor);
+		}
+		
+		edgesIterable = oldVertex.getEdges(Direction.OUT,"Successor");
+		edgesIter = edgesIterable.iterator();
+		
+		while(edgesIter.hasNext())
+		{
+			Edge edgeCurr = edgesIter.next();
+			Vertex vertexCurr = edgeCurr.getVertex(Direction.IN);
+			
+			Vertex vertexNew = visitor.getGraph().addVertex(null);
+			visitor.getGraph().addEdge(null, visitor.getVertexCopy(), vertexNew, edgeCurr.getLabel());
+			
+			visitor.setVertexCopy(vertexNew.getId());
+			
+			copyDepthFirst((long)vertexCurr.getId(), visitor);
+		}
+	}
+	
+	public static void copyToNextStep(Vertex stepVertex, Vertex sceneVertex, TransactionalGraph graph)
+	{
+		int oldStepId = ((Integer)stepVertex.getProperty("Step")).intValue();
+		
+		//create and connect new step vertex
+		Vertex stepVertexNew;
+		stepVertexNew = graph.addVertex(null);
+		stepVertexNew.setProperty( "Step", new Integer(oldStepId+1) );
+		graph.addEdge(null, sceneVertex, stepVertexNew, "Refinement");
+		
+		//create copying visitor
+		GvVisitorCopy visitorCopy = new GvVisitorCopy(stepVertexNew.getId(), graph);
+		
+		//copy step
+		copyDepthFirst((long)stepVertex.getId(), visitorCopy);
+		
+		//commit copy of step
+		graph.commit();
+	}
 }
+//END DEBUG

@@ -13,17 +13,22 @@ import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvPrimitive;
 import de.grovie.util.graph.GvVisitor;
 
+//FOR DEBUG
 public class GvVisitorDraw extends GvVisitor {
 
 	GvDrawGroup lDrawGroup;
+	int count;
 	
 	public GvVisitorDraw(GvDrawGroup drawGroup)
 	{
 		this.lDrawGroup = drawGroup;
+		count = 0;
 	}
 	
 	@Override
 	public void visit(Vertex vertex) {
+		count ++;
+		
 		//get type of vertex
 		String type = vertex.getProperty("Type");
 		
@@ -35,6 +40,15 @@ public class GvVisitorDraw extends GvVisitor {
 			float radius = ((Float)vertex.getProperty("Radius")).floatValue();
 			
 			GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  10, 1);
+			
+			float[] v = geomTube.getVertices();
+			for(int i=0; i<v.length; ++i)
+			{
+				if(i%3 == 0)
+				{
+					v[i] += (float)(count*2);
+				}
+			}
 			
 			GvBufferSet bufferSet;
 			try {
@@ -54,3 +68,4 @@ public class GvVisitorDraw extends GvVisitor {
 	}
 
 }
+//END DEBUG

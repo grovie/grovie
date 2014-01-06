@@ -1,5 +1,8 @@
 package de.grovie.sandbox;
 
+import java.util.Iterator;
+
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
@@ -65,21 +68,39 @@ public class GvSandbox {
 		
 		thirdNode = graph.addVertex(null);
 		thirdNode.setProperty( "Type", "Tube" );
-		thirdNode.setProperty( "Length", new Float(13.0f) );
+		thirdNode.setProperty( "Length", new Float(1.0f) );
 		thirdNode.setProperty( "Radius", new Float(0.5f) );
 
 		edge = graph.addEdge(null, firstNode, secondNode, "Refinement");
 		edge2 = graph.addEdge(null, secondNode, thirdNode, "Refinement");
 
-		graph.commit();
+		
 
 		for(int i=1; i< 1000; ++i)
 		{
 			
+			try {
+				//get scene vertex
+				Vertex sceneV = GvGraphUtil.getVertexScene(graph);
+				//get previous step vertex
+				Vertex stepV = GvGraphUtil.getVertexStep(sceneV, i-1);
+				//copy step to next step
+				GvGraphUtil.copyToNextStep(stepV,sceneV,graph);
+				//perform fake rules
+				Vertex stepVNew = GvGraphUtil.getVertexStep(sceneV, i);
+				testRules(stepVNew, graph);
+				
+				graph.commit();
+				
+			} catch (GvExDbSceneDuplicated e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			engine.simulationStep(i);
 			try {
-				Thread.sleep(1000);
+				//Thread.sleep(16); //approx 60 fps
+				Thread.sleep(500); 
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -97,5 +118,53 @@ public class GvSandbox {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
+	}
+	
+	public static void testRules(Vertex stepVertex, TransactionalGraph graph)
+	{
+		elongate((long) stepVertex.getId(), graph);
+	}
+	
+	private static void elongate(long oldVertexId, TransactionalGraph graph)
+	{
+		Vertex oldVertex = graph.getVertex(oldVertexId);
+
+		boolean noChild = true;
+		
+		Iterable<Vertex> vIterable = oldVertex.getVertices(Direction.OUT,"Refinement");
+		Iterator<Vertex> vIter = vIterable.iterator();
+		while(vIter.hasNext())
+		{
+			noChild = false;
+			Vertex vertexCurr = vIter.next();
+			elongate((long)vertexCurr.getId(), graph);
+		}
+		
+		vIterable = oldVertex.getVertices(Direction.OUT,"Branch");
+		vIter = vIterable.iterator();
+		while(vIter.hasNext())
+		{
+			noChild = false;
+			Vertex vertexCurr = vIter.next();
+			elongate((long)vertexCurr.getId(), graph);
+		}
+		
+		vIterable = oldVertex.getVertices(Direction.OUT,"Successor");
+		vIter = vIterable.iterator();
+		while(vIter.hasNext())
+		{
+			noChild = false;
+			Vertex vertexCurr = vIter.next();
+			elongate((long)vertexCurr.getId(), graph);
+		}
+		
+		if(noChild == true)
+		{
+			Vertex newInternode = graph.addVertex(null);
+			newInternode.setProperty("Type",oldVertex.getProperty("Type"));
+			newInternode.setProperty("Length",oldVertex.getProperty("Length"));
+			newInternode.setProperty("Radius",oldVertex.getProperty("Radius"));
+			graph.addEdge(null, oldVertex, newInternode, "Branch");
+		}
 	}
 }

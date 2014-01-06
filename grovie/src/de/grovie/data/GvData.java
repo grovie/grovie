@@ -154,6 +154,7 @@ public class GvData extends GvThread {
 		lStepId = stepId;
 		lGraph = graph;
 		
+		//FOR DEBUG
 		float tubev[] = geomTube.getVertices();
 		int tubevcount = tubev.length/3;
 		for(int i=0; i< tubevcount; ++i)
@@ -161,6 +162,7 @@ public class GvData extends GvThread {
 			int indexOffset = i * 3;
 			geomTube.setVertexValue(indexOffset+2, verticesTube[indexOffset+2]-(5*stepId));
 		}
+		//END DEBUG
 		
 		//insert geometry into drawgroup buffer and send to renderer
 		sendGeometry();
