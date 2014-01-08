@@ -3,6 +3,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
+
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -24,6 +27,7 @@ import de.grovie.renderer.GvPrimitive;
 import de.grovie.renderer.GvRenderer;
 import de.grovie.test.engine.renderer.TestRendererTex;
 import de.grovie.util.graph.GvGraphUtil;
+import de.grovie.util.math.GvMatrix;
 
 /**
  * This class performs CPU tasks that prepare data for visualization.
@@ -62,6 +66,9 @@ public class GvData extends GvThread {
 	float normals[];
 	GvGeometryTex geomBoxTex;
 	GvGeometryTex geomTube;
+	GvGeometryTex geomTube1;
+	GvGeometryTex geomTube2;
+	GvGeometryTex geomTube3;
 	float verticesTube[];
 	GvGeometryTex geomPoints;
 	//END DEBUG
@@ -104,6 +111,10 @@ public class GvData extends GvThread {
 		normals = geom.getNormals();
 		geomBoxTex = TestRendererTex.getTexturedBox();
 		geomTube = TestRendererTex.getTube(1, 20, 10, 1);
+		geomTube1 = TestRendererTex.getTube(1, 20, 10, 1);
+		geomTube2 = TestRendererTex.getTube(1, 20, 10, 1);
+		geomTube3 = TestRendererTex.getTube(1, 20, 10, 1);
+		transformTubeTest(); // test transformations
 		float tubev[] = geomTube.getVertices();
 		int tubevcount = tubev.length;
 		verticesTube = new float[tubevcount];
@@ -263,5 +274,57 @@ public class GvData extends GvThread {
 			) {
 		lQueueOutRenderer.offer(
 				new GvMsgRenderSceneStaticData(materials, textures,textureFileExts));
+	}
+	
+	private void transformTubeTest()
+	{
+		RealMatrix matTrans = GvMatrix.getMatrixTranslation(0, 20, 0);
+		RealMatrix mat = GvMatrix.getMatrixRotationRU(45);
+		
+		float[] v = geomTube2.getVertices();
+		float[] n = geomTube2.getNormals();
+		
+		double[][] vOld = new double[4][1];
+		double[][] vNew;
+		
+		for(int i=0; i<v.length/3; ++i)
+		{
+			int index = i*3;
+			
+			RealMatrix m = mat.multiply(matTrans);
+			
+			//vertices
+			vOld[0][0] = v[index];
+			vOld[1][0] = v[index+1];
+			vOld[2][0] = v[index+2];
+			vOld[3][0] = 1;
+			RealMatrix vertex = new Array2DRowRealMatrix(vOld);
+			RealMatrix vertexNew = m.multiply(vertex);
+			vNew =  vertexNew.getData();
+			v[index] = (float) vNew[0][0];
+			v[index+1] = (float) vNew[1][0];
+			v[index+2] = (float) vNew[2][0];
+			
+			//rotation
+			vOld[0][0] = n[index];
+			vOld[1][0] = n[index+1];
+			vOld[2][0] = n[index+2];
+			vOld[3][0] = 1;
+			RealMatrix normal = new Array2DRowRealMatrix(vOld);
+			vertexNew = mat.multiply(normal);
+			
+			vNew =  vertexNew.getData();
+			n[index] = (float) vNew[0][0];
+			n[index+1] = (float) vNew[1][0];
+			n[index+2] = (float) vNew[2][0];
+			
+			float normLen = (float) Math.sqrt(n[index]*n[index] + 
+					n[index+1]*n[index+1]+
+					n[index+2]*n[index+2]
+							);
+			n[index] /= normLen;
+			n[index+1] /= normLen;
+			n[index+2] /= normLen;
+		}
 	}
 }
