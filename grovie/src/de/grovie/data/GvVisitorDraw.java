@@ -54,14 +54,21 @@ public class GvVisitorDraw extends GvVisitor {
 			try {
 				bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 				bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
-			} catch (GvExRendererVertexBuffer | GvExRendererVertexArray
-					| GvExRendererIndexBuffer e) {
+			} catch (GvExRendererIndexBuffer e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			catch (GvExRendererDrawGroupRetrieval e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+			}
+			catch( GvExRendererVertexBuffer e)
+			{
+				
+			}
+			catch(GvExRendererVertexArray e)
+			{
+				
 			}
 			
 		}

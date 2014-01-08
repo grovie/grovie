@@ -1,6 +1,5 @@
 package de.grovie.renderer.GL2;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.media.opengl.GL2;
@@ -25,7 +24,14 @@ import de.grovie.renderer.GvRendererStateMachine.GvRendererState;
 import de.grovie.renderer.GvShaderProgram;
 import de.grovie.renderer.GvVertexArray;
 import de.grovie.renderer.renderstate.GvRenderState;
-import de.grovie.util.file.FileResource;
+import de.grovie.renderer.shader.gl2.standard.GvMaterialPointF;
+import de.grovie.renderer.shader.gl2.standard.GvMaterialPointV;
+import de.grovie.renderer.shader.gl2.standard.GvMaterialTriangleF;
+import de.grovie.renderer.shader.gl2.standard.GvMaterialTriangleV;
+import de.grovie.renderer.shader.gl2.standard.GvTextureMaterialPointF;
+import de.grovie.renderer.shader.gl2.standard.GvTextureMaterialPointV;
+import de.grovie.renderer.shader.gl2.standard.GvTextureMaterialTriangleF;
+import de.grovie.renderer.shader.gl2.standard.GvTextureMaterialTriangleV;
 
 /**
  * This class emulates the OpenGL fixed pipeline using VBOs/VAOs and custom shaders.
@@ -92,32 +98,14 @@ public class GvPassGL2 extends GvPass {
 		initRenderStates();
 
 		try {
-			String srcMaterialPointF = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "MaterialPointF.glsl");
-			String srcMaterialPointV = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "MaterialPointV.glsl");
-			
-			String srcMaterialTriangleF = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "MaterialTriangleF.glsl");
-			String srcMaterialTriangleV = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "MaterialTriangleV.glsl");
-
-			String srcTextureMaterialPointF = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "TextureMaterialPointF.glsl");
-			String srcTextureMaterialPointV = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "TextureMaterialPointV.glsl");
-			String srcTextureMaterialTriangleF = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "TextureMaterialTriangleF.glsl");
-			String srcTextureMaterialTriangleV = FileResource.getResourceAsString(
-					File.separator + "resources" + File.separator + "shader" + File.separator + "gl2" + File.separator + "standard" +
-							File.separator + "TextureMaterialTriangleV.glsl");
+			String srcMaterialPointF = GvMaterialPointF.kSource;
+			String srcMaterialPointV = GvMaterialPointV.kSource;
+			String srcMaterialTriangleF = GvMaterialTriangleF.kSource;
+			String srcMaterialTriangleV = GvMaterialTriangleV.kSource;
+			String srcTextureMaterialPointF = GvTextureMaterialPointF.kSource;
+			String srcTextureMaterialPointV = GvTextureMaterialPointV.kSource;
+			String srcTextureMaterialTriangleF = GvTextureMaterialTriangleF.kSource;
+			String srcTextureMaterialTriangleV = GvTextureMaterialTriangleV.kSource;
 			
 			GvDevice device = lRenderer.getDevice();
 			lShaderMatPoint = device.createShaderProgram(srcMaterialPointV, srcMaterialPointF,lgl2);

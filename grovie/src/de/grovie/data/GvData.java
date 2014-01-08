@@ -102,8 +102,8 @@ public class GvData extends GvThread {
 		
 		//FOR DEBUG
 		//Test geometry
-		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 		indices = geom.getIndices();
@@ -241,6 +241,16 @@ public class GvData extends GvThread {
 			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 			bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
 			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv());
+			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			bufferSet.insertGeometry(geomTube2.getVertices(), geomTube2.getNormals(), geomTube2.getIndices(), geomTube2.getUv());
+			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			bufferSet.insertGeometry(geomTube3.getVertices(), geomTube3.getNormals(), geomTube3.getIndices(), geomTube3.getUv());
+			
+			
 			bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
 			bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices());
 			
@@ -279,7 +289,11 @@ public class GvData extends GvThread {
 	private void transformTubeTest()
 	{
 		RealMatrix matTrans = GvMatrix.getMatrixTranslation(0, 20, 0);
-		RealMatrix mat = GvMatrix.getMatrixRotationRU(45);
+		RealMatrix matRot = GvMatrix.getMatrixRotationRU(45);
+		RealMatrix matRot2 = GvMatrix.getMatrixRotationRL(45);
+		
+		RealMatrix m2 = matTrans.multiply(matRot);
+		RealMatrix m3 = (m2.multiply(matTrans)).multiply(matRot2);
 		
 		float[] v = geomTube2.getVertices();
 		float[] n = geomTube2.getNormals();
@@ -287,11 +301,10 @@ public class GvData extends GvThread {
 		double[][] vOld = new double[4][1];
 		double[][] vNew;
 		
+		//transform tube 2
 		for(int i=0; i<v.length/3; ++i)
 		{
 			int index = i*3;
-			
-			RealMatrix m = mat.multiply(matTrans);
 			
 			//vertices
 			vOld[0][0] = v[index];
@@ -299,32 +312,66 @@ public class GvData extends GvThread {
 			vOld[2][0] = v[index+2];
 			vOld[3][0] = 1;
 			RealMatrix vertex = new Array2DRowRealMatrix(vOld);
-			RealMatrix vertexNew = m.multiply(vertex);
+			RealMatrix vertexNew = m2.multiply(vertex);
 			vNew =  vertexNew.getData();
 			v[index] = (float) vNew[0][0];
 			v[index+1] = (float) vNew[1][0];
 			v[index+2] = (float) vNew[2][0];
 			
-			//rotation
+			//rotate normals
 			vOld[0][0] = n[index];
 			vOld[1][0] = n[index+1];
 			vOld[2][0] = n[index+2];
 			vOld[3][0] = 1;
 			RealMatrix normal = new Array2DRowRealMatrix(vOld);
-			vertexNew = mat.multiply(normal);
+			vertexNew = matRot.multiply(normal);
 			
 			vNew =  vertexNew.getData();
 			n[index] = (float) vNew[0][0];
 			n[index+1] = (float) vNew[1][0];
 			n[index+2] = (float) vNew[2][0];
+		}
+		
+		v = geomTube3.getVertices();
+		n = geomTube3.getNormals();
+		
+		//transform tube 3
+		for(int i=0; i<v.length/3; ++i)
+		{
+			int index = i*3;
 			
-			float normLen = (float) Math.sqrt(n[index]*n[index] + 
-					n[index+1]*n[index+1]+
-					n[index+2]*n[index+2]
-							);
-			n[index] /= normLen;
-			n[index+1] /= normLen;
-			n[index+2] /= normLen;
+			//vertices
+			vOld[0][0] = v[index];
+			vOld[1][0] = v[index+1];
+			vOld[2][0] = v[index+2];
+			vOld[3][0] = 1;
+			RealMatrix vertex = new Array2DRowRealMatrix(vOld);
+			RealMatrix vertexNew = m3.multiply(vertex);
+			vNew =  vertexNew.getData();
+			v[index] = (float) vNew[0][0];
+			v[index+1] = (float) vNew[1][0];
+			v[index+2] = (float) vNew[2][0];
+			
+			//get rotation from m3, remove translation
+			double[][] m3Data = m3.getData();
+			m3Data[0][3] = 0;
+			m3Data[1][3] = 0;
+			m3Data[2][3] = 0;
+			m3Data[3][3] = 1;
+			RealMatrix m3Norm = new Array2DRowRealMatrix(m3Data);
+			
+			//rotate normals
+			vOld[0][0] = n[index];
+			vOld[1][0] = n[index+1];
+			vOld[2][0] = n[index+2];
+			vOld[3][0] = 1;
+			RealMatrix normal = new Array2DRowRealMatrix(vOld);
+			vertexNew = m3Norm.multiply(normal);
+			
+			vNew =  vertexNew.getData();
+			n[index] = (float) vNew[0][0];
+			n[index+1] = (float) vNew[1][0];
+			n[index+2] = (float) vNew[2][0];
 		}
 	}
 }

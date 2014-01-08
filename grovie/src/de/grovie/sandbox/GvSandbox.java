@@ -122,7 +122,7 @@ public class GvSandbox {
 	
 	public static void testRules(Vertex stepVertex, TransactionalGraph graph)
 	{
-		elongate((long) stepVertex.getId(), graph);
+		elongate(((Long)stepVertex.getId()).longValue(), graph);
 	}
 	
 	private static void elongate(long oldVertexId, TransactionalGraph graph)
@@ -137,7 +137,7 @@ public class GvSandbox {
 		{
 			noChild = false;
 			Vertex vertexCurr = vIter.next();
-			elongate((long)vertexCurr.getId(), graph);
+			elongate(((Long)vertexCurr.getId()).longValue(), graph);
 		}
 		
 		vIterable = oldVertex.getVertices(Direction.OUT,"Branch");
@@ -146,7 +146,7 @@ public class GvSandbox {
 		{
 			noChild = false;
 			Vertex vertexCurr = vIter.next();
-			elongate((long)vertexCurr.getId(), graph);
+			elongate(((Long)vertexCurr.getId()).longValue(), graph);
 		}
 		
 		vIterable = oldVertex.getVertices(Direction.OUT,"Successor");
@@ -155,7 +155,7 @@ public class GvSandbox {
 		{
 			noChild = false;
 			Vertex vertexCurr = vIter.next();
-			elongate((long)vertexCurr.getId(), graph);
+			elongate(((Long)vertexCurr.getId()).longValue(), graph);
 		}
 		
 		if(noChild == true)

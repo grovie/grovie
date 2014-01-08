@@ -123,7 +123,7 @@ public class GvGraphUtil {
 			
 			visitor.setVertexCopy(vertexNew.getId());
 			
-			copyDepthFirst((long)vertexCurr.getId(), visitor);
+			copyDepthFirst(((Long)vertexCurr.getId()).longValue(), visitor);
 		}
 		
 		edgesIterable = oldVertex.getEdges(Direction.OUT,"Branch");
@@ -139,7 +139,7 @@ public class GvGraphUtil {
 			
 			visitor.setVertexCopy(vertexNew.getId());
 			
-			copyDepthFirst((long)vertexCurr.getId(), visitor);
+			copyDepthFirst(((Long)vertexCurr.getId()).longValue(), visitor);
 		}
 		
 		edgesIterable = oldVertex.getEdges(Direction.OUT,"Successor");
@@ -155,7 +155,7 @@ public class GvGraphUtil {
 			
 			visitor.setVertexCopy(vertexNew.getId());
 			
-			copyDepthFirst((long)vertexCurr.getId(), visitor);
+			copyDepthFirst(((Long)vertexCurr.getId()).longValue(), visitor);
 		}
 	}
 	
@@ -173,7 +173,7 @@ public class GvGraphUtil {
 		GvVisitorCopy visitorCopy = new GvVisitorCopy(stepVertexNew.getId(), graph);
 		
 		//copy step
-		copyDepthFirst((long)stepVertex.getId(), visitorCopy);
+		copyDepthFirst(((Long)stepVertex.getId()).longValue(), visitorCopy);
 		
 		//commit copy of step
 		graph.commit();

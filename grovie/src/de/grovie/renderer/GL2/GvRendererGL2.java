@@ -198,8 +198,10 @@ public class GvRendererGL2 extends GvRenderer{
 		{
 			System.out.println(e.getMessage());
 		}
-		catch (GvExRendererDrawGroup | GvExRendererBufferSet e) {
-			// TODO Auto-generated catch block
+		catch (GvExRendererDrawGroup e) {
+			e.printStackTrace();
+		}
+		catch(GvExRendererBufferSet e) {
 			e.printStackTrace();
 		}
 

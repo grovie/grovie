@@ -1,6 +1,9 @@
 package de.grovie.db;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -15,7 +18,6 @@ import de.grovie.engine.concurrent.GvMsgQueue;
 import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
 import de.grovie.renderer.GvMaterial;
-import de.grovie.util.file.FileResource;
 import de.grovie.util.graph.GvGraphUtil;
 
 /**
@@ -177,20 +179,30 @@ public class GvDb {
 		greenMaterial.lDiffuse[2] = 0.0f;
 
 		//Textures
-		InputStream streamColors = FileResource.getResource(
-				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
-						File.separator + "test.jpg");
+		String filePath = "/Users/yongzhiong/Downloads/";
 		
-		InputStream streamBark = FileResource.getResource(
-				File.separator + "resources" + File.separator + "test" + File.separator + "texture" + 
-						File.separator + "BarkDecidious0164_5_thumbhuge.jpg");
+		try {
+			FileInputStream streamColors = new FileInputStream(new File(filePath + "test.jpg"));
+			
+			FileInputStream streamBark = new FileInputStream(new File(filePath +"BarkDecidious0164_5_thumbhuge.jpg"));
+			
+			materials.add(materialDefault);
+			materials.add(greenMaterial);
+			textures.add(streamColors);
+			textureFileExts.add("jpg");
+			textures.add(streamBark);
+			textureFileExts.add("jpg");
+			
+			//streamColors.close();
+			//streamBark.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		
-		materials.add(materialDefault);
-		materials.add(greenMaterial);
-		textures.add(streamColors);
-		textureFileExts.add("jpg");
-		textures.add(streamBark);
-		textureFileExts.add("jpg");
+		
+
+		
 		//END DEBUG
 		
 		//load materials from database
