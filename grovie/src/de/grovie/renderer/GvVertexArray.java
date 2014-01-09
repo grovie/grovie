@@ -22,6 +22,8 @@ public class GvVertexArray {
 	private long lSizeUv;
 	private int lSizeIndices;
 	
+	private float[] lMatrix;
+	
 	public GvVertexArray(int id)
 	{
 		this.lId = id;
@@ -96,5 +98,15 @@ public class GvVertexArray {
 
 	public void setSizeIndices(int sizeIndices) {
 		this.lSizeIndices = sizeIndices;
+	}
+	
+	public float[] getMatrix()
+	{
+		return this.lMatrix;
+	}
+	
+	public void setMatrix(float[] matrix)
+	{
+		this.lMatrix = matrix;
 	}
 }

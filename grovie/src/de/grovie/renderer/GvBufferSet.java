@@ -30,6 +30,7 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	protected ArrayList<float[]> lNormals;
 	protected ArrayList<int[]> lIndices;
 	protected ArrayList<float[]> lUv;
+	protected ArrayList<float[]> lMatrices;
 	
 	//Messages
 	
@@ -45,23 +46,24 @@ public abstract class GvBufferSet extends GvDrawGroup{
 		lNormals = new ArrayList<float[]>();
 		lIndices = new ArrayList<int[]>();
 		lUv = new ArrayList<float[]>();
+		lMatrices = new ArrayList<float[]>();
 	}
 	
-	public void insertGeometry(float[] vertices, float[] normals, int[] indices) 
+	public void insertGeometry(float[] vertices, float[] normals, int[] indices, float[] matrixTransform) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
 		//insert in array buffers
-		insertIntoArrayBuffers(vertices, normals);
+		insertIntoArrayBuffers(vertices, normals, matrixTransform);
 		
 		//insert in element buffer
 		insertIntoElementBuffer(indices);
 	}
 	
-	public void insertGeometry(float[] vertices, float[] normals, int[] indices, float[] uvcoords) 
+	public void insertGeometry(float[] vertices, float[] normals, int[] indices, float[] uvcoords, float[] matrixTransform) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
 		//insert in array buffers
-		insertIntoArrayBuffers(vertices, normals, uvcoords);
+		insertIntoArrayBuffers(vertices, normals, uvcoords, matrixTransform);
 		
 		//insert in element buffer
 		insertIntoElementBuffer(indices);
@@ -78,14 +80,14 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	 * @param normals
 	 * @param uvcoords
 	 */
-	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords);
+	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords, float[] matrixTransform);
 	
 	/**
 	 * Called by data or updating thread to store CPU-side geometry data
 	 * @param vertices
 	 * @param normals
 	 */
-	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals);
+	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] matrixTransform);
 	
 	/**
 	 * Called by data or updating thread to store CPU-side geometry indices

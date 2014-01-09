@@ -26,9 +26,9 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	 * Inserts geometry info (vertices, normals, uv-coords) into lists
 	 */
 	@Override 
-	protected void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords) 
+	protected void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords, float[] matrixTransform) 
 	{
-		insertIntoArrayBuffers(vertices, normals);
+		insertIntoArrayBuffers(vertices, normals, matrixTransform);
 		lUv.add(uvcoords);
 	}
 
@@ -36,9 +36,10 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	 * Inserts geometry info (vertices, normals) into lists
 	 */
 	@Override
-	protected void insertIntoArrayBuffers(float[] vertices, float[] normals) {
+	protected void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] matrixTransform) {
 		lVertices.add(vertices);
 		lNormals.add(normals);
+		lMatrices.add(matrixTransform);
 	}
 
 	/**
@@ -81,12 +82,13 @@ public class GvBufferSetGL2 extends GvBufferSet {
 					lNormals.get(i),
 					(lUv.size()==0)?null:lUv.get(i),
 							lIndices.get(i),
+							lMatrices.get(i),
 							gl2,
 							devicegl2);
 		}
 			}
 
-	private void update(float[] vertices, float[] normals, float[] uv, int[] indices, GL2 gl2, GvDeviceGL2 device) 
+	private void update(float[] vertices, float[] normals, float[] uv, int[] indices, float[] matrix, GL2 gl2, GvDeviceGL2 device) 
 			throws GvExRendererVertexBuffer, GvExRendererIndexBuffer
 			{
 
@@ -141,6 +143,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		else
 			vao.setSizeUv(0);
 		vao.setSizeIndices(indices.length * 4);
+		vao.setMatrix(matrix);
 
 		//create VAO object (only wrapper object at CPU side, not allocated at GPU yet)
 		lVertexArrays.add(vao);
@@ -205,6 +208,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		lNormals.clear();
 		lUv.clear();
 		lIndices.clear();
+		lMatrices.clear();
 
 		//clear VBOs
 		for(int i=0; i<lVertexBuffers.size(); ++i)

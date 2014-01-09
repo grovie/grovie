@@ -3,7 +3,6 @@ package de.grovie.db;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -169,7 +168,7 @@ public class GvDb {
 		ArrayList<InputStream> textures = new ArrayList<InputStream>();
 		ArrayList<String> textureFileExts = new ArrayList<String>();
 		
-		//FOR DEBUG
+		//FOR DEBUG - PATH
 
 		//Materials
 		GvMaterial materialDefault = new GvMaterial();
@@ -179,7 +178,8 @@ public class GvDb {
 		greenMaterial.lDiffuse[2] = 0.0f;
 
 		//Textures
-		String filePath = "/Users/yongzhiong/Downloads/";
+		//String filePath = "/Users/yongzhiong/Downloads/";
+		String filePath = "C:\\Users\\yong\\GroViE\\textures\\";
 		
 		try {
 			FileInputStream streamColors = new FileInputStream(new File(filePath + "test.jpg"));

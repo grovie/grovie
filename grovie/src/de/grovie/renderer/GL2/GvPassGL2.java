@@ -332,6 +332,9 @@ public class GvPassGL2 extends GvPass {
 			{
 				GvVertexArray vao = vaos.get(k);
 				
+				gl2.glPushMatrix();
+				gl2.glMultMatrixf(vao.getMatrix(),0);
+				
 				gl2.glBindVertexArray(vao.getId());
 				
 				gl2.glDrawElements(
@@ -342,6 +345,8 @@ public class GvPassGL2 extends GvPass {
 						);
 				
 				gl2.glBindVertexArray(0);
+				
+				gl2.glPopMatrix();
 				
 				lVertexCount += vao.getSizeVertices();
 			}

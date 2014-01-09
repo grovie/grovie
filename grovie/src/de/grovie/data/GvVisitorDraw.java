@@ -12,6 +12,7 @@ import de.grovie.renderer.GvBufferSet;
 import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvPrimitive;
 import de.grovie.util.graph.GvVisitor;
+import de.grovie.util.math.GvMatrix;
 
 //FOR DEBUG
 public class GvVisitorDraw extends GvVisitor {
@@ -53,7 +54,7 @@ public class GvVisitorDraw extends GvVisitor {
 			GvBufferSet bufferSet;
 			try {
 				bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-				bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv());
+				bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), GvMatrix.getIdentity());
 			} catch (GvExRendererIndexBuffer e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
