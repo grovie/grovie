@@ -31,7 +31,7 @@ public class GvGraphUtil {
 		return null;
 	}
 
-	public static Vertex getVertexStep(Vertex scene, int stepId)
+	public static Vertex getVertexStep(Vertex scene, String stepId)
 	{
 		Iterable<Vertex> stepVertices = GvGraphUtil.getVerticesRefine(scene);
 		Iterator<Vertex> stepVertexIter = stepVertices.iterator();
@@ -40,8 +40,8 @@ public class GvGraphUtil {
 		while(stepVertexIter.hasNext())
 		{
 			stepVertex = stepVertexIter.next();
-			Integer currStepId = stepVertex.getProperty("Step");
-			if(currStepId.intValue() == stepId)
+			String currStepId = stepVertex.getProperty("Step");
+			if(currStepId.equals(stepId))
 				return stepVertex;
 		}
 		return null;

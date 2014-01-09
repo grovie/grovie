@@ -150,7 +150,7 @@ public class GvDb {
 		lQueueOutData= queueData;
 	}
 	
-	public void simulationStep(int stepId)
+	public void simulationStep(String stepId)
 	{
 		lQueueOutData.offer(new GvMsgDataSceneUpdate(stepId, lGraph));
 	}
@@ -160,7 +160,7 @@ public class GvDb {
 		sendSceneStaticData();
 		
 		//send initial step id and graph reference to data layer
-		lQueueOutData.offer(new GvMsgDataSceneUpdate(0, lGraph));
+		lQueueOutData.offer(new GvMsgDataSceneUpdate("0", lGraph));
 	}
 
 	public void sendSceneStaticData() {

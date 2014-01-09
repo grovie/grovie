@@ -52,11 +52,11 @@ public class GvData extends GvThread {
 	private GvCamera lCamera;
 
 	//latest simulation step and graph database reference
-	private int lStepId;
+	private String lStepId;
 	private TransactionalGraph lGraph;
 
 	//latest set of processed data sent to renderer
-	private int lLatestStepId;
+	private String lLatestStepId;
 	private GvCamera lLatestCamera;
 	
 	//FOR DEBUG
@@ -96,11 +96,11 @@ public class GvData extends GvThread {
 		lCamera = null;
 
 		//null until arrival in message queue from db thread
-		lStepId = -1;
+		lStepId = null;
 		lGraph = null;
 
 		//tracking step id of latest  set of geometry sent to renderer 
-		lLatestStepId = -1;
+		lLatestStepId = null;
 		//tracking camera info relevant to latest set of geometry sent to renderer
 		lLatestCamera = new GvCamera();
 		
@@ -164,19 +164,19 @@ public class GvData extends GvThread {
 		sendGeometry(); //TODO: need to use time buffer at msg queue handling to prevent flooding
 	}
 
-	public void receiveSceneUpdate(int stepId, TransactionalGraph graph)
+	public void receiveSceneUpdate(String stepId, TransactionalGraph graph)
 	{
 		lStepId = stepId;
 		lGraph = graph;
 		
 		//FOR DEBUG
-		float tubev[] = geomTube.getVertices();
-		int tubevcount = tubev.length/3;
-		for(int i=0; i< tubevcount; ++i)
-		{
-			int indexOffset = i * 3;
-			geomTube.setVertexValue(indexOffset+2, verticesTube[indexOffset+2]-(5*stepId));
-		}
+//		float tubev[] = geomTube.getVertices();
+//		int tubevcount = tubev.length/3;
+//		for(int i=0; i< tubevcount; ++i)
+//		{
+//			int indexOffset = i * 3;
+//			geomTube.setVertexValue(indexOffset+2, verticesTube[indexOffset+2]-(5*stepId));
+//		}
 		//END DEBUG
 		
 		//insert geometry into drawgroup buffer and send to renderer
@@ -198,12 +198,12 @@ public class GvData extends GvThread {
 	private void sendGeometry() 
 	{
 		//check if any of the required items are missing for geometry insertion
-		if((lDrawGroup==null)||(lCamera==null)||(lGraph==null)||(lStepId==-1))
+		if((lDrawGroup==null)||(lCamera==null)||(lGraph==null)||(lStepId==null))
 			return;
 
 		//check if any data has changed, or if camera has changed
 		//if nothing has changed, no updated geometry needs to be sent to renderer
-		if((lStepId == lLatestStepId)&&(lCamera.compare(lLatestCamera)))
+		if((lStepId.equals(lLatestStepId))&&(lCamera.compare(lLatestCamera)))
 			return;
 		
 		try{

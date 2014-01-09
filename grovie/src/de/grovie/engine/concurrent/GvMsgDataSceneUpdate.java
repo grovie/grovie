@@ -6,10 +6,10 @@ import de.grovie.data.GvData;
 
 public class GvMsgDataSceneUpdate implements GvMsgData {
 
-	private int lStepId;
+	private String lStepId;
 	private TransactionalGraph lGraph;
 	
-	public GvMsgDataSceneUpdate(int stepId, TransactionalGraph graph)
+	public GvMsgDataSceneUpdate(String stepId, TransactionalGraph graph)
 	{
 		lStepId = stepId;
 		lGraph = graph;

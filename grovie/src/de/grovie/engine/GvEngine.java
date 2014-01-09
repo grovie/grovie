@@ -12,6 +12,7 @@ import de.grovie.renderer.GvRenderer;
 import de.grovie.renderer.GL2.GvRendererGL2;
 import de.grovie.renderer.windowsystem.GvWindowSystem;
 import de.grovie.renderer.windowsystem.AWT.GvWindowSystemAWTGL;
+import de.grovie.renderer.windowsystem.swing.GvWindowSystemSwingGL;
 
 /**
  * This class is the main class representing the visualization engine.
@@ -30,7 +31,8 @@ public class GvEngine extends GvThreadManager{
 
 	public enum GvWindowSystemLibrary
 	{
-		AWT_OPEN_GL;
+		AWT_OPEN_GL,
+		SWING_OPEN_GL;
 	}
 	
 	public enum GvGraphicsAPI
@@ -165,7 +167,8 @@ public class GvEngine extends GvThreadManager{
 	{
 		if(winSysClass == GvEngine.GvWindowSystemLibrary.AWT_OPEN_GL)
 			return new GvWindowSystemAWTGL();
-		
+		if(winSysClass == GvEngine.GvWindowSystemLibrary.SWING_OPEN_GL)
+			return new GvWindowSystemSwingGL();
 		return null;
 	}
 	
@@ -198,7 +201,7 @@ public class GvEngine extends GvThreadManager{
 		return null;
 	}
 	
-	public void simulationStep(int stepId)
+	public void simulationStep(String stepId)
 	{
 		lDb.simulationStep(stepId);
 	}
