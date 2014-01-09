@@ -161,12 +161,12 @@ public class GvGraphUtil {
 	
 	public static void copyToNextStep(Vertex stepVertex, Vertex sceneVertex, TransactionalGraph graph)
 	{
-		int oldStepId = ((Integer)stepVertex.getProperty("Step")).intValue();
+		int oldStepId = Integer.parseInt((String)(stepVertex.getProperty("Step")));
 		
 		//create and connect new step vertex
 		Vertex stepVertexNew;
 		stepVertexNew = graph.addVertex(null);
-		stepVertexNew.setProperty( "Step", new Integer(oldStepId+1) );
+		stepVertexNew.setProperty( "Step", new Integer(oldStepId+1).toString() );
 		graph.addEdge(null, sceneVertex, stepVertexNew, "Refinement");
 		
 		//create copying visitor
