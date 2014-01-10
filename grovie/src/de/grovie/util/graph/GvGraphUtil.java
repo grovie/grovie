@@ -96,13 +96,32 @@ public class GvGraphUtil {
 		Iterable<Vertex> verticesIterable = GvGraphUtil.getVertices(vertex, edgeLabel);
 		Iterator<Vertex> verticesIter = verticesIterable.iterator();
 
-		if(!verticesIter.hasNext())
-		{
-			System.out.println("No refinement: " + vertex.getId());
-		}
 		while(verticesIter.hasNext())
 		{
 			traverseDepthFirst(verticesIter.next(), edgeLabel, visitor);
+		}
+		
+		visitor.leave(vertex);
+	}
+	
+	public static void traverseTurtle(Vertex vertex, GvVisitor visitor)
+	{
+		visitor.visit(vertex);
+
+		Iterable<Vertex> verticesIterableSucc = GvGraphUtil.getVertices(vertex, "Successor");
+		Iterator<Vertex> verticesIterSucc = verticesIterableSucc.iterator();
+
+		while(verticesIterSucc.hasNext())
+		{
+			traverseTurtle(verticesIterSucc.next(), visitor);
+		}
+		
+		Iterable<Vertex> verticesIterableBran = GvGraphUtil.getVertices(vertex, "Branch");
+		Iterator<Vertex> verticesIterBran = verticesIterableBran.iterator();
+
+		while(verticesIterBran.hasNext())
+		{
+			traverseTurtle(verticesIterBran.next(), visitor);
 		}
 		
 		visitor.leave(vertex);

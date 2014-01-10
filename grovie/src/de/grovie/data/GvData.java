@@ -271,15 +271,23 @@ public class GvData extends GvThread {
 				if(stepVertex!=null) //step vertex found
 				{
 					System.out.println("LOD Plant scale - step found: " + lStepId);
+					
+					//1.precompute LOD cache
+						//search for fine scale base node
+						Object plantId = stepVertex.getProperty("PlantId");
+						Vertex plantVertex = lGraph.getVertex(plantId);
+						Object guBaseId = plantVertex.getProperty("GUBaseId");
+						Vertex guBaseVertex = lGraph.getVertex(guBaseId);
+					
+						//precomputing visitor
+						GvVisitorLODPrecompute visitorPre = new GvVisitorLODPrecompute();
+						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
+						visitorPre.printCounters();
+					
+					//2.send display/rendering visitor
 					GvVisitorLODTest visitor = new GvVisitorLODTest();
 					GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
-					System.out.println("Count T:" + visitor.countT);
-					System.out.println("Count RU:" + visitor.countRU);
-					System.out.println("Count RL:" + visitor.countRL);
-					System.out.println("Count RH:" + visitor.countRH);
-					System.out.println("Count Plant:" + visitor.countPlant);
-					System.out.println("Count Axis:" + visitor.countAxis);
-					System.out.println("Count GU:" + visitor.countGU);
+					visitor.printCounters();
 				}
 			}
 			
