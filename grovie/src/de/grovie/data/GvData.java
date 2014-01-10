@@ -76,6 +76,10 @@ public class GvData extends GvThread {
 	float[] m3gl; //transformation for geomTube3 column major
 	//END DEBUG
 	
+	//FOR DEBUG
+	GvVisitorLODPrecompute visitorPre;
+	//END DEBUG
+	
 	public GvData() {
 	}
 
@@ -126,6 +130,10 @@ public class GvData extends GvThread {
 			verticesTube[i] = tubev[i];
 		}
 		geomPoints = TestRendererTex.getPoints(1000);
+		//END DEBUG
+		
+		//FOR DEBUG - LOD
+		visitorPre = new GvVisitorLODPrecompute();
 		//END DEBUG
 	}
 
@@ -275,12 +283,17 @@ public class GvData extends GvThread {
 					//1.precompute LOD cache
 						//search for fine scale base node
 						Object plantId = stepVertex.getProperty("PlantId");
+						System.out.println("Plant ID: " + plantId);
 						Vertex plantVertex = lGraph.getVertex(plantId);
 						Object guBaseId = plantVertex.getProperty("GUBaseId");
+						System.out.println("GU Base ID: " + guBaseId);
 						Vertex guBaseVertex = lGraph.getVertex(guBaseId);
-					
+						if(guBaseVertex == null)
+						{
+							System.out.println("cannot find base GU vertex");
+						}
 						//precomputing visitor
-						GvVisitorLODPrecompute visitorPre = new GvVisitorLODPrecompute();
+						visitorPre.resetCounters();
 						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
 						visitorPre.printCounters();
 					

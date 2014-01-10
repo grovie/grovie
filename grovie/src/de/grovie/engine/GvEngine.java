@@ -148,7 +148,9 @@ public class GvEngine extends GvThreadManager{
 	 */
 	public void stop()
 	{
-		shutdownAndAwaitTermination();
+		lDb.shutdown(); //shut down the graph database
+		
+		shutdownAndAwaitTermination(); //terminate threads
 	}
 
 	@Override

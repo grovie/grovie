@@ -1,6 +1,7 @@
 package de.grovie.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -19,17 +20,15 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	public int countAxis;
 	public int countGU;
 	
+	HashMap<String, RealMatrix> lCache;
+	
 	ArrayList<RealMatrix> lMatrixStack;
 	
 	public GvVisitorLODPrecompute()
 	{
-		countT=0;
-		countRU=0;
-		countRL=0;
-		countRH=0;
-		countPlant=0;
-		countAxis=0;
-		countGU=0;
+		resetCounters();
+		
+		lCache = new HashMap<String, RealMatrix>(); //cache of matrices
 		
 		lMatrixStack = new ArrayList<RealMatrix>();
 		lMatrixStack.add(GvMatrix.getIdentityRealMatrix());
@@ -37,38 +36,95 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	
 	@Override
 	public void visit(Vertex vertex) {
+		Object groimpId = vertex.getProperty("GID");
+		String groimpIdStr=null;
+		if(groimpId!=null)
+		{
+			groimpIdStr = ((Long)groimpId).toString();
+		}
+		
 		if(vertex.getProperty("Type").equals("Translate"))
 		{
 			System.out.println("LOD Precompute - Node Translate: " + vertex.getId());
-			float x = ((Float)vertex.getProperty("x")).floatValue();
-			float y = ((Float)vertex.getProperty("y")).floatValue();
-			float z = ((Float)vertex.getProperty("z")).floatValue();
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixTranslation(x,y,z)));
+			
+			RealMatrix cachedMatrix = lCache.get(groimpIdStr);
+			if(cachedMatrix != null)
+			{
+				lMatrixStack.add(cachedMatrix);
+				System.out.println("cached matrix found");
+			}
+			else
+			{
+				float x = ((Float)vertex.getProperty("x")).floatValue();
+				float y = ((Float)vertex.getProperty("y")).floatValue();
+				float z = ((Float)vertex.getProperty("z")).floatValue();
+				RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
+				RealMatrix newMatrix = lastMatrix.multiply(GvMatrix.getMatrixTranslation(x,y,z));
+				lMatrixStack.add(newMatrix);
+				lCache.put(groimpIdStr, newMatrix);
+			}
 			countT++;
 		}
 		else if(vertex.getProperty("Type").equals("RU"))
 		{
 			System.out.println("LOD Precompute - Node RU: " + vertex.getId());
-			float angle = ((Float)vertex.getProperty("angle")).floatValue();
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRU(angle)));
+			
+			RealMatrix cachedMatrix = lCache.get(groimpIdStr);
+			if(cachedMatrix != null)
+			{
+				lMatrixStack.add(cachedMatrix);
+				System.out.println("cached matrix found");
+			}
+			else
+			{
+				float angle = ((Float)vertex.getProperty("angle")).floatValue();
+				RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
+				RealMatrix newMatrix = lastMatrix.multiply(GvMatrix.getMatrixRotationRU(angle));
+				lMatrixStack.add(newMatrix);
+				
+				lCache.put(groimpIdStr, newMatrix);
+			}
 			countRU++;
 		}
 		else if(vertex.getProperty("Type").equals("RL"))
 		{
 			System.out.println("LOD Precompute - Node RL: " + vertex.getId());
-			float angle = ((Float)vertex.getProperty("angle")).floatValue();
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRL(angle)));
+			RealMatrix cachedMatrix = lCache.get(groimpIdStr);
+			if(cachedMatrix != null)
+			{
+				lMatrixStack.add(cachedMatrix);
+				System.out.println("cached matrix found");
+			}
+			else
+			{
+				float angle = ((Float)vertex.getProperty("angle")).floatValue();
+				RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
+				RealMatrix newMatrix = lastMatrix.multiply(GvMatrix.getMatrixRotationRL(angle));
+				lMatrixStack.add(newMatrix);
+				
+				lCache.put(groimpIdStr, newMatrix);
+			}
 			countRL++;
 		}
 		else if(vertex.getProperty("Type").equals("RH"))
 		{
 			System.out.println("LOD Precompute - Node RH: " + vertex.getId());
-			float angle = ((Float)vertex.getProperty("angle")).floatValue();
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRH(angle)));
+			RealMatrix cachedMatrix = lCache.get(groimpIdStr);
+			if(cachedMatrix != null)
+			{
+				lMatrixStack.add(cachedMatrix);
+				System.out.println("cached matrix found");
+			}
+			else
+			{
+				
+				float angle = ((Float)vertex.getProperty("angle")).floatValue();
+				RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
+				RealMatrix newMatrix = lastMatrix.multiply(GvMatrix.getMatrixRotationRH(angle));
+				lMatrixStack.add(newMatrix);
+				
+				lCache.put(groimpIdStr, newMatrix);
+			}
 			countRH++;
 		}
 		else if(vertex.getProperty("Type").equals("Plant"))
@@ -85,9 +141,21 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
 			System.out.println("LOD Precompute - Node GU: " + vertex.getId());
-			float length = ((Float)vertex.getProperty("Length")).floatValue();
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixTranslation(0,length,0)));
+			RealMatrix cachedMatrix = lCache.get(groimpIdStr);
+			if(cachedMatrix != null)
+			{
+				lMatrixStack.add(cachedMatrix);
+				System.out.println("cached matrix found");
+			}
+			else
+			{
+				float length = ((Float)vertex.getProperty("Length")).floatValue();
+				RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
+				RealMatrix newMatrix = lastMatrix.multiply(GvMatrix.getMatrixTranslation(0,length,0));
+				lMatrixStack.add(newMatrix);
+				
+				lCache.put(groimpIdStr, newMatrix);
+			}
 			countGU++;
 		}
 	}
@@ -113,5 +181,16 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 		System.out.println("Count Plant:" + countPlant);
 		System.out.println("Count Axis:" + countAxis);
 		System.out.println("Count GU:" + countGU);
+	}
+	
+	public void resetCounters()
+	{
+		countT=0;
+		countRU=0;
+		countRL=0;
+		countRH=0;
+		countPlant=0;
+		countAxis=0;
+		countGU=0;
 	}
 }

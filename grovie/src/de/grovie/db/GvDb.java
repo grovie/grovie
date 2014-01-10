@@ -215,4 +215,15 @@ public class GvDb {
 		//send to data layer
 		lQueueOutData.offer(new GvMsgDataSceneStaticData(materials, textures, textureFileExts));
 	}
+	
+	/**
+	 * Shutsdown the graph database
+	 */
+	public void shutdown()
+	{
+		if(lGraph!=null)
+		{
+			lGraph.shutdown();
+		}
+	}
 }
