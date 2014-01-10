@@ -11,10 +11,25 @@ import de.grovie.util.math.GvMatrix;
 
 public class GvVisitorLODTest extends GvVisitor {
 
+	public int countT;
+	public int countRU;
+	public int countRL;
+	public int countRH;
+	public int countPlant;
+	public int countAxis;
+	public int countGU;
+	
 	ArrayList<RealMatrix> lMatrixStack;
 	
 	public GvVisitorLODTest()
 	{
+		countT=0;
+		countRU=0;
+		countRL=0;
+		countRH=0;
+		countPlant=0;
+		countAxis=0;
+		countGU=0;
 		lMatrixStack = new ArrayList<RealMatrix>();
 		lMatrixStack.add(GvMatrix.getIdentityRealMatrix());
 	}
@@ -29,6 +44,7 @@ public class GvVisitorLODTest extends GvVisitor {
 			float z = ((Float)vertex.getProperty("z")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixTranslation(x,y,z)));
+			countT++;
 		}
 		else if(vertex.getProperty("Type").equals("RU"))
 		{
@@ -36,6 +52,7 @@ public class GvVisitorLODTest extends GvVisitor {
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRU(angle)));
+			countRU++;
 		}
 		else if(vertex.getProperty("Type").equals("RL"))
 		{
@@ -43,6 +60,7 @@ public class GvVisitorLODTest extends GvVisitor {
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRL(angle)));
+			countRL++;
 		}
 		else if(vertex.getProperty("Type").equals("RH"))
 		{
@@ -50,21 +68,25 @@ public class GvVisitorLODTest extends GvVisitor {
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRH(angle)));
+			countRH++;
 		}
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
 			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
 			System.out.println(lMatrixStack.get(lMatrixStack.size()-1).toString());
 //			System.out.println("GUBaseId: " + vertex.getProperty("GUBaseId"));
+			countPlant++;
 			
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
 		{
 			System.out.println("LOD Plant scale - Node Axis: " + vertex.getId());
+			countAxis++;
 		}
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
 			System.out.println("LOD Plant scale - Node GU: " + vertex.getId());
+			countGU++;
 		}
 	}
 

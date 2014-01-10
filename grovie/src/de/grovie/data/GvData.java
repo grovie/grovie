@@ -273,8 +273,16 @@ public class GvData extends GvThread {
 					System.out.println("LOD Plant scale - step found: " + lStepId);
 					GvVisitorLODTest visitor = new GvVisitorLODTest();
 					GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+					System.out.println("Count T:" + visitor.countT);
+					System.out.println("Count RU:" + visitor.countRU);
+					System.out.println("Count RL:" + visitor.countRL);
+					System.out.println("Count RH:" + visitor.countRH);
+					System.out.println("Count Plant:" + visitor.countPlant);
+					System.out.println("Count Axis:" + visitor.countAxis);
+					System.out.println("Count GU:" + visitor.countGU);
 				}
 			}
+			
 			//END DEBUG - LOD Plant scale
 			
 			
