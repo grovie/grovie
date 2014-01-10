@@ -47,5 +47,11 @@ public class GvVisitorCopy extends GvVisitor {
 		}
 	}
 
+	@Override
+	public void leave(Vertex vertex) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
 //END DEBUG

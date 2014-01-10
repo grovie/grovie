@@ -1,7 +1,6 @@
 package de.grovie.data;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -210,28 +209,28 @@ public class GvData extends GvThread {
 			//TODO: acceleration structure updates, geometry generation and insertion
 			
 			//FOR DEBUG
-			Vertex sceneVertex = GvGraphUtil.getVertexScene(lGraph);
-			if(sceneVertex != null)
-			{
-	
-				Vertex stepVertex = GvGraphUtil.getVertexStep(sceneVertex, lStepId);
-				
-				if(stepVertex!=null)
-				{
-					Vertex vertexInternode = null;
-					
-					Iterable<Vertex> internodeVertices = GvGraphUtil.getVerticesRefine(stepVertex);
-					Iterator<Vertex> internodeVertexIter = internodeVertices.iterator();
-					
-					GvVisitorDraw visitorDraw = new GvVisitorDraw(lDrawGroup);
-					
-					while(internodeVertexIter.hasNext())
-					{
-						vertexInternode = internodeVertexIter.next();
-						GvGraphUtil.traverseDepthFirst(vertexInternode, "Branch", visitorDraw);
-					}
-				}
-			}
+//			Vertex sceneVertex = GvGraphUtil.getVertexScene(lGraph);
+//			if(sceneVertex != null)
+//			{
+//	
+//				Vertex stepVertex = GvGraphUtil.getVertexStep(sceneVertex, lStepId);
+//				
+//				if(stepVertex!=null)
+//				{
+//					Vertex vertexInternode = null;
+//					
+//					Iterable<Vertex> internodeVertices = GvGraphUtil.getVerticesRefine(stepVertex);
+//					Iterator<Vertex> internodeVertexIter = internodeVertices.iterator();
+//					
+//					GvVisitorDraw visitorDraw = new GvVisitorDraw(lDrawGroup);
+//					
+//					while(internodeVertexIter.hasNext())
+//					{
+//						vertexInternode = internodeVertexIter.next();
+//						GvGraphUtil.traverseDepthFirst(vertexInternode, "Branch", visitorDraw);
+//					}
+//				}
+//			}
 			
 			float[] transformIdentity = GvMatrix.getIdentity();
 			
@@ -261,6 +260,22 @@ public class GvData extends GvThread {
 			
 			
 			//END DEBUG
+			
+			//FOR DEBUG - LOD Plant scale
+			Vertex sceneVertex = GvGraphUtil.getVertexScene(lGraph);
+			if(sceneVertex != null)
+			{
+				System.out.println("LOD Plant scale - begin");
+				System.out.println("LOD Plant scale - searching for step: " + lStepId);
+				Vertex stepVertex = GvGraphUtil.getVertexStep(sceneVertex, lStepId);
+				if(stepVertex!=null) //step vertex found
+				{
+					System.out.println("LOD Plant scale - step found: " + lStepId);
+					GvVisitorLODTest visitor = new GvVisitorLODTest();
+					GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+				}
+			}
+			//END DEBUG - LOD Plant scale
 			
 			
 			//if geometry was inserted and sent to renderer,

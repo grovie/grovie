@@ -47,65 +47,65 @@ public class GvSandbox {
 		}
 
 		//FOR DEBUG
-		TransactionalGraph graph = engine.getGraph();
-		
-		//clear graph
-		GvGraphUtil.clear(graph);
-
-		//add test graph
-		Vertex firstNode;
-		Vertex secondNode;
-		Vertex thirdNode;
-		Edge edge;
-		Edge edge2;
-		
-		firstNode = graph.addVertex(null);
-		firstNode.setProperty( "Type", "Scene" );
-		
-		secondNode = graph.addVertex(null);
-		secondNode.setProperty( "Type", "Step" );
-		secondNode.setProperty( "Step", new String("0") );
-		
-		thirdNode = graph.addVertex(null);
-		thirdNode.setProperty( "Type", "Tube" );
-		thirdNode.setProperty( "Length", new Float(1.0f) );
-		thirdNode.setProperty( "Radius", new Float(0.5f) );
-
-		edge = graph.addEdge(null, firstNode, secondNode, "Refinement");
-		edge2 = graph.addEdge(null, secondNode, thirdNode, "Refinement");
-
-		
-
-		for(int i=1; i< 1000; ++i)
-		{
-			
-			try {
-				//get scene vertex
-				Vertex sceneV = GvGraphUtil.getVertexScene(graph);
-				//get previous step vertex
-				Vertex stepV = GvGraphUtil.getVertexStep(sceneV, new Integer(i-1).toString());
-				//copy step to next step
-				GvGraphUtil.copyToNextStep(stepV,sceneV,graph);
-				//perform fake rules
-				Vertex stepVNew = GvGraphUtil.getVertexStep(sceneV, new Integer(i).toString());
-				testRules(stepVNew, graph);
-				
-				graph.commit();
-				
-			} catch (GvExDbSceneDuplicated e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			engine.simulationStep(new Integer(i).toString());
-			try {
-				//Thread.sleep(16); //approx 60 fps
-				Thread.sleep(500); 
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		TransactionalGraph graph = engine.getGraph();
+//		
+//		//clear graph
+//		GvGraphUtil.clear(graph);
+//
+//		//add test graph
+//		Vertex firstNode;
+//		Vertex secondNode;
+//		Vertex thirdNode;
+//		Edge edge;
+//		Edge edge2;
+//		
+//		firstNode = graph.addVertex(null);
+//		firstNode.setProperty( "Type", "Scene" );
+//		
+//		secondNode = graph.addVertex(null);
+//		secondNode.setProperty( "Type", "Step" );
+//		secondNode.setProperty( "Step", new String("0") );
+//		
+//		thirdNode = graph.addVertex(null);
+//		thirdNode.setProperty( "Type", "Tube" );
+//		thirdNode.setProperty( "Length", new Float(1.0f) );
+//		thirdNode.setProperty( "Radius", new Float(0.5f) );
+//
+//		edge = graph.addEdge(null, firstNode, secondNode, "Refinement");
+//		edge2 = graph.addEdge(null, secondNode, thirdNode, "Refinement");
+//
+//		
+//
+//		for(int i=1; i< 1000; ++i)
+//		{
+//			
+//			try {
+//				//get scene vertex
+//				Vertex sceneV = GvGraphUtil.getVertexScene(graph);
+//				//get previous step vertex
+//				Vertex stepV = GvGraphUtil.getVertexStep(sceneV, new Integer(i-1).toString());
+//				//copy step to next step
+//				GvGraphUtil.copyToNextStep(stepV,sceneV,graph);
+//				//perform fake rules
+//				Vertex stepVNew = GvGraphUtil.getVertexStep(sceneV, new Integer(i).toString());
+//				testRules(stepVNew, graph);
+//				
+//				graph.commit();
+//				
+//			} catch (GvExDbSceneDuplicated e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			
+//			engine.simulationStep(new Integer(i).toString());
+//			try {
+//				//Thread.sleep(16); //approx 60 fps
+//				Thread.sleep(500); 
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 
 		//END DEBUG
 		

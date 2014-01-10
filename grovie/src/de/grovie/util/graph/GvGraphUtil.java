@@ -96,12 +96,16 @@ public class GvGraphUtil {
 		Iterable<Vertex> verticesIterable = GvGraphUtil.getVertices(vertex, edgeLabel);
 		Iterator<Vertex> verticesIter = verticesIterable.iterator();
 
-		Vertex vertexCurr = null;
+		if(!verticesIter.hasNext())
+		{
+			System.out.println("No refinement: " + vertex.getId());
+		}
 		while(verticesIter.hasNext())
 		{
-			vertexCurr = verticesIter.next();
-			traverseDepthFirst(vertexCurr, edgeLabel, visitor);
+			traverseDepthFirst(verticesIter.next(), edgeLabel, visitor);
 		}
+		
+		visitor.leave(vertex);
 	}
 	
 	private static void copyDepthFirst(long oldVertexId, GvVisitorCopy visitor)
