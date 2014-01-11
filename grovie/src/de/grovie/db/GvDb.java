@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.neo4j.Neo4jGraph;
@@ -96,7 +99,10 @@ public class GvDb {
 	private TransactionalGraph createDb(String dbPathAbs, GvDbImpl impl) throws GvExDbUnrecognizedImpl
 	{
 		if(impl==GvDbImpl.NEO4J)
-			return new Neo4jGraph(dbPathAbs);
+		{
+			GraphDatabaseService graphDbService = new GraphDatabaseFactory().newEmbeddedDatabase(dbPathAbs);
+			return new Neo4jGraph(graphDbService,false);
+		}
 		else
 			throw new GvExDbUnrecognizedImpl("GrovieExceptionDb unrecognized database implementation: " + impl);
 	}
