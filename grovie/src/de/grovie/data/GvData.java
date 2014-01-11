@@ -296,9 +296,10 @@ public class GvData extends GvThread {
 						visitorPre.resetCounters();
 						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
 						visitorPre.printCounters();
+						
 					
 					//2.send display/rendering visitor
-					GvVisitorLODTest visitor = new GvVisitorLODTest();
+					GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache());
 					GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
 					visitor.printCounters();
 				}

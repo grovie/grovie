@@ -3,7 +3,6 @@ package de.grovie.sandbox;
 import java.util.Iterator;
 
 import com.tinkerpop.blueprints.Direction;
-import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.TransactionalGraph;
 import com.tinkerpop.blueprints.Vertex;
 
@@ -11,7 +10,6 @@ import de.grovie.engine.GvEngine;
 import de.grovie.engine.GvEngine.GvEngineMode;
 import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
-import de.grovie.util.graph.GvGraphUtil;
 
 public class GvSandbox {
 

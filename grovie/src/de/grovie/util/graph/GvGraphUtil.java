@@ -12,6 +12,10 @@ import de.grovie.exception.GvExDbSceneDuplicated;
 //FOR DEBUG
 public class GvGraphUtil {
 
+	public static final String SUCCESSOR = "Successor";
+	public static final String BRANCH = "Branch";
+	public static final String REFINEMENT = "Refinement";
+	
 	public static Vertex getVertexScene(TransactionalGraph graph) throws GvExDbSceneDuplicated
 	{
 		Iterable<Vertex> vertexSceneList = graph.getVertices("Type", "Scene");
@@ -70,17 +74,22 @@ public class GvGraphUtil {
 
 	public static Iterable<Vertex> getVerticesRefine(Vertex vertex)
 	{
-		return vertex.getVertices(Direction.OUT, "Refinement");
+		return vertex.getVertices(Direction.OUT, REFINEMENT);
 	}
 	
 	public static Iterable<Vertex> getVerticesBranch(Vertex vertex)
 	{
-		return vertex.getVertices(Direction.OUT, "Branch");
+		return vertex.getVertices(Direction.OUT, BRANCH);
 	}
 
 	public static Iterable<Vertex> getVertices(Vertex vertex, String edgeLabel)
 	{
 		return vertex.getVertices(Direction.OUT, edgeLabel);
+	}
+	
+	public static Iterable<Vertex> getVerticesParent(Vertex vertex, String edgeLabel)
+	{
+		return vertex.getVertices(Direction.IN, edgeLabel);
 	}
 	
 	public static Iterable<Edge> getEdges(Vertex vertex, String edgeLabel)
@@ -108,7 +117,7 @@ public class GvGraphUtil {
 	{
 		visitor.visit(vertex);
 
-		Iterable<Vertex> verticesIterableSucc = GvGraphUtil.getVertices(vertex, "Successor");
+		Iterable<Vertex> verticesIterableSucc = GvGraphUtil.getVertices(vertex, SUCCESSOR);
 		Iterator<Vertex> verticesIterSucc = verticesIterableSucc.iterator();
 
 		while(verticesIterSucc.hasNext())
@@ -116,7 +125,7 @@ public class GvGraphUtil {
 			traverseTurtle(verticesIterSucc.next(), visitor);
 		}
 		
-		Iterable<Vertex> verticesIterableBran = GvGraphUtil.getVertices(vertex, "Branch");
+		Iterable<Vertex> verticesIterableBran = GvGraphUtil.getVertices(vertex, BRANCH);
 		Iterator<Vertex> verticesIterBran = verticesIterableBran.iterator();
 
 		while(verticesIterBran.hasNext())
@@ -133,7 +142,7 @@ public class GvGraphUtil {
 		
 		visitor.visit(oldVertex);
 
-		Iterable<Edge> edgesIterable = oldVertex.getEdges(Direction.OUT,"Refinement");
+		Iterable<Edge> edgesIterable = oldVertex.getEdges(Direction.OUT,REFINEMENT);
 		Iterator<Edge> edgesIter = edgesIterable.iterator();
 		
 		while(edgesIter.hasNext())
@@ -149,7 +158,7 @@ public class GvGraphUtil {
 			copyDepthFirst(((Long)vertexCurr.getId()).longValue(), visitor);
 		}
 		
-		edgesIterable = oldVertex.getEdges(Direction.OUT,"Branch");
+		edgesIterable = oldVertex.getEdges(Direction.OUT,BRANCH);
 		edgesIter = edgesIterable.iterator();
 		
 		while(edgesIter.hasNext())
@@ -165,7 +174,7 @@ public class GvGraphUtil {
 			copyDepthFirst(((Long)vertexCurr.getId()).longValue(), visitor);
 		}
 		
-		edgesIterable = oldVertex.getEdges(Direction.OUT,"Successor");
+		edgesIterable = oldVertex.getEdges(Direction.OUT,SUCCESSOR);
 		edgesIter = edgesIterable.iterator();
 		
 		while(edgesIter.hasNext())
@@ -190,7 +199,7 @@ public class GvGraphUtil {
 		Vertex stepVertexNew;
 		stepVertexNew = graph.addVertex(null);
 		stepVertexNew.setProperty( "Step", new Integer(oldStepId+1).toString() );
-		graph.addEdge(null, sceneVertex, stepVertexNew, "Refinement");
+		graph.addEdge(null, sceneVertex, stepVertexNew, REFINEMENT);
 		
 		//create copying visitor
 		GvVisitorCopy visitorCopy = new GvVisitorCopy(stepVertexNew.getId(), graph);

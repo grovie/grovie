@@ -1,6 +1,7 @@
 package de.grovie.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -21,8 +22,11 @@ public class GvVisitorLODTest extends GvVisitor {
 	
 	ArrayList<RealMatrix> lMatrixStack;
 	
-	public GvVisitorLODTest()
+	HashMap<String, RealMatrix> lCache;
+	
+	public GvVisitorLODTest(HashMap<String, RealMatrix> cache)
 	{
+		lCache = cache;
 		countT=0;
 		countRU=0;
 		countRL=0;
@@ -83,6 +87,11 @@ public class GvVisitorLODTest extends GvVisitor {
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
 			System.out.println("LOD Plant scale - Node GU: " + vertex.getId());
+			
+			//drawing
+			
+			//end drawing
+			
 			countGU++;
 		}
 	}
