@@ -65,7 +65,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 	public void visit(Vertex vertex) {
 		if(vertex.getProperty("Type").equals("Translate"))
 		{
-			System.out.println("LOD Plant scale - Node Translate: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node Translate: " + vertex.getId());
 			float x = ((Float)vertex.getProperty("x")).floatValue();
 			float y = ((Float)vertex.getProperty("y")).floatValue();
 			float z = ((Float)vertex.getProperty("z")).floatValue();
@@ -75,7 +75,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		}
 		else if(vertex.getProperty("Type").equals("RU"))
 		{
-			System.out.println("LOD Plant scale - Node RU: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node RU: " + vertex.getId());
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRU(angle)));
@@ -83,7 +83,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		}
 		else if(vertex.getProperty("Type").equals("RL"))
 		{
-			System.out.println("LOD Plant scale - Node RL: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node RL: " + vertex.getId());
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRL(angle)));
@@ -91,7 +91,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		}
 		else if(vertex.getProperty("Type").equals("RH"))
 		{
-			System.out.println("LOD Plant scale - Node RH: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node RH: " + vertex.getId());
 			float angle = ((Float)vertex.getProperty("angle")).floatValue();
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRH(angle)));
@@ -99,20 +99,28 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		}
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
-			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			System.out.println(lastMatrix.toString());
 			countPlant++;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
 		{
-			System.out.println("LOD Plant scale - Node Axis: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node Axis: " + vertex.getId());
 			
 			//drawing
 			String groImpNodeId = this.getGroIMPNodeId(vertex);
 			RealMatrix objSpaceMat = lCacheAxis.get(groImpNodeId);
 			Float lenF = lCacheAxisLen.get(groImpNodeId);
 			Float radF = lCacheAxisRad.get(groImpNodeId);
+//			System.out.println("Axis id: " + groImpNodeId);
+//			if(objSpaceMat!=null)
+//				System.out.println("Axis matrix: " + objSpaceMat.toString());
+//			if(lenF != null)
+//				System.out.println("Axis len: " + lenF.toString());
+//			if(radF != null)
+//				System.out.println("Axis radius: " + radF.toString());
+			
 			if((objSpaceMat != null)&&(lenF!=null)&&(radF!=null))
 			{
 				RealMatrix worldSpaceMat = lMatrixStack.get(lMatrixStack.size()-1).multiply(objSpaceMat);
@@ -120,12 +128,15 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 				
 				float length = lenF.floatValue();
 				float radius = radF.floatValue();
+				System.out.println("draw len:" + length);
+				System.out.println("draw rad:" + radius);
 				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
 				
 				GvBufferSet bufferSet;
 				try {
 					bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
+					//bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
+					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), GvMatrix.getIdentity());
 				} catch (GvExRendererIndexBuffer e) {
 					System.out.println("Display visitor error:" + "error inserting in bufferset");
 					e.printStackTrace();
@@ -149,7 +160,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		}
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
-			System.out.println("LOD Plant scale - Node GU: " + vertex.getId());
+//			System.out.println("LOD Plant scale - Node GU: " + vertex.getId());
 
 			
 

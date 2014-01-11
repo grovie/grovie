@@ -12,15 +12,17 @@ import de.grovie.util.graph.GvGraphUtil;
 import de.grovie.util.graph.GvVisitor;
 import de.grovie.util.math.GvMatrix;
 
-public class GvVisitorLODPrecompute extends GvVisitor {
+public class GvVisitorLODPrecomputeOld extends GvVisitor {
 
 	static final int TRANSLATE = 0;
 	static final int RU = 1;
 	static final int RH = 2;
 	static final int RL = 3;
 	static final int GU = 4;
-	static final int PLANT = 5;
-	static final int AXIS = 6;
+	static final int BUD = 5;
+	static final int PLANT = 6;
+	static final int AXIS = 7;
+	
 	
 	public int countT;
 	public int countRU;
@@ -44,7 +46,7 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	
 	int currType; //current visit's vertex type
 	
-	public GvVisitorLODPrecompute()
+	public GvVisitorLODPrecomputeOld()
 	{
 		resetCounters();
 		
@@ -65,14 +67,15 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	@Override
 	public void visit(Vertex vertex) {
 		
-		System.out.println("Precompute visit: " + vertex.getId());
+		//System.out.println("Precompute visit: " + vertex.getId());
 		
 		//vertex type
 		currType = getType(vertex); 
 		
 		//for transformation node types and GU
-		if((currType>-1)&&(currType<5))
+		if((currType>-1)&&(currType<6))
 		{
+			//get cached info for this vertex
 			String groimpIdStr=null;
 			RealMatrix matrix=null;
 			try{
@@ -82,6 +85,27 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 			{
 				System.out.println("Precompute visit: " + "Error fetching cached matrix");
 				ex.printStackTrace();
+			}
+			
+			//get encoarsement/macro scale
+			Iterable<Vertex> axisEncoarseVertex = GvGraphUtil.getVerticesEncoarse(vertex);
+			java.util.Iterator<Vertex> axisVertexIter = axisEncoarseVertex.iterator();
+			Vertex axisVertex = null;
+			String axisGroimpId = null;
+			if(axisVertexIter.hasNext())
+			{
+				axisVertex = axisVertexIter.next();
+				axisGroimpId = getGroIMPNodeId(axisVertex);
+				
+				if(!axisVertex.getId().equals(this.lastAxisId))
+				{
+					//set as last visited axis
+					lastAxisId=axisVertex.getId();
+					
+					//radius of axis set to first growth unit (presumably the thickest)
+					//replace old radius
+					lCacheAxisRad.put(axisGroimpId, (Float) vertex.getProperty("Radius"));
+				}
 			}
 			
 			if(matrix==null)
@@ -94,7 +118,9 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 						//put into cache as pre-transform matrix for current vertex
 						lCache.put(groimpIdStr, matrix);
 						//compute post-transform matrix for current vertex and push into stack
-						stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+						RealMatrix nextMat = matrix.multiply(getTransformMatrix(vertex,currType));
+						System.out.println("PUSHED:" + nextMat.toString());
+						stackPush(nextMat);
 					}
 					catch(Exception ex)
 					{
@@ -140,59 +166,57 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 					}
 				}
 				
-				//update macro scale (axis) position, orientation, diameter, length
-//				if(currType==GU)
-//				{
-//					Iterable<Vertex> axisEncoarseVertex = GvGraphUtil.getVerticesEncoarse(vertex);
-//					java.util.Iterator<Vertex> axisVertexIter = axisEncoarseVertex.iterator();
-//					if(axisVertexIter.hasNext())
-//					{
-//						//pre-transform position and diameter
-//						Vertex axisVertex = axisVertexIter.next();
-//						String axisGroimpId = getGroIMPNodeId(axisVertex);
-//						if(!axisVertex.getId().equals(this.lastAxisId))
-//						{
-//							//set as last visited axis
-//							lastAxisId=axisVertex.getId();
-//							//position of axis same as first GU position
-//							lCacheAxis.put(axisGroimpId, matrix.copy());
-//							//radius of axis set to first growth unit (presumably the thickest)
-//							lCacheAxisRad.put(axisGroimpId, (Float) vertex.getProperty("Radius"));
-//						}
-//						
-//						//orientation and length
-//						if(isLeafVertex(vertex))
-//						{
-//							//compute direction vector from start of axis to post-transform of this vertex
-//							RealMatrix posStartMat = lCacheAxis.get(axisGroimpId);
-//							RealMatrix posEndMat = lStack.get(lStackSize);
-//							double[] posStartVec = posStartMat.getColumn(3);
-//							double[] posEndVec = posEndMat.getColumn(3);
-//							posStartVec[3]=0;
-//							posEndVec[3]=0;
-//							Vector3D posStart = new Vector3D(posStartVec);
-//							Vector3D posEnd = new Vector3D(posEndVec);
-//							Vector3D dir = posEnd.subtract(posStart);
-//							float len = (float) Math.sqrt(dir.getX()*dir.getX() + dir.getY()*dir.getY() + dir.getZ()*dir.getZ());
-//							dir = dir.normalize();
-//							//get matrix for direction vector and set into axis cache
-//							RealMatrix orientMat = GvMatrix.getMatrixRotationFromUpDirection(new double[]{dir.getX(),dir.getY(),dir.getZ()});
-//							orientMat.setColumn(3, posStartVec); //set position also into matrix
-//							lCacheAxis.put(axisGroimpId, orientMat);
-//							//set length into axis cache
-//							lCacheAxisLen.put(axisGroimpId, new Float(len));
-//						}
-//					}
-//				}
+				
+				//pre-transform position and diameter
+				if(lCacheAxis.get(axisGroimpId) == null)
+				{
+					//position of axis same as first GU position
+					lCacheAxis.put(axisGroimpId, matrix.copy());
+				}
+				
+				//orientation and length
+				if (currType == BUD)
+				{
+					//System.out.println("BUD UPDATE:" + axisGroimpId);
+					
+					//compute direction vector from start of axis to post-transform of this vertex
+					RealMatrix posStartMat = lCacheAxis.get(axisGroimpId);
+					RealMatrix posEndMat = lStack.get(lStackSize);
+					//System.out.println("BUD MAT:" + posEndMat.toString());
+					//System.out.println("STACK SIZE: " + lStackSize);
+					double[] posStartVec = posStartMat.getColumn(3);
+					double[] posEndVec = posEndMat.getColumn(3);
+					//System.out.println("START POS: " + posStartVec[0] + "," + posStartVec[1] + "," + posStartVec[2]);
+					//System.out.println("END POS: "+ posEndVec[0] + "," + posEndVec[1] + "," + posEndVec[2]);
+					posStartVec[3]=0;
+					posEndVec[3]=0;
+					Vector3D posStart = new Vector3D(posStartVec[0],posStartVec[1],posStartVec[2]);
+					Vector3D posEnd = new Vector3D(posEndVec[0],posEndVec[1],posEndVec[2]);
+					Vector3D dir = posEnd.subtract(posStart);
+					float len = (float) Math.sqrt(dir.getX()*dir.getX() + dir.getY()*dir.getY() + dir.getZ()*dir.getZ());
+					//System.out.println("LEN: " + len);
+					if(len == 0)
+						return;
+					dir = dir.normalize();
+					//get matrix for direction vector and set into axis cache
+					RealMatrix orientMat = GvMatrix.getMatrixRotationFromUpDirection(new double[]{dir.getX(),dir.getY(),dir.getZ()});
+					orientMat.setColumn(3, posStartVec); //set position also into matrix
+					lCacheAxis.put(axisGroimpId, orientMat);
+					//set length into axis cache
+					lCacheAxisLen.put(axisGroimpId, new Float(len));
+					
+					//System.out.println("Set Axis " +axisGroimpId + " Orient: "+ orientMat.toString());
+					//System.out.println("Set Axis " + axisGroimpId + " Len: "+ len);
+				}
 			}
 		}
 	}
 	
-//	/**
-//	 * Checks if specified vertex has child successor or branched vertex.
-//	 * @param vertex
-//	 * @return
-//	 */
+	/**
+	 * Checks if specified vertex has child successor or branched vertex.
+	 * @param vertex
+	 * @return
+	 */
 //	private boolean isLeafVertex(Vertex vertex)
 //	{
 //		Iterable<Vertex> iterable = GvGraphUtil.getVerticesBranch(vertex);
@@ -289,6 +313,10 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 			float length = ((Float)vertex.getProperty("Length")).floatValue();
 			return GvMatrix.getMatrixTranslation(0,length,0);
 		}
+		else if(type==BUD)
+		{
+			return GvMatrix.getIdentityRealMatrix();
+		}
 		
 		return null;
 	}
@@ -341,6 +369,12 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 //			System.out.println("LOD Precompute - Node Axis: " + vertex.getId());
 //			countAxis++;
 			return AXIS;
+		}
+		if(vertex.getProperty("Type").equals("Bud"))
+		{
+//			System.out.println("LOD Precompute - Node Axis: " + vertex.getId());
+//			countAxis++;
+			return BUD;
 		}
 		return -1;
 	}

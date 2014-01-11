@@ -305,12 +305,12 @@ public class GvData extends GvThread {
 					
 					//2.send display/rendering visitor
 					try{
-						//GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
-						GvVisitorLODTestAxis visitor = new GvVisitorLODTestAxis(visitorPre.getCache(),
-								visitorPre.getCacheAxis(),
-								visitorPre.getCacheAxisRad(),
-								visitorPre.getCacheAxisLen(),
-								lDrawGroup);
+						GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
+//						GvVisitorLODTestAxis visitor = new GvVisitorLODTestAxis(visitorPre.getCache(),
+//								visitorPre.getCacheAxis(),
+//								visitorPre.getCacheAxisRad(),
+//								visitorPre.getCacheAxisLen(),
+//								lDrawGroup);
 						GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
 						visitor.printCounters();
 					}
