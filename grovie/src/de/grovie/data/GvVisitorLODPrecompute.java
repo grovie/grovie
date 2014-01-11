@@ -3,6 +3,7 @@ package de.grovie.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -29,6 +30,11 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	public int countAxis;
 	public int countGU;
 	
+	Object lastAxisId;
+	HashMap<String,RealMatrix> lCacheAxis;
+	HashMap<String,Float> lCacheAxisRad;
+	HashMap<String,Float> lCacheAxisLen;
+	
 	HashMap<String, RealMatrix> lCache; //cached world transformation matrix for each GroIMP node ID
 	
 	ArrayList<RealMatrix> lStack;	//transformation matrix stack. in use only when flag is true
@@ -49,6 +55,11 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 		lStackSize=0;
 		
 		lStackInOperation = false;
+		
+		lastAxisId=null;
+		lCacheAxis = new HashMap<String, RealMatrix>(); //cache of matrices for axes
+		lCacheAxisRad = new HashMap<String, Float>();
+		lCacheAxisLen = new HashMap<String, Float>();
 	}
 	
 	@Override
@@ -128,8 +139,73 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 						ex.printStackTrace();
 					}
 				}
+				
+				//update macro scale (axis) position, orientation, diameter, length
+				if(currType==GU)
+				{
+					Iterable<Vertex> axisEncoarseVertex = GvGraphUtil.getVerticesEncoarse(vertex);
+					java.util.Iterator<Vertex> axisVertexIter = axisEncoarseVertex.iterator();
+					if(axisVertexIter.hasNext())
+					{
+						//pre-transform position and diameter
+						Vertex axisVertex = axisVertexIter.next();
+						String axisGroimpId = getGroIMPNodeId(axisVertex);
+						if(!axisVertex.getId().equals(this.lastAxisId))
+						{
+							//set as last visited axis
+							lastAxisId=axisVertex.getId();
+							//position of axis same as first GU position
+							lCacheAxis.put(axisGroimpId, matrix.copy());
+							//radius of axis set to first growth unit (presumably the thickest)
+							lCacheAxisRad.put(axisGroimpId, (Float) vertex.getProperty("Radius"));
+						}
+						
+						//orientation and length
+						if(isLeafVertex(vertex))
+						{
+							//compute direction vector from start of axis to post-transform of this vertex
+							RealMatrix posStartMat = lCacheAxis.get(axisGroimpId);
+							RealMatrix posEndMat = lStack.get(lStackSize);
+							double[] posStartVec = posStartMat.getColumn(3);
+							double[] posEndVec = posEndMat.getColumn(3);
+							posStartVec[3]=0;
+							posEndVec[3]=0;
+							Vector3D posStart = new Vector3D(posStartVec);
+							Vector3D posEnd = new Vector3D(posEndVec);
+							Vector3D dir = posEnd.subtract(posStart);
+							float len = (float) Math.sqrt(dir.getX()*dir.getX() + dir.getY()*dir.getY() + dir.getZ()*dir.getZ());
+							dir = dir.normalize();
+							//get matrix for direction vector and set into axis cache
+							RealMatrix orientMat = GvMatrix.getMatrixRotationFromUpDirection(new double[]{dir.getX(),dir.getY(),dir.getZ()});
+							orientMat.setColumn(3, posStartVec); //set position also into matrix
+							lCacheAxis.put(axisGroimpId, orientMat);
+							//set length into axis cache
+							lCacheAxisLen.put(axisGroimpId, new Float(len));
+						}
+					}
+				}
 			}
 		}
+	}
+	
+	/**
+	 * Checks if specified vertex has child successor or branched vertex.
+	 * @param vertex
+	 * @return
+	 */
+	private boolean isLeafVertex(Vertex vertex)
+	{
+		Iterable<Vertex> iterable = GvGraphUtil.getVerticesBranch(vertex);
+		java.util.Iterator<Vertex> iterator = iterable.iterator();
+		if(iterator.hasNext())
+			return false;
+		
+		iterable = GvGraphUtil.getVerticesSuccessor(vertex);
+		iterator = iterable.iterator();
+		if(iterator.hasNext())
+			return false;
+		
+		return true;
 	}
 	
 	/**
@@ -325,5 +401,20 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	public HashMap<String, RealMatrix> getCache()
 	{
 		return this.lCache;
+	}
+	
+	public HashMap<String, RealMatrix> getCacheAxis()
+	{
+		return this.lCacheAxis;
+	}
+	
+	public HashMap<String, Float> getCacheAxisRad()
+	{
+		return this.lCacheAxisRad;
+	}
+	
+	public HashMap<String, Float> getCacheAxisLen()
+	{
+		return this.lCacheAxisLen;
 	}
 }

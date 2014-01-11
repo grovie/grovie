@@ -305,7 +305,12 @@ public class GvData extends GvThread {
 					
 					//2.send display/rendering visitor
 					try{
-						GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
+						//GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
+						GvVisitorLODTestAxis visitor = new GvVisitorLODTestAxis(visitorPre.getCache(),
+								visitorPre.getCacheAxis(),
+								visitorPre.getCacheAxisRad(),
+								visitorPre.getCacheAxisLen(),
+								lDrawGroup);
 						GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
 						visitor.printCounters();
 					}
@@ -353,7 +358,17 @@ public class GvData extends GvThread {
 		RealMatrix matRot = GvMatrix.getMatrixRotationRU(45);
 		RealMatrix matRot2 = GvMatrix.getMatrixRotationRL(45);
 		
-		m2 = matTrans.multiply(matRot);
+		//m2 = matTrans.multiply(matRot);
+		
+		//testing matrix from direction vector
+		double dir[] = new double[]{1,1,-1};
+		double len = Math.sqrt(3.0);
+		dir[0] /= len;
+		dir[1] /= len;
+		dir[2] /= len;
+		m2 = GvMatrix.getMatrixRotationFromUpDirection(dir);
+		
+		
 		m3 = (m2.multiply(matTrans)).multiply(matRot2);
 		
 		m2gl = GvMatrix.convertRowMajorToColumnMajor(m2.getData());

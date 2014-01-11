@@ -1,6 +1,8 @@
 package de.grovie.util.math;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 
 /**
@@ -16,7 +18,9 @@ public class GvMatrix {
 	public static final RealMatrix[] kRotationRU = getMatrixRotationPrecomputeRU();
 	public static final RealMatrix[] kRotationRH = getMatrixRotationPrecomputeRH();
 	public static final RealMatrix[] kRotationRL = getMatrixRotationPrecomputeRL();
-	
+	public static final Vector3D kUpVector = new Vector3D(new double[]{0,1,0});
+	public static final Vector3D kRightVector = new Vector3D(new double[]{1,0,0});
+	public static final Vector3D kTowardVector = new Vector3D(new double[]{0,0,-1});
 	/**
 	 * Returns rotation matrix about axis with specified angle in degrees.
 	 * Axis parameters should be normalized.
@@ -290,4 +294,24 @@ public class GvMatrix {
 		
 		return new Array2DRowRealMatrix(result);
 	}
+	
+	public static RealMatrix getMatrixRotationFromUpDirection(double[] directionUpVector)
+    {
+		Vector3D vecDir = new Vector3D(directionUpVector);
+		
+		Vector3D vecZAxis = vecDir.crossProduct(kRightVector);
+		vecZAxis = vecZAxis.normalize();
+        
+		Vector3D vecXAxis = vecDir.crossProduct(vecZAxis);
+		vecXAxis = vecXAxis.normalize();
+
+		return new Array2DRowRealMatrix(new double[][]{
+				{vecXAxis.getX(),vecXAxis.getY(),vecXAxis.getZ(),0},
+				{vecDir.getX(),vecDir.getY(),vecDir.getZ(),0},
+				{vecZAxis.getX(),vecZAxis.getY(),vecZAxis.getZ(),0},
+				{0,0,0,1}
+				}
+		);
+		
+    }
 }

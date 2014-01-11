@@ -73,6 +73,11 @@ public class GvGraphUtil {
 
 		graph.commit();
 	}
+	
+	public static Iterable<Vertex> getVerticesEncoarse(Vertex vertex)
+	{
+		return vertex.getVertices(Direction.IN, REFINEMENT);
+	}
 
 	public static Iterable<Vertex> getVerticesRefine(Vertex vertex)
 	{
@@ -82,6 +87,11 @@ public class GvGraphUtil {
 	public static Iterable<Vertex> getVerticesBranch(Vertex vertex)
 	{
 		return vertex.getVertices(Direction.OUT, BRANCH);
+	}
+	
+	public static Iterable<Vertex> getVerticesSuccessor(Vertex vertex)
+	{
+		return vertex.getVertices(Direction.OUT, SUCCESSOR);
 	}
 
 	public static Iterable<Vertex> getVertices(Vertex vertex, String edgeLabel)
