@@ -54,46 +54,79 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	@Override
 	public void visit(Vertex vertex) {
 		
+		System.out.println("Precompute visit: " + vertex.getId());
+		
 		//vertex type
 		currType = getType(vertex); 
 		
 		//for transformation node types and GU
 		if((currType>-1)&&(currType<5))
 		{
-			String groimpIdStr = getGroIMPNodeId(vertex);
-			RealMatrix matrix = getCachedPreTransformMatrix(groimpIdStr);
+			String groimpIdStr=null;
+			RealMatrix matrix=null;
+			try{
+				groimpIdStr = getGroIMPNodeId(vertex);
+				matrix = getCachedPreTransformMatrix(groimpIdStr);
+			}catch(Exception ex)
+			{
+				System.out.println("Precompute visit: " + "Error fetching cached matrix");
+				ex.printStackTrace();
+			}
+			
 			if(matrix==null)
 			{
 				if(lStackInOperation)
 				{
-					//get post transform matrix from parent vertex
-					matrix = lStack.get(lStackSize);
-					//put into cache as pre-transform matrix for current vertex
-					lCache.put(groimpIdStr, matrix);
-					//compute post-transform matrix for current vertex and push into stack
-					stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+					try{
+						//get post transform matrix from parent vertex
+						matrix = lStack.get(lStackSize);
+						//put into cache as pre-transform matrix for current vertex
+						lCache.put(groimpIdStr, matrix);
+						//compute post-transform matrix for current vertex and push into stack
+						stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+					}
+					catch(Exception ex)
+					{
+						System.out.println("Precompute visit: " + "Error in stacked op");
+						ex.printStackTrace();
+					}
 				}
 				else
 				{
-					Vertex parent = getParent(vertex);
-					if(parent != null)
+					try
 					{
-						//compute post-transform matrix of parent, i.e. pre-transform matrix of this vertex
-						String parentGroimpId = getGroIMPNodeId(parent);
-						RealMatrix matrixParent = getCachedPreTransformMatrix(parentGroimpId);
-						matrix = matrixParent.multiply(getTransformMatrix(parent,getType(parent)));
+						Vertex parent = getParent(vertex);
+						if(parent != null)
+						{
+							//compute post-transform matrix of parent, i.e. pre-transform matrix of this vertex
+							String parentGroimpId = getGroIMPNodeId(parent);
+							RealMatrix matrixParent = getCachedPreTransformMatrix(parentGroimpId);
+							matrix = matrixParent.multiply(getTransformMatrix(parent,getType(parent)));
+						}
+						else //no parent, so post transform matrix of previous vertex is identity mat
+						{
+							matrix = GvMatrix.getIdentityRealMatrix();
+						}
 					}
-					else //no parent, so post transform matrix of previous vertex is identity mat
+					catch(Exception ex)
 					{
-						matrix = GvMatrix.getIdentityRealMatrix();
+						System.out.println("Precompute visit: " + "Error in getting parent matrix");
+						ex.printStackTrace();
 					}
 					
-					//put into cache as pre-transform matrix for current vertex
-					lCache.put(groimpIdStr, matrix);
-					//compute post-transform matrix for current vertex and push into stack
-					stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
-					//switch on stack operation, having encountered uncached portion of graph
-					lStackInOperation = true;
+					try{
+						//put into cache as pre-transform matrix for current vertex
+						lCache.put(groimpIdStr, matrix);
+						//compute post-transform matrix for current vertex and push into stack
+						stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+						//switch on stack operation, having encountered uncached portion of graph
+						lStackInOperation = true;
+					}
+					catch(Exception ex)
+					{
+						System.out.println("Precompute visit: " + "Error in non-stacked op");
+						ex.printStackTrace();
+					}
 				}
 			}
 		}
@@ -246,11 +279,11 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 				(vType.equals("GU"))
 				)
 		{
-			stackPop();
-			
-			if((lStackInOperation == true)&&(lStackSize==0))
+			if(lStackInOperation == true)
 			{
-				lStackInOperation=false;
+				stackPop();
+				if(lStackSize==0)
+					lStackInOperation=false;
 			}
 		}
 	}

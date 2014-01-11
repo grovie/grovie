@@ -109,8 +109,8 @@ public class GvData extends GvThread {
 		
 		//FOR DEBUG - PATH
 		//Test geometry
-		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
-		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
+		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 		indices = geom.getIndices();
@@ -244,24 +244,24 @@ public class GvData extends GvThread {
 			
 			GvBufferSet bufferSet;
 			//send geometry to categorized draw groups //TODO: discard unnecessary listing of geometry in buffer sets
-			bufferSet = lDrawGroup.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
-			bufferSet.insertGeometry(vertices, normals, indices,transformIdentity);
-	
-			bufferSet = lDrawGroup.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
-			bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv(),transformIdentity);
-	
-			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-			bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(),transformIdentity);
-			
-			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-			bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
-			
-			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-			bufferSet.insertGeometry(geomTube2.getVertices(), geomTube2.getNormals(), geomTube2.getIndices(), geomTube2.getUv(),m3gl);
-			
-			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-			bufferSet.insertGeometry(geomTube3.getVertices(), geomTube3.getNormals(), geomTube3.getIndices(), geomTube3.getUv(),transformIdentity);
-			
+//			bufferSet = lDrawGroup.getBufferSet(false, -1, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+//			bufferSet.insertGeometry(vertices, normals, indices,transformIdentity);
+//	
+//			bufferSet = lDrawGroup.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
+//			bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv(),transformIdentity);
+//	
+//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+//			bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(),transformIdentity);
+//			
+//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+//			bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
+//			
+//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+//			bufferSet.insertGeometry(geomTube2.getVertices(), geomTube2.getNormals(), geomTube2.getIndices(), geomTube2.getUv(),m3gl);
+//			
+//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+//			bufferSet.insertGeometry(geomTube3.getVertices(), geomTube3.getNormals(), geomTube3.getIndices(), geomTube3.getUv(),transformIdentity);
+//			
 			
 			bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
 			bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices(),transformIdentity);
@@ -292,16 +292,27 @@ public class GvData extends GvThread {
 						{
 							System.out.println("cannot find base GU vertex");
 						}
-						//precomputing visitor
-						visitorPre.resetCounters();
-						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
-						visitorPre.printCounters();
-						
+						try{
+							//precomputing visitor
+							visitorPre.resetCounters();
+							GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
+							visitorPre.printCounters();
+						}catch(Exception ex)
+						{
+							System.out.println("Error in precomputing visitor.");
+							ex.printStackTrace();
+						}
 					
 					//2.send display/rendering visitor
-					GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache());
-					GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
-					visitor.printCounters();
+					try{
+						GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
+						GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+						visitor.printCounters();
+					}
+					catch(Exception ex)
+					{
+						System.out.println("Error in display visitor.");
+					}
 				}
 			}
 			

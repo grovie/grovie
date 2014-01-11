@@ -178,8 +178,8 @@ public class GvDb {
 		greenMaterial.lDiffuse[2] = 0.0f;
 
 		//Textures
-		//String filePath = "/Users/yongzhiong/Downloads/";
-		String filePath = "C:\\Users\\yong\\GroViE\\textures\\";
+		String filePath = "/Users/yongzhiong/Downloads/";
+		//String filePath = "C:\\Users\\yong\\GroViE\\textures\\";
 		
 		try {
 			FileInputStream streamColors = new FileInputStream(new File(filePath + "test.jpg"));
