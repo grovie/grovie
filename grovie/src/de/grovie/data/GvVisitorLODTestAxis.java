@@ -135,8 +135,8 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 				GvBufferSet bufferSet;
 				try {
 					bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-					//bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
-					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), GvMatrix.getIdentity());
+					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
+//					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), GvMatrix.getIdentity());
 				} catch (GvExRendererIndexBuffer e) {
 					System.out.println("Display visitor error:" + "error inserting in bufferset");
 					e.printStackTrace();
