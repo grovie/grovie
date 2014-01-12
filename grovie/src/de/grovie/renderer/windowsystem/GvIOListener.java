@@ -81,7 +81,8 @@ public class GvIOListener {
 			//redraw to visualize rotation
 			lRenderer.refresh();
 			
-			
+			//send camera update to data thread
+			lRenderer.sendCamera();
 		}
 	}
 
@@ -127,6 +128,8 @@ public class GvIOListener {
 			if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_ROTATION)
 			{
 				stateMachine.setState(GvRendererStateMachine.GvRendererState.IDLE);
+				//send camera update to data thread
+				lRenderer.sendCamera();
 			}
 		}
 		else if(button == MOUSE_BUTTON_MIDDLE)
@@ -135,6 +138,8 @@ public class GvIOListener {
 			if(stateMachine.getState() == GvRendererStateMachine.GvRendererState.CAMERA_TRANSLATION)
 			{
 				stateMachine.setState(GvRendererStateMachine.GvRendererState.IDLE);
+				//send camera update to data thread
+				lRenderer.sendCamera();
 			}
 		}
 	}

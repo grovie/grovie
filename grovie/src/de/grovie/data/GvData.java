@@ -205,7 +205,7 @@ public class GvData extends GvThread {
 		lCamera = camera;
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry(); //TODO: need to use time buffer at msg queue handling to prevent flooding
+		sendGeometry(false); //TODO: need to use time buffer at msg queue handling to prevent flooding
 	}
 
 	public void receiveSceneUpdate(String stepId, TransactionalGraph graph)
@@ -224,14 +224,14 @@ public class GvData extends GvThread {
 		//END DEBUG
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry();
+		sendGeometry(true);
 	}
 
 	public void receiveBufferSet(GvDrawGroup drawGroup){
 		lDrawGroup = drawGroup;
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry();
+		sendGeometry(true);
 	}
 
 	/**
@@ -239,7 +239,7 @@ public class GvData extends GvThread {
 	 * 
 	 * @return true if geometry is inserted successfully, false otherwise.
 	 */
-	private void sendGeometry() 
+	private void sendGeometry(boolean updateCache) 
 	{
 		//check if any of the required items are missing for geometry insertion
 		if((lDrawGroup==null)||(lCamera==null)||(lGraph==null)||(lStepId==null))
@@ -318,6 +318,8 @@ public class GvData extends GvThread {
 					System.out.println("LOD Plant scale - step found: " + lStepId);
 					
 					//1.precompute LOD cache
+					if(updateCache)
+					{
 						//search for fine scale base node
 						Object plantId = stepVertex.getProperty("PlantId");
 						System.out.println("Plant ID: " + plantId);
@@ -339,7 +341,7 @@ public class GvData extends GvThread {
 							System.out.println("Error in precomputing visitor.");
 							ex.printStackTrace();
 						}
-					
+					}
 					//2.send display/rendering visitor
 					try{
 						

@@ -3,6 +3,7 @@ package de.grovie.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -39,6 +40,8 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitorSelective {
 	GvDrawGroup lDrawGroup;
 	
 	GvCamera lCamera;
+	
+	float lErrorThres;
 
 	public GvVisitorLODTestAxisDynamic(HashMap<String, RealMatrix> cache,
 			HashMap<String, GvAxis> cacheAxes,
@@ -60,6 +63,7 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitorSelective {
 		lMatrixStack.add(GvMatrix.getIdentityRealMatrix());
 		this.lDrawGroup = drawGroup;
 		this.lCamera = camera;
+		lErrorThres=0;
 	}
 
 	@Override
@@ -107,20 +111,31 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitorSelective {
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
 //			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
+			//compute error threshold
+			lErrorThres = computeErrorThres();
+			System.out.println("Error thres for plant: " + lErrorThres);
+			
 			countPlant++;
 			return true;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
 		{			
+			
+			
 			//drawing
 			String groImpNodeId = this.getGroIMPNodeId(vertex);
 			
 			//axis and cached info
 			GvAxis axis = lCacheAxes.get(groImpNodeId);
+			
+			//check if error larger than threshold
+			float error = (float) Math.sqrt(axis.getError());
+			if(error > lErrorThres)
+				return true;
+			
 			RealMatrix objSpaceMat = axis.getMatrix();
 			float length = axis.getLength();
 			float radius = axis.getRadius();
-			float error = axis.getError();
 			
 			if((objSpaceMat != null)&&(length>0)&&(radius>0))
 			{
@@ -153,15 +168,59 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitorSelective {
 			}
 			
 			countAxis++;
-			return true;
+			return false;
 		}
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
+			//drawing
+			RealMatrix objSpaceMat = lCache.get(this.getGroIMPNodeId(vertex));
+			RealMatrix worldSpaceMat = lMatrixStack.get(lMatrixStack.size()-1).multiply(objSpaceMat);
+			float[] finalMat = GvMatrix.convertRowMajorToColumnMajor(worldSpaceMat.getData());
+			
+			float length = ((Float)vertex.getProperty("Length")).floatValue();
+			float radius = ((Float)vertex.getProperty("Radius")).floatValue();
+			GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
+			
+			GvBufferSet bufferSet;
+			try {
+				bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+				bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
+			} catch (GvExRendererIndexBuffer e) {
+				System.out.println("Display visitor error:" + "error inserting in bufferset");
+				e.printStackTrace();
+			}
+			catch (GvExRendererDrawGroupRetrieval e) {
+				System.out.println("Display visitor error:" + "error inserting in bufferset");
+				e.printStackTrace();
+			}
+			//end drawing
+			catch (GvExRendererVertexBuffer e) {
+				System.out.println("Display visitor error:" + "error inserting in bufferset");
+				e.printStackTrace();
+			} catch (GvExRendererVertexArray e) {
+				System.out.println("Display visitor error:" + "error inserting in bufferset");
+				e.printStackTrace();
+			}
+			
 			countGU++;
 			return true;
 		}
 
 		return true;
+	}
+
+	private float computeErrorThres() {
+		double[][] currMat = lMatrixStack.get(lMatrixStack.size()-1).getData();
+		Vector3D currPos = new Vector3D(currMat[0][3],currMat[1][3],currMat[2][3]);
+		Vector3D camPos = new Vector3D(lCamera.lPosition[0],lCamera.lPosition[1],lCamera.lPosition[2]);
+		Vector3D camView = new Vector3D(lCamera.lView[0],lCamera.lView[1],lCamera.lView[2]);
+		
+		double fovRadians = lCamera.lFov/180.0*Math.PI;
+		double orthoDistToObj = (currPos.subtract(camPos)).dotProduct(camView);
+		double screenRes = 640;
+		double pixelErrorThres = 2;
+		
+		return (float) (pixelErrorThres*((2*orthoDistToObj*Math.tan(fovRadians/2.0))/screenRes));
 	}
 
 	@Override
