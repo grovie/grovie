@@ -20,7 +20,7 @@ import de.grovie.renderer.GvPrimitive;
 import de.grovie.util.graph.GvVisitor;
 import de.grovie.util.math.GvMatrix;
 
-public class GvVisitorLODTestAxis extends GvVisitor {
+public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 
 	public int countT;
 	public int countRU;
@@ -33,29 +33,15 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 	ArrayList<RealMatrix> lMatrixStack;
 
 	HashMap<String, RealMatrix> lCache;
-	
-	//combined cache
-//	HashMap<String, RealMatrix> lCacheAxis;
-//	HashMap<String, Float> lCacheAxisRad;
-//	HashMap<String, Float> lCacheAxisLen;
 	HashMap<String, GvAxis> lCacheAxes;
 	
 	GvDrawGroup lDrawGroup;
 
-	public GvVisitorLODTestAxis(HashMap<String, RealMatrix> cache,
-			//combined cache
-//			HashMap<String, RealMatrix> cacheAxis,
-//			HashMap<String, Float> cacheAxisRad,
-//			HashMap<String, Float> cacheAxisLen,
+	public GvVisitorLODTestAxisDynamic(HashMap<String, RealMatrix> cache,
 			HashMap<String, GvAxis> cacheAxes,
 			GvDrawGroup drawGroup)
 	{
 		lCache = cache;
-		
-		//combined cache
-//		lCacheAxis = cacheAxis;
-//		lCacheAxisLen = cacheAxisLen;
-//		lCacheAxisRad = cacheAxisRad;
 		
 		lCacheAxes = cacheAxes;
 		
@@ -117,25 +103,18 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 			//drawing
 			String groImpNodeId = this.getGroIMPNodeId(vertex);
 			
-			//combined cache
-//			RealMatrix objSpaceMat = lCacheAxis.get(groImpNodeId);
-//			Float lenF = lCacheAxisLen.get(groImpNodeId);
-//			Float radF = lCacheAxisRad.get(groImpNodeId);
+			//axis and cached info
 			GvAxis axis = lCacheAxes.get(groImpNodeId);
-			
 			RealMatrix objSpaceMat = axis.getMatrix();
 			float length = axis.getLength();
 			float radius = axis.getRadius();
+			float error = axis.getError();
+			System.out.println("Axis "+ groImpNodeId + " error: " + error);
 			
-			//combined cache
-			//if((objSpaceMat != null)&&(lenF!=null)&&(radF!=null))
 			if((objSpaceMat != null)&&(length>0)&&(radius>0))
 			{
 				RealMatrix worldSpaceMat = lMatrixStack.get(lMatrixStack.size()-1).multiply(objSpaceMat);
 				float[] finalMat = GvMatrix.convertRowMajorToColumnMajor(worldSpaceMat.getData());
-				
-				//float length = lenF.floatValue();
-				//float radius = radF.floatValue();
 
 				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
 				
@@ -143,7 +122,6 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 				try {
 					bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), finalMat);
-//					bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(), GvMatrix.getIdentity());
 				} catch (GvExRendererIndexBuffer e) {
 					System.out.println("Display visitor error:" + "error inserting in bufferset");
 					e.printStackTrace();

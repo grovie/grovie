@@ -8,11 +8,13 @@ import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import de.grovie.data.object.GvAxis;
 import de.grovie.util.graph.GvGraphUtil;
 import de.grovie.util.graph.GvVisitor;
 import de.grovie.util.math.GvMatrix;
 
 public class GvVisitorLODPrecomputeAxis extends GvVisitor {
+	
 	static final int TRANSLATE = 0;
 	static final int RU = 1;
 	static final int RH = 2;
@@ -30,37 +32,32 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 	public int countAxis;
 	public int countGU;
 	
-	Object lastAxisId;
-	HashMap<String,RealMatrix> lCacheAxis;
-	HashMap<String,Float> lCacheAxisRad;
-	HashMap<String,Float> lCacheAxisLen;
+	//cached data
+	HashMap<String, GvAxis> lCacheAxes;		//cached axis matrix,length,radius,error for each GroIMP node
+	HashMap<String, RealMatrix> lCache; 	//cached world transformation matrix for each GroIMP node ID
 	
-	HashMap<String, RealMatrix> lCache; //cached world transformation matrix for each GroIMP node ID
-	
+	//transformation matrix stack
 	ArrayList<RealMatrix> lStack;	//transformation matrix stack. in use only when flag is true
 	int lStackSize;
 	
-	boolean lStackInOperation;	//flag is true if traversing new (uncached) part of graph
+	//flag is true if traversing new (uncached) part of graph
+	boolean lStackInOperation;
 	
-	int currType; //current visit's vertex type
+	//current visit's vertex type
+	int currType;
 	
 	public GvVisitorLODPrecomputeAxis() 
 	{
 		resetCounters();
 		
 		lCache = new HashMap<String, RealMatrix>(); //cache of matrices
-		lCacheAxis = new HashMap<String, RealMatrix>(); //cache of matrices
+		lCacheAxes = new HashMap<String, GvAxis>(); //cache of matrices for axes
 		
 		lStack = new ArrayList<RealMatrix>();
 		lStack.add(GvMatrix.getIdentityRealMatrix());
 		lStackSize=0;
 		
 		lStackInOperation = false;
-		
-		lastAxisId=null;
-		lCacheAxis = new HashMap<String, RealMatrix>(); //cache of matrices for axes
-		lCacheAxisRad = new HashMap<String, Float>();
-		lCacheAxisLen = new HashMap<String, Float>();
 	}
 	
 	@Override
@@ -150,14 +147,14 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 				}
 				
 				//update macro scale (axis) positioning in object-space
-				if(lCacheAxis.get(axisGroimpId)==null)
+				if(lCacheAxes.get(axisGroimpId)==null)
 				{
-					lCacheAxis.put(axisGroimpId, matrix.copy());
+					lCacheAxes.put(axisGroimpId, new GvAxis(matrix.copy()));
 				}
 			}
 		}
 		
-		//update length of macro scale axis
+		//update length and orientation of macro scale axis
 		if(currType == BUD)
 		{
 			//position at bud
@@ -165,7 +162,8 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 			Vector3D budPos = new Vector3D(budMat[0][3],budMat[1][3],budMat[2][3]);
 			
 			//position at beginning of axis
-			RealMatrix axisMatReal = lCacheAxis.get(axisGroimpId);
+			RealMatrix axisMatReal = lCacheAxes.get(axisGroimpId).getMatrix();
+			
 			double[][] axisMat = axisMatReal.getData();
 			Vector3D axisPos = new Vector3D(axisMat[0][3],axisMat[1][3],axisMat[2][3]);
 			
@@ -177,13 +175,15 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 			double y= axisDir.getY();
 			double z = axisDir.getZ();
 			float axisLen = (float) Math.sqrt(x*x + y*y + z*z);
-			lCacheAxisLen.put(axisGroimpId, new Float(axisLen));
+			
+			lCacheAxes.get(axisGroimpId).setLength(axisLen);
 			
 			if(axisLen > 0)
 			{
 				axisDir = axisDir.normalize();
 				RealMatrix axisOrientMat = GvMatrix.getMatrixFromUpDirectionAndPosition(axisDir.toArray(),axisMat[0][3],axisMat[1][3],axisMat[2][3]);
-				lCacheAxis.put(axisGroimpId, axisOrientMat);
+
+				lCacheAxes.get(axisGroimpId).setMatrix(axisOrientMat);
 			}
 		}
 		
@@ -191,12 +191,10 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 		if(currType == GU)
 		{
 			float guRadius = ((Float)vertex.getProperty("Radius")).floatValue();
-			Float axisRadF = lCacheAxisRad.get(axisGroimpId);
-			float axisRad = 0;
-			if(axisRadF != null)
-				axisRad = axisRadF.floatValue();
-			if(guRadius > axisRad)
-				lCacheAxisRad.put(axisGroimpId, new Float(guRadius));
+			float axisRadF = lCacheAxes.get(axisGroimpId).getRadius();
+			
+			if(guRadius > axisRadF)
+				lCacheAxes.get(axisGroimpId).setRadius(guRadius);
 		}
 	}
 	
@@ -400,19 +398,9 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 	{
 		return this.lCache;
 	}
-	
-	public HashMap<String, RealMatrix> getCacheAxis()
+
+	public HashMap<String, GvAxis> getCacheAxes()
 	{
-		return this.lCacheAxis;
-	}
-	
-	public HashMap<String, Float> getCacheAxisRad()
-	{
-		return this.lCacheAxisRad;
-	}
-	
-	public HashMap<String, Float> getCacheAxisLen()
-	{
-		return this.lCacheAxisLen;
+		return this.lCacheAxes;
 	}
 }

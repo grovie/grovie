@@ -77,8 +77,9 @@ public class GvData extends GvThread {
 	//END DEBUG
 	
 	//FOR DEBUG
-	//GvVisitorLODPrecompute visitorPre;
-	GvVisitorLODPrecomputeAxis visitorPre;
+	//GvVisitorLODPrecompute visitorPre;		//GU scale rendering
+	//GvVisitorLODPrecomputeAxis visitorPre;	//Axis scale rendering
+	GvVisitorLODPrecomputeAxisDynamic visitorPre;		//Axis scale rendering with error LOD
 	//END DEBUG
 	
 	public GvData() {
@@ -134,8 +135,9 @@ public class GvData extends GvThread {
 		//END DEBUG
 		
 		//FOR DEBUG - LOD
-		//visitorPre = new GvVisitorLODPrecompute();
-		visitorPre = new GvVisitorLODPrecomputeAxis();
+		//visitorPre = new GvVisitorLODPrecompute();	//GU scale rendering
+		//visitorPre = new GvVisitorLODPrecomputeAxis();	//Axis scale rendering
+		visitorPre = new GvVisitorLODPrecomputeAxisDynamic();	//Axis scale rendering with LOD
 		//END DEBUG
 	}
 
@@ -307,13 +309,23 @@ public class GvData extends GvThread {
 					
 					//2.send display/rendering visitor
 					try{
-//						GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
-						GvVisitorLODTestAxis visitor = new GvVisitorLODTestAxis(visitorPre.getCache(),
-								visitorPre.getCacheAxis(),
-								visitorPre.getCacheAxisRad(),
-								visitorPre.getCacheAxisLen(),
-								lDrawGroup);
+						
+						//GU scale drawing
+						//GvVisitorLODTest visitor = new GvVisitorLODTest(visitorPre.getCache(),lDrawGroup);
+
+						//Axis scale drawing
+						//GvVisitorLODTestAxis visitor = new GvVisitorLODTestAxis(visitorPre.getCache(),
+						//		visitorPre.getCacheAxes(),
+						//		lDrawGroup);
+						
+						//Axis LOD drawing
+						GvVisitorLODTestAxisDynamic visitor = new GvVisitorLODTestAxisDynamic(visitorPre.getCache(),
+										visitorPre.getCacheAxes(),
+										lDrawGroup);
+						
+						//draw traversal
 						GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+						
 						visitor.printCounters();
 					}
 					catch(Exception ex)

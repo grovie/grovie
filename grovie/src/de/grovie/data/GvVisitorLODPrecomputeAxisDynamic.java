@@ -3,16 +3,18 @@ package de.grovie.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
 
+import de.grovie.data.object.GvAxis;
 import de.grovie.util.graph.GvGraphUtil;
 import de.grovie.util.graph.GvVisitor;
 import de.grovie.util.math.GvMatrix;
 
-public class GvVisitorLODPrecompute extends GvVisitor {
-
+public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
+	
 	static final int TRANSLATE = 0;
 	static final int RU = 1;
 	static final int RH = 2;
@@ -20,6 +22,7 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	static final int GU = 4;
 	static final int PLANT = 5;
 	static final int AXIS = 6;
+	static final int BUD= 7;
 	
 	public int countT;
 	public int countRU;
@@ -29,43 +32,50 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	public int countAxis;
 	public int countGU;
 	
-	Object lastAxisId;
-	//HashMap<String,RealMatrix> lCacheAxis;
-	//HashMap<String,Float> lCacheAxisRad;
-	//HashMap<String,Float> lCacheAxisLen;
+	//cached data
+	HashMap<String, GvAxis> lCacheAxes;		//cached axis matrix,length,radius,error for each GroIMP node
+	HashMap<String, RealMatrix> lCache; 	//cached world transformation matrix for each GroIMP node ID
 	
-	HashMap<String, RealMatrix> lCache; //cached world transformation matrix for each GroIMP node ID
-	
-	ArrayList<RealMatrix> lStack;	//transformation matrix stack. in use only when flag is true
+	//transformation matrix stack
+	ArrayList<GvPack> lStack;	//transformation matrix stack. in use only when flag is true
 	int lStackSize;
 	
-	boolean lStackInOperation;	//flag is true if traversing new (uncached) part of graph
+	//flag is true if traversing new (uncached) part of graph
+	boolean lStackInOperation;
 	
-	int currType; //current visit's vertex type
+	//current visit's vertex type
+	int currType;
 	
-	public GvVisitorLODPrecompute()
+	public GvVisitorLODPrecomputeAxisDynamic() 
 	{
 		resetCounters();
 		
 		lCache = new HashMap<String, RealMatrix>(); //cache of matrices
+		lCacheAxes = new HashMap<String, GvAxis>(); //cache of matrices for axes
 		
-		lStack = new ArrayList<RealMatrix>();
-		lStack.add(GvMatrix.getIdentityRealMatrix());
+		lStack = new ArrayList<GvPack>();
+		lStack.add(new GvPack(GvMatrix.getIdentityRealMatrix(),-1,0));
 		lStackSize=0;
 		
 		lStackInOperation = false;
-		
-		lastAxisId=null;
-//		lCacheAxis = new HashMap<String, RealMatrix>(); //cache of matrices for axes
-//		lCacheAxisRad = new HashMap<String, Float>();
-//		lCacheAxisLen = new HashMap<String, Float>();
 	}
 	
 	@Override
 	public void visit(Vertex vertex) {
-
+		
 		//vertex type
 		currType = getType(vertex); 
+		
+		//macro scale / encoarsement
+		Iterable<Vertex> axisEncoarseVertex = GvGraphUtil.getVerticesEncoarse(vertex);
+		java.util.Iterator<Vertex> axisVertexIter = axisEncoarseVertex.iterator();
+		Vertex axisVertex = null;
+		String axisGroimpId = null;
+		if(axisVertexIter.hasNext())
+		{
+			axisVertex = axisVertexIter.next();
+			axisGroimpId = getGroIMPNodeId(axisVertex);	
+		}
 		
 		//for transformation node types and GU
 		if((currType>-1)&&(currType<5))
@@ -81,17 +91,21 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 				ex.printStackTrace();
 			}
 			
+			//if in the newly created part of the graph
 			if(matrix==null)
 			{
-				if(lStackInOperation)
+				if(lStackInOperation)//current vertex is newly created vertex in this step
 				{
 					try{
 						//get post transform matrix from parent vertex
-						matrix = lStack.get(lStackSize);
+						matrix = lStack.get(lStackSize).lMatrix;
 						//put into cache as pre-transform matrix for current vertex
 						lCache.put(groimpIdStr, matrix);
 						//compute post-transform matrix for current vertex and push into stack
-						stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+						stackPush(new GvPack(
+								matrix.multiply(getTransformMatrix(vertex,currType)),
+								currType,
+								getValue(vertex,currType)));
 					}
 					catch(Exception ex)
 					{
@@ -99,7 +113,7 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 						ex.printStackTrace();
 					}
 				}
-				else
+				else //current vertex is first encountered newly created vertex in this step
 				{
 					try
 					{
@@ -126,7 +140,10 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 						//put into cache as pre-transform matrix for current vertex
 						lCache.put(groimpIdStr, matrix);
 						//compute post-transform matrix for current vertex and push into stack
-						stackPush(matrix.multiply(getTransformMatrix(vertex,currType)));
+						stackPush(new GvPack(
+								matrix.multiply(getTransformMatrix(vertex,currType)),
+								currType,
+								getValue(vertex,currType)));
 						//switch on stack operation, having encountered uncached portion of graph
 						lStackInOperation = true;
 					}
@@ -137,74 +154,116 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 					}
 				}
 				
-				//update macro scale (axis) position, orientation, diameter, length
-//				if(currType==GU)
-//				{
-//					Iterable<Vertex> axisEncoarseVertex = GvGraphUtil.getVerticesEncoarse(vertex);
-//					java.util.Iterator<Vertex> axisVertexIter = axisEncoarseVertex.iterator();
-//					if(axisVertexIter.hasNext())
-//					{
-//						//pre-transform position and diameter
-//						Vertex axisVertex = axisVertexIter.next();
-//						String axisGroimpId = getGroIMPNodeId(axisVertex);
-//						if(!axisVertex.getId().equals(this.lastAxisId))
-//						{
-//							//set as last visited axis
-//							lastAxisId=axisVertex.getId();
-//							//position of axis same as first GU position
-//							lCacheAxis.put(axisGroimpId, matrix.copy());
-//							//radius of axis set to first growth unit (presumably the thickest)
-//							lCacheAxisRad.put(axisGroimpId, (Float) vertex.getProperty("Radius"));
-//						}
-//						
-//						//orientation and length
-//						if(isLeafVertex(vertex))
-//						{
-//							//compute direction vector from start of axis to post-transform of this vertex
-//							RealMatrix posStartMat = lCacheAxis.get(axisGroimpId);
-//							RealMatrix posEndMat = lStack.get(lStackSize);
-//							double[] posStartVec = posStartMat.getColumn(3);
-//							double[] posEndVec = posEndMat.getColumn(3);
-//							posStartVec[3]=0;
-//							posEndVec[3]=0;
-//							Vector3D posStart = new Vector3D(posStartVec);
-//							Vector3D posEnd = new Vector3D(posEndVec);
-//							Vector3D dir = posEnd.subtract(posStart);
-//							float len = (float) Math.sqrt(dir.getX()*dir.getX() + dir.getY()*dir.getY() + dir.getZ()*dir.getZ());
-//							dir = dir.normalize();
-//							//get matrix for direction vector and set into axis cache
-//							RealMatrix orientMat = GvMatrix.getMatrixRotationFromUpDirection(new double[]{dir.getX(),dir.getY(),dir.getZ()});
-//							orientMat.setColumn(3, posStartVec); //set position also into matrix
-//							lCacheAxis.put(axisGroimpId, orientMat);
-//							//set length into axis cache
-//							lCacheAxisLen.put(axisGroimpId, new Float(len));
-//						}
-//					}
-//				}
+				//update macro scale (axis) positioning in object-space
+				if(lCacheAxes.get(axisGroimpId)==null)
+				{
+					lCacheAxes.put(axisGroimpId, new GvAxis(matrix.copy()));
+				}
+				
+				//compute bend area between 2 GUs and add to accumlated error in axis
+				if(currType == GU)
+				{
+					float errorLocal = computeBendError(((Float)vertex.getProperty("Length")).floatValue());
+					if(errorLocal>0)
+					{
+						GvAxis axis = lCacheAxes.get(axisGroimpId);
+						axis.setError(axis.getError() + errorLocal);
+					}
+				}
 			}
+		}
+		
+		//update length and orientation of macro scale axis
+		if(currType == BUD)
+		{
+			//position at bud
+			double[][] budMat = lStack.get(lStackSize).lMatrix.getData();
+			Vector3D budPos = new Vector3D(budMat[0][3],budMat[1][3],budMat[2][3]);
+			
+			//position at beginning of axis
+			RealMatrix axisMatReal = lCacheAxes.get(axisGroimpId).getMatrix();
+			
+			double[][] axisMat = axisMatReal.getData();
+			Vector3D axisPos = new Vector3D(axisMat[0][3],axisMat[1][3],axisMat[2][3]);
+			
+			//direction vector from start to end of axis
+			Vector3D axisDir = budPos.subtract(axisPos);
+			
+			//length of axis
+			double x = axisDir.getX();
+			double y= axisDir.getY();
+			double z = axisDir.getZ();
+			float axisLen = (float) Math.sqrt(x*x + y*y + z*z);
+			
+			lCacheAxes.get(axisGroimpId).setLength(axisLen);
+			
+			if(axisLen > 0)
+			{
+				axisDir = axisDir.normalize();
+				RealMatrix axisOrientMat = GvMatrix.getMatrixFromUpDirectionAndPosition(axisDir.toArray(),axisMat[0][3],axisMat[1][3],axisMat[2][3]);
+
+				lCacheAxes.get(axisGroimpId).setMatrix(axisOrientMat);
+			}
+		}
+		
+		//update radius of macro scale axis
+		if(currType == GU)
+		{
+			float guRadius = ((Float)vertex.getProperty("Radius")).floatValue();
+			float axisRadF = lCacheAxes.get(axisGroimpId).getRadius();
+			
+			if(guRadius > axisRadF)
+				lCacheAxes.get(axisGroimpId).setRadius(guRadius);
 		}
 	}
 	
-//	/**
-//	 * Checks if specified vertex has child successor or branched vertex.
-//	 * @param vertex
-//	 * @return
-//	 */
-//	private boolean isLeafVertex(Vertex vertex)
-//	{
-//		Iterable<Vertex> iterable = GvGraphUtil.getVerticesBranch(vertex);
-//		java.util.Iterator<Vertex> iterator = iterable.iterator();
-//		if(iterator.hasNext())
-//			return false;
-//		
-//		iterable = GvGraphUtil.getVerticesSuccessor(vertex);
-//		iterator = iterable.iterator();
-//		if(iterator.hasNext())
-//			return false;
-//		
-//		return true;
-//	}
-	
+	/**
+	 * Compute the error between 2 consecutive GUs as the area of the triangle
+	 * between them.
+	 * 
+	 * @param currGULength
+	 * @return error in terms of square metres.
+	 */
+	private float computeBendError(float currGULength) {
+		if(lStack.size()>2)
+		{
+			float angleBetween = 0;
+			float prevGULength = 0;
+			
+			//search for previous/parent GU and angle between them in traversal stack
+			for(int i=lStackSize-1; i>0; --i)
+			{
+				GvPack pack = lStack.get(i);
+				
+				if(pack.lType == GU)
+				{
+					prevGULength = pack.lValue;
+					System.out.println("Found prev GU wif len: " + pack.lValue);
+					break;
+				}
+				else if((pack.lType == RL)||(pack.lType == RU))
+				{
+					if(pack.lValue>angleBetween)
+					{
+						angleBetween = pack.lValue;
+						System.out.println("Found prev R wif angle: " + pack.lValue);
+					}
+				}
+			}
+			
+			//compute area of triangle formed between 2 GUs
+			if((angleBetween >0) && (prevGULength>0))
+			{
+				float area = (float) (0.5f * prevGULength * currGULength * Math.sin(angleBetween));
+				System.out.println("Found area error: " + area);
+				return area;
+				
+			}
+		}
+		
+		return 0;
+	}
+
 	/**
 	 * Get corresponding groimp node id for current database vertex.
 	 * @param vertex
@@ -249,6 +308,32 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 			return parentsIter.next();
 		
 		return null;
+	}
+	
+	private float getValue(Vertex vertex, int type)
+	{
+		if(type==RU)
+		{
+			float angle = ((Float)vertex.getProperty("angle")).floatValue();
+			return angle;
+		}
+		else if(type==RL)
+		{
+			float angle = ((Float)vertex.getProperty("angle")).floatValue();
+			return angle;
+		}
+		else if(type==RH)
+		{
+			float angle = ((Float)vertex.getProperty("angle")).floatValue();
+			return angle;
+		}
+		else if(type==GU)
+		{
+			float length = ((Float)vertex.getProperty("Length")).floatValue();
+			return length;
+		}
+		
+		return 0;
 	}
 
 	/**
@@ -339,6 +424,12 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 //			countAxis++;
 			return AXIS;
 		}
+		if(vertex.getProperty("Type").equals("Bud"))
+		{
+//			System.out.println("LOD Precompute - Node Axis: " + vertex.getId());
+//			countAxis++;
+			return BUD;
+		}
 		return -1;
 	}
 
@@ -383,7 +474,7 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 		countGU=0;
 	}
 	
-	private void stackPush(RealMatrix m)
+	private void stackPush(GvPack m)
 	{
 		lStack.add(m);
 		lStackSize++;
@@ -399,19 +490,9 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	{
 		return this.lCache;
 	}
-	
-//	public HashMap<String, RealMatrix> getCacheAxis()
-//	{
-//		return this.lCacheAxis;
-//	}
-//	
-//	public HashMap<String, Float> getCacheAxisRad()
-//	{
-//		return this.lCacheAxisRad;
-//	}
-//	
-//	public HashMap<String, Float> getCacheAxisLen()
-//	{
-//		return this.lCacheAxisLen;
-//	}
+
+	public HashMap<String, GvAxis> getCacheAxes()
+	{
+		return this.lCacheAxes;
+	}
 }
