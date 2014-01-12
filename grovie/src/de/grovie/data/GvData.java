@@ -360,15 +360,15 @@ public class GvData extends GvThread {
 		RealMatrix matRot = GvMatrix.getMatrixRotationRU(45);
 		RealMatrix matRot2 = GvMatrix.getMatrixRotationRL(45);
 		
-		//m2 = matTrans.multiply(matRot);
+		m2 = matTrans.multiply(matRot);
 		
 		//testing matrix from direction vector
-		double dir[] = new double[]{1,1,-1};
-		double len = Math.sqrt(3.0);
-		dir[0] /= len;
-		dir[1] /= len;
-		dir[2] /= len;
-		m2 = GvMatrix.getMatrixRotationFromUpDirection(dir);
+//		double dir[] = new double[]{1,1,-1};
+//		double len = Math.sqrt(3.0);
+//		dir[0] /= len;
+//		dir[1] /= len;
+//		dir[2] /= len;
+//		m2 = GvMatrix.getMatrixRotationFromUpDirection(dir);
 		
 		
 		m3 = (m2.multiply(matTrans)).multiply(matRot2);

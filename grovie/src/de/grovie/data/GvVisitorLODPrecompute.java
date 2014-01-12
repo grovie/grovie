@@ -3,7 +3,6 @@ package de.grovie.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -64,9 +63,7 @@ public class GvVisitorLODPrecompute extends GvVisitor {
 	
 	@Override
 	public void visit(Vertex vertex) {
-		
-		System.out.println("Precompute visit: " + vertex.getId());
-		
+
 		//vertex type
 		currType = getType(vertex); 
 		

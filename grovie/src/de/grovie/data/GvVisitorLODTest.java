@@ -89,8 +89,6 @@ public class GvVisitorLODTest extends GvVisitor {
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
 			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			System.out.println(lastMatrix.toString());
 			countPlant++;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))

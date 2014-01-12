@@ -66,8 +66,6 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 	@Override
 	public void visit(Vertex vertex) {
 		
-		System.out.println("Precompute visit: " + vertex.getId());
-		
 		//vertex type
 		currType = getType(vertex); 
 		
@@ -167,7 +165,8 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 			Vector3D budPos = new Vector3D(budMat[0][3],budMat[1][3],budMat[2][3]);
 			
 			//position at beginning of axis
-			double[][] axisMat = lCacheAxis.get(axisGroimpId).getData();
+			RealMatrix axisMatReal = lCacheAxis.get(axisGroimpId);
+			double[][] axisMat = axisMatReal.getData();
 			Vector3D axisPos = new Vector3D(axisMat[0][3],axisMat[1][3],axisMat[2][3]);
 			
 			//direction vector from start to end of axis
@@ -179,6 +178,13 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 			double z = axisDir.getZ();
 			float axisLen = (float) Math.sqrt(x*x + y*y + z*z);
 			lCacheAxisLen.put(axisGroimpId, new Float(axisLen));
+			
+			if(axisLen > 0)
+			{
+				axisDir = axisDir.normalize();
+				RealMatrix axisOrientMat = GvMatrix.getMatrixFromUpDirectionAndPosition(axisDir.toArray(),axisMat[0][3],axisMat[1][3],axisMat[2][3]);
+				lCacheAxis.put(axisGroimpId, axisOrientMat);
+			}
 		}
 		
 		//update radius of macro scale axis
@@ -193,26 +199,6 @@ public class GvVisitorLODPrecomputeAxis extends GvVisitor {
 				lCacheAxisRad.put(axisGroimpId, new Float(guRadius));
 		}
 	}
-	
-//	/**
-//	 * Checks if specified vertex has child successor or branched vertex.
-//	 * @param vertex
-//	 * @return
-//	 */
-//	private boolean isLeafVertex(Vertex vertex)
-//	{
-//		Iterable<Vertex> iterable = GvGraphUtil.getVerticesBranch(vertex);
-//		java.util.Iterator<Vertex> iterator = iterable.iterator();
-//		if(iterator.hasNext())
-//			return false;
-//		
-//		iterable = GvGraphUtil.getVerticesSuccessor(vertex);
-//		iterator = iterable.iterator();
-//		if(iterator.hasNext())
-//			return false;
-//		
-//		return true;
-//	}
 	
 	/**
 	 * Get corresponding groimp node id for current database vertex.

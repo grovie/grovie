@@ -100,26 +100,15 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
 //			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
-			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
-			System.out.println(lastMatrix.toString());
 			countPlant++;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
-		{
-//			System.out.println("LOD Plant scale - Node Axis: " + vertex.getId());
-			
+		{			
 			//drawing
 			String groImpNodeId = this.getGroIMPNodeId(vertex);
 			RealMatrix objSpaceMat = lCacheAxis.get(groImpNodeId);
 			Float lenF = lCacheAxisLen.get(groImpNodeId);
 			Float radF = lCacheAxisRad.get(groImpNodeId);
-//			System.out.println("Axis id: " + groImpNodeId);
-//			if(objSpaceMat!=null)
-//				System.out.println("Axis matrix: " + objSpaceMat.toString());
-//			if(lenF != null)
-//				System.out.println("Axis len: " + lenF.toString());
-//			if(radF != null)
-//				System.out.println("Axis radius: " + radF.toString());
 			
 			if((objSpaceMat != null)&&(lenF!=null)&&(radF!=null))
 			{
@@ -128,8 +117,7 @@ public class GvVisitorLODTestAxis extends GvVisitor {
 				
 				float length = lenF.floatValue();
 				float radius = radF.floatValue();
-				System.out.println("draw len:" + length);
-				System.out.println("draw rad:" + radius);
+
 				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
 				
 				GvBufferSet bufferSet;

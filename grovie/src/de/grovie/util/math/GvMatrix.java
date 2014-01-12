@@ -2,7 +2,6 @@ package de.grovie.util.math;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 
 /**
@@ -295,7 +294,7 @@ public class GvMatrix {
 		return new Array2DRowRealMatrix(result);
 	}
 	
-	public static RealMatrix getMatrixRotationFromUpDirection(double[] directionUpVector)
+	public static RealMatrix getMatrixFromUpDirectionAndPosition(double[] directionUpVector, double posX, double posY, double posZ)
     {
 		Vector3D vecDir = new Vector3D(directionUpVector);
 		
@@ -306,9 +305,9 @@ public class GvMatrix {
 		vecXAxis = vecXAxis.normalize();
 
 		return new Array2DRowRealMatrix(new double[][]{
-				{vecXAxis.getX(),vecXAxis.getY(),vecXAxis.getZ(),0},
-				{vecDir.getX(),vecDir.getY(),vecDir.getZ(),0},
-				{vecZAxis.getX(),vecZAxis.getY(),vecZAxis.getZ(),0},
+				{vecXAxis.getX(),vecXAxis.getY(),vecXAxis.getZ(),posX},
+				{vecDir.getX(),vecDir.getY(),vecDir.getZ(),posY},
+				{vecZAxis.getX(),vecZAxis.getY(),vecZAxis.getZ(),posZ},
 				{0,0,0,1}
 				}
 		);
