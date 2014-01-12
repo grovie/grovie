@@ -1,5 +1,6 @@
 package de.grovie.engine.concurrent;
 
+import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class GvMsgQueue<E> {
@@ -33,5 +34,10 @@ public class GvMsgQueue<E> {
 	public synchronized int size()
 	{
 		return lQueue.size();
+	}
+	
+	public synchronized void drainTo(ArrayList<GvMsg<E> > drainList)
+	{
+		lQueue.drainTo(drainList);
 	}
 }

@@ -15,12 +15,13 @@ import de.grovie.exception.GvExRendererIndexBuffer;
 import de.grovie.exception.GvExRendererVertexArray;
 import de.grovie.exception.GvExRendererVertexBuffer;
 import de.grovie.renderer.GvBufferSet;
+import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvDrawGroup;
 import de.grovie.renderer.GvPrimitive;
-import de.grovie.util.graph.GvVisitor;
+import de.grovie.util.graph.GvVisitorSelective;
 import de.grovie.util.math.GvMatrix;
 
-public class GvVisitorLODTestAxisDynamic extends GvVisitor {
+public class GvVisitorLODTestAxisDynamic extends GvVisitorSelective {
 
 	public int countT;
 	public int countRU;
@@ -36,10 +37,13 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 	HashMap<String, GvAxis> lCacheAxes;
 	
 	GvDrawGroup lDrawGroup;
+	
+	GvCamera lCamera;
 
 	public GvVisitorLODTestAxisDynamic(HashMap<String, RealMatrix> cache,
 			HashMap<String, GvAxis> cacheAxes,
-			GvDrawGroup drawGroup)
+			GvDrawGroup drawGroup,
+			GvCamera camera)
 	{
 		lCache = cache;
 		
@@ -55,10 +59,11 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 		lMatrixStack = new ArrayList<RealMatrix>();
 		lMatrixStack.add(GvMatrix.getIdentityRealMatrix());
 		this.lDrawGroup = drawGroup;
+		this.lCamera = camera;
 	}
 
 	@Override
-	public void visit(Vertex vertex) {
+	public boolean visit(Vertex vertex) {
 		if(vertex.getProperty("Type").equals("Translate"))
 		{
 //			System.out.println("LOD Plant scale - Node Translate: " + vertex.getId());
@@ -68,6 +73,7 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixTranslation(x,y,z)));
 			countT++;
+			return true;
 		}
 		else if(vertex.getProperty("Type").equals("RU"))
 		{
@@ -76,6 +82,7 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRU(angle)));
 			countRU++;
+			return true;
 		}
 		else if(vertex.getProperty("Type").equals("RL"))
 		{
@@ -84,6 +91,7 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRL(angle)));
 			countRL++;
+			return true;
 		}
 		else if(vertex.getProperty("Type").equals("RH"))
 		{
@@ -92,11 +100,15 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			RealMatrix lastMatrix = lMatrixStack.get(lMatrixStack.size()-1);
 			lMatrixStack.add(lastMatrix.multiply(GvMatrix.getMatrixRotationRH(angle)));
 			countRH++;
+			return true;
 		}
+
+		
 		else if(vertex.getProperty("Type").equals("Plant"))
 		{
 //			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
 			countPlant++;
+			return true;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
 		{			
@@ -109,7 +121,6 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			float length = axis.getLength();
 			float radius = axis.getRadius();
 			float error = axis.getError();
-			System.out.println("Axis "+ groImpNodeId + " error: " + error);
 			
 			if((objSpaceMat != null)&&(length>0)&&(radius>0))
 			{
@@ -142,15 +153,15 @@ public class GvVisitorLODTestAxisDynamic extends GvVisitor {
 			}
 			
 			countAxis++;
+			return true;
 		}
 		else if(vertex.getProperty("Type").equals("GU"))
 		{
-//			System.out.println("LOD Plant scale - Node GU: " + vertex.getId());
-
-			
-
 			countGU++;
+			return true;
 		}
+
+		return true;
 	}
 
 	@Override

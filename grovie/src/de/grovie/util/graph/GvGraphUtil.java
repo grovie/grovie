@@ -125,6 +125,24 @@ public class GvGraphUtil {
 		visitor.leave(vertex);
 	}
 	
+	public static void traverseDepthFirstLOD(Vertex vertex, String edgeLabel, GvVisitorSelective visitor)
+	{
+		boolean proceedDeeper = visitor.visit(vertex);
+
+		if(proceedDeeper)
+		{
+			Iterable<Vertex> verticesIterable = GvGraphUtil.getVertices(vertex, edgeLabel);
+			Iterator<Vertex> verticesIter = verticesIterable.iterator();
+	
+			while(verticesIter.hasNext())
+			{
+				traverseDepthFirstLOD(verticesIter.next(), edgeLabel, visitor);
+			}
+		}
+		
+		visitor.leave(vertex);
+	}
+	
 	public static void traverseTurtle(Vertex vertex, GvVisitor visitor)
 	{
 		visitor.visit(vertex);

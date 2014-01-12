@@ -212,4 +212,18 @@ public class GvCamera implements GvMsgDataCameraUpdate{
 	public void process(GvData target) {
 		target.receiveCameraUpdate(this);
 	}
+	
+	public String toString()
+	{
+		return new String(
+				"Camera \n"+
+				"    position: " + lPosition[0] + "," + lPosition[1] + "," + lPosition[2] + "\n" +
+				"    up: " + lUp[0] + "," + lUp[1] + "," + lUp[2] + "\n" +
+				"    view: " + lView[0] + "," + lView[1] + "," + lView[2] + "\n" +
+				"    fov: " + lFov + "\n" +
+				"    aspect: " + lAspect + "\n" +
+				"    near: " + lNear + "\n" +
+				"    far: " + lFar + "\n"
+				);
+	}
 }

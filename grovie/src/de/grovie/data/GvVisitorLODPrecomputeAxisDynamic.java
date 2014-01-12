@@ -238,7 +238,6 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 				if(pack.lType == GU)
 				{
 					prevGULength = pack.lValue;
-					System.out.println("Found prev GU wif len: " + pack.lValue);
 					break;
 				}
 				else if((pack.lType == RL)||(pack.lType == RU))
@@ -246,7 +245,6 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 					if(pack.lValue>angleBetween)
 					{
 						angleBetween = pack.lValue;
-						System.out.println("Found prev R wif angle: " + pack.lValue);
 					}
 				}
 			}
@@ -254,8 +252,15 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 			//compute area of triangle formed between 2 GUs
 			if((angleBetween >0) && (prevGULength>0))
 			{
-				float area = (float) (0.5f * prevGULength * currGULength * Math.sin(angleBetween));
-				System.out.println("Found area error: " + area);
+				angleBetween %= 360.0f;
+				if(angleBetween<0)
+					angleBetween *= -1.0f;
+				if(angleBetween > 180)
+					angleBetween -= 180.0f;
+				else
+					angleBetween = 180.0f - angleBetween;
+				
+				float area = (float) (0.5f * prevGULength * currGULength * Math.sin(angleBetween/180.0f * Math.PI));
 				return area;
 				
 			}

@@ -144,6 +144,10 @@ public class GvData extends GvThread {
 	@Override
 	public void runThread() throws InterruptedException, GvExEngineConcurrentThreadInitFail 
 	{	
+//		ArrayList<GvMsg<GvData> > drainList = new ArrayList<GvMsg<GvData> >();
+//		int drainListLast = -1;
+//		int cameraLast = -1;
+		
 		//thread loop
 		for(;;)
 		{
@@ -157,7 +161,36 @@ public class GvData extends GvThread {
 			}
 			else
 			{	
-				msg.process(this);
+//				//filtering excess camera update msgs
+//				if(msg instanceof GvMsgDataCameraUpdate)
+//				{
+//					lQueueIn.drainTo(drainList);
+//					drainListLast = drainList.size()-1;
+//					cameraLast = -1;
+//					
+//					//keep last camera update, remove the rest in front
+//					for(int i=drainListLast; i >= 0; --i)
+//					{
+//						if(drainList.get(i) instanceof GvMsgDataCameraUpdate)
+//						{
+//							if(cameraLast != -1)
+//								drainList.remove(i);
+//							else
+//								cameraLast = i;
+//						}
+//					}
+//					
+//					//process the rest in drain list
+//					for(int i=0; i<drainList.size(); ++i)
+//					{
+//						drainList.get(i).process(this);
+//					}
+//					
+//					//clear drain list
+//					drainList.clear();
+//				}
+//				else
+					msg.process(this);
 			}
 		}
 	}
@@ -319,12 +352,16 @@ public class GvData extends GvThread {
 						//		lDrawGroup);
 						
 						//Axis LOD drawing
+						//camera current
+						System.out.println(this.lCamera.toString());
 						GvVisitorLODTestAxisDynamic visitor = new GvVisitorLODTestAxisDynamic(visitorPre.getCache(),
 										visitorPre.getCacheAxes(),
-										lDrawGroup);
+										lDrawGroup,
+										lCamera);
 						
 						//draw traversal
-						GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+						//GvGraphUtil.traverseDepthFirst(stepVertex, "Refinement", visitor);
+						GvGraphUtil.traverseDepthFirstLOD(stepVertex, "Refinement", visitor);
 						
 						visitor.printCounters();
 					}
