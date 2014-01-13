@@ -3,10 +3,7 @@ package de.grovie.data;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.math3.complex.Quaternion;
-import org.apache.commons.math3.geometry.euclidean.threed.Rotation;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import com.tinkerpop.blueprints.Vertex;
@@ -209,31 +206,6 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 				RealMatrix axisOrientMat = GvMatrix.getMatrixFromUpDirectionAndPosition(axisDir.toArray(),axisMat[0][3],axisMat[1][3],axisMat[2][3]);
 
 				lCacheAxes.get(axisGroimpId).setMatrix(axisOrientMat);
-				
-				//rotate original y-axis to new axis direction
-//				Vector3D yAxisOri = new Vector3D(axisMat[1][0],axisMat[1][1],axisMat[1][2]);
-//				yAxisOri = yAxisOri.normalize();
-//				axisDir = axisDir.normalize();
-//				Vector3D rotateAxis = yAxisOri.crossProduct(axisDir);
-//
-//				//if original y-axis not the same as new y-axis
-//				if(!((rotateAxis.getX() == 0)&&(rotateAxis.getY()==0)&&(rotateAxis.getZ()==0)))
-//				{
-//					rotateAxis = rotateAxis.normalize();
-//					double rotateAngle = yAxisOri.dotProduct(axisDir);
-//					Rotation rotate = new Rotation(rotateAxis, Math.acos(rotateAngle));
-//					double[][] rotateMat = rotate.getMatrix();
-//					RealMatrix rotateMatReal = new Array2DRowRealMatrix(new double[][]
-//							{
-//								{rotateMat[0][0],rotateMat[0][1],rotateMat[0][2],0},
-//								{rotateMat[1][0],rotateMat[1][1],rotateMat[1][2],0},
-//								{rotateMat[2][0],rotateMat[2][1],rotateMat[2][2],0},
-//								{0,0,0,1}
-//							});
-//					RealMatrix axisOrientMat = axisMatReal.multiply(rotateMatReal);
-//					
-//					lCacheAxes.get(axisGroimpId).setMatrix(axisOrientMat);
-//				}
 			}
 		}
 		

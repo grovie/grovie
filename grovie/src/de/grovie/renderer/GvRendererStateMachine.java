@@ -59,6 +59,12 @@ public class GvRendererStateMachine {
 	private boolean lOverlayOn;
 	
 	/**
+	 * Screen background color
+	 */
+	private static float[] DEFAULT_COLOR_BACKGROUND = new float[]{1.0f,1.0f,1.0f,1.0f};
+	private float lColorBackground[];
+	
+	/**
 	 * Constructor
 	 */
 	public GvRendererStateMachine(int screenWidth, int screenHeight)
@@ -79,6 +85,11 @@ public class GvRendererStateMachine {
 				DEFAULT_LIGHT_2_POS[2]);
 		
 		lOverlayOn = true;
+		
+		lColorBackground = new float[]{DEFAULT_COLOR_BACKGROUND[0],
+				DEFAULT_COLOR_BACKGROUND[1],
+				DEFAULT_COLOR_BACKGROUND[2],
+				DEFAULT_COLOR_BACKGROUND[3]};
 	}
 	
 	/**
@@ -215,5 +226,13 @@ public class GvRendererStateMachine {
 	public boolean getOverlayOn()
 	{
 		return lOverlayOn;
+	}
+	
+	public void getColorBackground(float[] color)
+	{
+		color[0] = lColorBackground[0];
+		color[1] = lColorBackground[1];
+		color[2] = lColorBackground[2];
+		color[3] = lColorBackground[3];
 	}
 }

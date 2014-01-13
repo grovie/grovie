@@ -21,6 +21,7 @@ public class GvWindowSwing extends JFrame implements GvWindow {
 
 	@Override
 	public void close() {
-		this.close();
+		this.setVisible(false);
+		this.dispose();
 	}
 }

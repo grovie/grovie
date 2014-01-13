@@ -156,15 +156,21 @@ public class GvEngine extends GvThreadManager{
 	{
 		//shutdown rendering thread
 		lQueueRenderer.offer(new GvMsgRenderShutdown());
+		System.out.println("Shutdown: Renderer thread");
 		
 		//shutdown data thread
 		lFutureData.cancel(false); //cancel scheduled data thread execution
+		System.out.println("Shutdown: Data thread");
 		
 		//shutdown database
-		lDb.shutdown(); //shut down the graph database
+		lDb.shutdown(); //shut down the graph databas
+		System.out.println("Shutdown: Database");
 				
 		//shutdown thread pool
 		shutdownAndAwaitTermination(); //terminate threads
+		System.out.println("Shutdown: Thread pool");
+		
+		System.out.println("Engine shutdown complete");
 	}
 
 	@Override

@@ -20,6 +20,7 @@ public class GvWindowAWT extends Frame implements GvWindow {
 
 	@Override
 	public void close() {
-		
+		this.setVisible(false);
+		this.dispose();
 	}
 }

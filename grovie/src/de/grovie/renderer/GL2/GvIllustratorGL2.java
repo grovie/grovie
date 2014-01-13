@@ -9,6 +9,7 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.gl2.GLUT;
 
 import de.grovie.exception.GvExRendererPassShaderResource;
+import de.grovie.renderer.GvCamera;
 import de.grovie.renderer.GvIllustrator;
 import de.grovie.renderer.renderstate.GvRenderState;
 
@@ -20,6 +21,8 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 	GLUT lglut;
 
 	private GvRenderState lStateOverlay2D;
+	
+	private GvCamera lCameraCopy;
 
 	public GvIllustratorGL2(GvRendererGL2 renderer)
 	{
@@ -32,6 +35,8 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		lStateOverlay2D.lFaceCulling.lEnabled = false;
 		lStateOverlay2D.lDepthTest.lEnabled = false;
 		lStateOverlay2D.lTexture.lEnabled = false;
+		
+		lCameraCopy = new GvCamera();
 	}
 
 	@Override
@@ -87,13 +92,6 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 		//else
 		lPipeline = new GvPipelineGL2(lRenderer, lglAutoDrawable, lgl2, lglu);
 	}
-	
-//	public void initTextureMode()
-//	{
-//		//textures always in repeat wrapping mode
-//		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_REPEAT);
-//		lgl2.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_REPEAT);
-//	}
 
 	@Override
 	public void init()
@@ -120,14 +118,26 @@ public class GvIllustratorGL2  extends GvIllustrator implements GLEventListener{
 			
 			lgl2.glColor4f(0.0f, 0.0f, 1.0f, 1.0f); //color must be set before windowPos
 			
+			//time per frame in seconds
 			lgl2.glWindowPos2i(5, 5);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Frame time: " + lFrameTime);
 			
+			//frames per second
 			lgl2.glWindowPos2i(5, 15);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "FPS: " + 1.0/lFrameTime);
 			
+			//vertex count
 			lgl2.glWindowPos2i(5, 25);
 			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Vertices: " + lRenderer.getIllustrator().getVertexCount());
+			
+			//camera position
+			lRenderer.getRendererStateMachine().getCamera(lCameraCopy);
+			lgl2.glWindowPos2i(5, 35);
+			lglut.glutBitmapString(GLUT.BITMAP_HELVETICA_10, "Camera position: (" + 
+					lCameraCopy.lPosition[0] + "," +
+					lCameraCopy.lPosition[1] + "," +
+					lCameraCopy.lPosition[2] + ")"
+					);
 		}
 	}
 

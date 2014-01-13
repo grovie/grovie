@@ -68,7 +68,7 @@ public class GvGraphUtil {
 		{
 			Vertex v = vertexIter.next();
 			if(((Long)v.getId()).longValue() != 0) //cannot delete node with id 0 (root node for neo4j visualization)
-				graph.removeVertex(vertexIter.next());
+				graph.removeVertex(v);
 		}
 
 		graph.commit();

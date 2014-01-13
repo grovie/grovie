@@ -125,7 +125,10 @@ public class GvPassGL2 extends GvPass {
 	@Override
 	public void start() {
 		
-		//clear frame buffer
+		//clear  buffers
+		float clearColor[] = new float[4];
+		lRenderer.getRendererStateMachine().getColorBackground(clearColor);
+		lgl2.glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);;
 		lgl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
 		//get camera info

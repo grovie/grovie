@@ -28,16 +28,17 @@ public abstract class GvThreadManager {
 	 * Shuts down this thread manager
 	 */
 	public void shutdownAndAwaitTermination() {
+	
 		// Disable new tasks from being submitted
 		lThreadPool.shutdown();
 		
 		try {
 			// Wait a while for existing tasks to terminate
-			if (!lThreadPool.awaitTermination(60, TimeUnit.SECONDS)) {
+			if (!lThreadPool.awaitTermination(2, TimeUnit.SECONDS)) {
 				 // Cancel currently executing tasks
 				lThreadPool.shutdownNow();
 				// Wait a while for tasks to respond to being cancelled
-				if (!lThreadPool.awaitTermination(60, TimeUnit.SECONDS))
+				if (!lThreadPool.awaitTermination(2, TimeUnit.SECONDS))
 					System.err.println("GvService did not terminate");
 			}
 		} catch (InterruptedException ie) {
