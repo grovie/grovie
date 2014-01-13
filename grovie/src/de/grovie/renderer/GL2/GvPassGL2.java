@@ -131,6 +131,9 @@ public class GvPassGL2 extends GvPass {
 		lgl2.glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);;
 		lgl2.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
+		//test MSAA
+		lgl2.glEnable(GL2.GL_MULTISAMPLE);
+		
 		//get camera info
 		lRenderer.getRendererStateMachine().getCamera(lCameraCopy);
 		

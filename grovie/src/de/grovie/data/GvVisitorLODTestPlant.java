@@ -42,6 +42,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 	GvCamera lCamera;
 	
 	float lErrorThres;
+	float lErrorThresPixel;
 
 	public GvVisitorLODTestPlant(HashMap<String, RealMatrix> cache,
 			HashMap<String, GvAxis> cacheAxes,
@@ -64,6 +65,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 		this.lDrawGroup = drawGroup;
 		this.lCamera = camera;
 		lErrorThres=0;
+		lErrorThresPixel=0;
 	}
 
 	@Override
@@ -113,6 +115,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 //			System.out.println("LOD Plant scale - Node Plant: " + vertex.getId());
 			//compute error threshold
 			lErrorThres = computeErrorThres();
+			lErrorThresPixel = lErrorThres/2.0f;
 			System.out.println("Error thres for plant: " + lErrorThres);
 			
 			countPlant++;
@@ -148,7 +151,8 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 				RealMatrix worldSpaceMat = lMatrixStack.get(lMatrixStack.size()-1).multiply(objSpaceMat);
 				float[] finalMat = GvMatrix.convertRowMajorToColumnMajor(worldSpaceMat.getData());
 
-				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
+				float detailDegree = computeDetailDegree(radius);
+				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  detailDegree, length);
 				
 				GvBufferSet bufferSet;
 				try {
@@ -185,7 +189,10 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			
 			float length = ((Float)vertex.getProperty("Length")).floatValue();
 			float radius = ((Float)vertex.getProperty("Radius")).floatValue();
-			GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  20, length);
+			
+			float detailDegree = computeDetailDegree(radius);
+			
+			GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  detailDegree, length);
 			
 			GvBufferSet bufferSet;
 			try {
@@ -213,6 +220,11 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 		}
 
 		return true;
+	}
+
+	private float computeDetailDegree(float radius) {
+		float numDivisions = (float) (Math.PI * radius / lErrorThresPixel);
+		return 180.0f/numDivisions;
 	}
 
 	private float computeErrorThres() {
