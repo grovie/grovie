@@ -17,4 +17,9 @@ public class GvWindowAWT extends Frame implements GvWindow {
 	public void setCanvas(GvCanvas canvas) {
 		this.add((Component) canvas);
 	}
+
+	@Override
+	public void close() {
+		
+	}
 }

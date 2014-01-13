@@ -304,10 +304,16 @@ public class GvMatrix {
 		Vector3D vecXAxis = vecDir.crossProduct(vecZAxis);
 		vecXAxis = vecXAxis.normalize();
 
+//		return new Array2DRowRealMatrix(new double[][]{
+//				{vecXAxis.getX(),vecXAxis.getY(),vecXAxis.getZ(),posX},
+//				{vecDir.getX(),vecDir.getY(),vecDir.getZ(),posY},
+//				{vecZAxis.getX(),vecZAxis.getY(),vecZAxis.getZ(),posZ},
+//				{0,0,0,1}
+//				}
 		return new Array2DRowRealMatrix(new double[][]{
-				{vecXAxis.getX(),vecXAxis.getY(),vecXAxis.getZ(),posX},
-				{vecDir.getX(),vecDir.getY(),vecDir.getZ(),posY},
-				{vecZAxis.getX(),vecZAxis.getY(),vecZAxis.getZ(),posZ},
+				{vecXAxis.getX(),vecDir.getX(),vecZAxis.getX(),posX},
+				{vecXAxis.getY(),vecDir.getY(),vecZAxis.getY(),posY},
+				{vecXAxis.getZ(),vecDir.getZ(),vecZAxis.getZ(),posZ},
 				{0,0,0,1}
 				}
 		);

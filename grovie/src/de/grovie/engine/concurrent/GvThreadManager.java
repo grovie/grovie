@@ -1,7 +1,7 @@
 package de.grovie.engine.concurrent;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class GvThreadManager {
 
-	protected ExecutorService lThreadPool; //java's thread pool implementation
+	protected ScheduledExecutorService lThreadPool; //java's thread pool implementation
 		
 	/**
 	 * Constructor and thread pool initiation
@@ -21,7 +21,7 @@ public abstract class GvThreadManager {
 	 */
 	public GvThreadManager(int numThreads)
 	{
-		lThreadPool = Executors.newFixedThreadPool(numThreads);
+		lThreadPool = Executors.newScheduledThreadPool(numThreads);
 	}
 	
 	/**

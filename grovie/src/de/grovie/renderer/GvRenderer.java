@@ -140,6 +140,11 @@ public abstract class GvRenderer extends GvThread {
 	public abstract void updateRenderState(GvRenderState newState, Object context);
 
 	//incoming msg handler methods
+	public void shutdown()
+	{
+		lAnimator.stopAnimation();
+		lGraphicsWindow.close(); //close rendering window
+	}
 	public abstract void initSceneStaticData(
 			ArrayList<GvMaterial> materials,
 			ArrayList<InputStream> textures,

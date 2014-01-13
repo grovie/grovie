@@ -25,6 +25,7 @@ public class GvMaterialPointV {
 			"vec4 ambientColor;"+"\n"+
 			"vec4 ambientColorGlobal;"+"\n"+
 			"vec4 specularColor;"+"\n"+
+			"varying vec3 normal;"+"\n"+
 			"float NdotL; 				//angle between world space normal and light direction"+"\n"+
 			"float NdotHV; 				//cos angle between half vector and normal"+"\n"+
 
@@ -38,6 +39,7 @@ public class GvMaterialPointV {
 			"	//ambient color global - from material ambient and global ambient color"+"\n"+
 			"	ambientColorGlobal = materialAmb * globalAmb;"+"\n"+
 
+			"   normal = gl_NormalMatrix * gl_Normal;"+"\n"+
 			"	for (int i= 0; i < lightCount; i++)"+"\n"+
 			"	{"+"\n"+
 			"		//ambient color from material ambient and light ambient colors"+"\n"+
@@ -45,7 +47,7 @@ public class GvMaterialPointV {
 				
 			"		//diffuse term - compute cos of angle between normal and light direction (world space)"+"\n"+
 			"		//that is the dot product of the two vectors. clamp result to [0,1]."+"\n"+
-			"		NdotL = max(dot(gl_Normal,lights[i].lightDir), 0.0);"+"\n"+
+			"		NdotL = max(dot(normal,lights[i].lightDir), 0.0);"+"\n"+
 					
 			"		//diffuse term - diffuse color from material diffuse and light diffuse color"+"\n"+
 			"		diffuseColor += NdotL * (materialDif * lights[i].lightDif);"+"\n"+
@@ -56,7 +58,7 @@ public class GvMaterialPointV {
 			"		//specular term"+"\n"+
 			"		if(NdotL > 0.0)"+"\n"+
 			"		{"+"\n"+
-			"			NdotHV = max(dot(gl_Normal,halfVector),0.0);"+"\n"+
+			"			NdotHV = max(dot(normal,halfVector),0.0);"+"\n"+
 			"			specularColor += materialSpe * lights[i].lightSpe * pow(NdotHV,materialShi);"+"\n"+
 			"		}"+"\n"+
 			"	}"+"\n"+

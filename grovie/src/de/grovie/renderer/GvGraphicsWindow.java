@@ -21,4 +21,9 @@ public class GvGraphicsWindow {
 	{
 		return lWindowSystem;
 	}
+	
+	public void close()
+	{
+		lWindowSystem.close();
+	}
 }

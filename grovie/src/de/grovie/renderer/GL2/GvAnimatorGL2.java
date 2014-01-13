@@ -9,4 +9,9 @@ public class GvAnimatorGL2 extends Animator implements GvAnimator{
 	public GvAnimatorGL2() {
 		super();
 	}
+	
+	public boolean stopAnimation()
+	{
+		return this.stop();
+	}
 }

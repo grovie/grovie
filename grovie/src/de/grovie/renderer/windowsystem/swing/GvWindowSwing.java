@@ -18,4 +18,9 @@ public class GvWindowSwing extends JFrame implements GvWindow {
 	public void setCanvas(GvCanvas canvas) {
 		getContentPane().add( (GvCanvasSwingGL)canvas, BorderLayout.CENTER );
 	}
+
+	@Override
+	public void close() {
+		this.close();
+	}
 }

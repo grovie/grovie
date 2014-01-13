@@ -49,6 +49,11 @@ public abstract class GvWindowSystem {
 		this.lIOListener = IOListener;
 	}
 	
+	public void close()
+	{
+		lWindow.close();
+	}
+	
 	public abstract GvWindowSystem getInstanceInvisible(Object sharedContext);
 	
 	public abstract GvWindowSystem getInstance(GvRenderer renderer);

@@ -1,10 +1,14 @@
 package de.grovie.engine;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import com.tinkerpop.blueprints.TransactionalGraph;
 
 import de.grovie.data.GvData;
 import de.grovie.db.GvDb;
 import de.grovie.engine.concurrent.GvMsgQueue;
+import de.grovie.engine.concurrent.GvMsgRenderShutdown;
 import de.grovie.engine.concurrent.GvThreadManager;
 import de.grovie.exception.GvExDbSceneDuplicated;
 import de.grovie.exception.GvExDbUnrecognizedImpl;
@@ -58,6 +62,8 @@ public class GvEngine extends GvThreadManager{
 	private GvData lData;			//data acceleration layer
 	private GvDb lDb;				//graph database
 	
+	//data thread future - reference to scheduled task
+	ScheduledFuture<?> lFutureData;
 	
 	//communication queues between threads
 	private GvMsgQueue<GvRenderer> lQueueRenderer;
@@ -148,8 +154,16 @@ public class GvEngine extends GvThreadManager{
 	 */
 	public void stop()
 	{
-		lDb.shutdown(); //shut down the graph database
+		//shutdown rendering thread
+		lQueueRenderer.offer(new GvMsgRenderShutdown());
 		
+		//shutdown data thread
+		lFutureData.cancel(false); //cancel scheduled data thread execution
+		
+		//shutdown database
+		lDb.shutdown(); //shut down the graph database
+				
+		//shutdown thread pool
 		shutdownAndAwaitTermination(); //terminate threads
 	}
 
@@ -159,7 +173,7 @@ public class GvEngine extends GvThreadManager{
 		lThreadPool.execute(lRenderer);
 		
 		//start data thread service
-		lThreadPool.execute(lData);
+		lFutureData = lThreadPool.scheduleAtFixedRate(lData, 0, 16, TimeUnit.MILLISECONDS);
 		
 		//initialize static scene data, e.g. textures and materials
 		lDb.initScene();

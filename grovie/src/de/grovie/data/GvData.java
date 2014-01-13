@@ -111,8 +111,8 @@ public class GvData extends GvThread {
 		
 		//FOR DEBUG - PATH
 		//Test geometry
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 		indices = geom.getIndices();
@@ -141,58 +141,39 @@ public class GvData extends GvThread {
 		//END DEBUG
 	}
 
+//	@Override
+//	public void runThread() throws InterruptedException, GvExEngineConcurrentThreadInitFail 
+//	{			
+//		//thread loop
+//		for(;;)
+//		{
+//			//check for msgs from incoming queue
+//			GvMsg<GvData> msg = lQueueIn.poll();
+//
+//			//if no messages, continue check
+//			if(msg==null)
+//			{
+//				continue;
+//			}
+//			else
+//			{	
+//				msg.process(this);
+//			}
+//		}
+//	}
+//	
 	@Override
 	public void runThread() throws InterruptedException, GvExEngineConcurrentThreadInitFail 
-	{	
-//		ArrayList<GvMsg<GvData> > drainList = new ArrayList<GvMsg<GvData> >();
-//		int drainListLast = -1;
-//		int cameraLast = -1;
+	{			
+		//check for msgs from incoming queue
+		GvMsg<GvData> msg = lQueueIn.poll();
 		
-		//thread loop
-		for(;;)
-		{
-			//check for msgs from incoming queue
-			GvMsg<GvData> msg = lQueueIn.poll();
-
-			//if no messages, continue check
-			if(msg==null)
-			{
-				continue;
-			}
-			else
-			{	
-//				//filtering excess camera update msgs
-//				if(msg instanceof GvMsgDataCameraUpdate)
-//				{
-//					lQueueIn.drainTo(drainList);
-//					drainListLast = drainList.size()-1;
-//					cameraLast = -1;
-//					
-//					//keep last camera update, remove the rest in front
-//					for(int i=drainListLast; i >= 0; --i)
-//					{
-//						if(drainList.get(i) instanceof GvMsgDataCameraUpdate)
-//						{
-//							if(cameraLast != -1)
-//								drainList.remove(i);
-//							else
-//								cameraLast = i;
-//						}
-//					}
-//					
-//					//process the rest in drain list
-//					for(int i=0; i<drainList.size(); ++i)
-//					{
-//						drainList.get(i).process(this);
-//					}
-//					
-//					//clear drain list
-//					drainList.clear();
-//				}
-//				else
-					msg.process(this);
-			}
+		if(msg!=null)
+		{	
+			msg.process(this);
 		}
+		
+		sendGeometry();
 	}
 
 	//standard out-going messages
@@ -205,7 +186,7 @@ public class GvData extends GvThread {
 		lCamera = camera;
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry(false); //TODO: need to use time buffer at msg queue handling to prevent flooding
+		//sendGeometry(false); //TODO: need to use time buffer at msg queue handling to prevent flooding
 	}
 
 	public void receiveSceneUpdate(String stepId, TransactionalGraph graph)
@@ -224,14 +205,14 @@ public class GvData extends GvThread {
 		//END DEBUG
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry(true);
+		//sendGeometry(true);
 	}
 
 	public void receiveBufferSet(GvDrawGroup drawGroup){
 		lDrawGroup = drawGroup;
 		
 		//insert geometry into drawgroup buffer and send to renderer
-		sendGeometry(true);
+		//sendGeometry(true);
 	}
 
 	/**
@@ -239,7 +220,7 @@ public class GvData extends GvThread {
 	 * 
 	 * @return true if geometry is inserted successfully, false otherwise.
 	 */
-	private void sendGeometry(boolean updateCache) 
+	private void sendGeometry() 
 	{
 		//check if any of the required items are missing for geometry insertion
 		if((lDrawGroup==null)||(lCamera==null)||(lGraph==null)||(lStepId==null))
@@ -318,7 +299,7 @@ public class GvData extends GvThread {
 					System.out.println("LOD Plant scale - step found: " + lStepId);
 					
 					//1.precompute LOD cache
-					if(updateCache)
+					//if(!lStepId.equals(lLatestStepId))
 					{
 						//search for fine scale base node
 						Object plantId = stepVertex.getProperty("PlantId");
