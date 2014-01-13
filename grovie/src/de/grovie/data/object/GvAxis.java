@@ -15,6 +15,7 @@ public class GvAxis {
 	private float lLength;
 	private float lRadius;
 	private float lError;
+	private float lErrorBifuration;
 	
 	public GvAxis(RealMatrix matrix)
 	{
@@ -22,6 +23,7 @@ public class GvAxis {
 		lLength = -1;
 		lRadius = -1;
 		lError = 0;
+		lErrorBifuration = 0;
 	}
 	
 	public RealMatrix getMatrix() {
@@ -47,5 +49,13 @@ public class GvAxis {
 	}
 	public void setError(float error) {
 		this.lError = error;
+	}
+
+	public float getErrorBifuration() {
+		return lErrorBifuration;
+	}
+
+	public void setErrorBifuration(float errorBifuration) {
+		this.lErrorBifuration = errorBifuration;
 	}
 }

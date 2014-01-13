@@ -298,32 +298,42 @@ public class GvData extends GvThread {
 				{
 					System.out.println("LOD Plant scale - step found: " + lStepId);
 					
-					//1.precompute LOD cache
-					//if(!lStepId.equals(lLatestStepId))
+					//1.precompute axis scale LOD cache
+					
+					//Plant vertex
+					Object plantId = stepVertex.getProperty("PlantId");
+					System.out.println("Plant ID: " + plantId);
+					Vertex plantVertex = lGraph.getVertex(plantId);
+					
+					//Base GU vertex
+					Object guBaseId = plantVertex.getProperty("GUBaseId");
+					System.out.println("GU Base ID: " + guBaseId);
+					Vertex guBaseVertex = lGraph.getVertex(guBaseId);
+					
+					//Base Axis vertex
+					Iterable<Vertex> axisBaseIterable = GvGraphUtil.getVerticesParent(guBaseVertex, GvGraphUtil.REFINEMENT);
+					Vertex axisBaseVertex = axisBaseIterable.iterator().next();
+					
+					if(guBaseVertex == null)
 					{
-						//search for fine scale base node
-						Object plantId = stepVertex.getProperty("PlantId");
-						System.out.println("Plant ID: " + plantId);
-						Vertex plantVertex = lGraph.getVertex(plantId);
-						Object guBaseId = plantVertex.getProperty("GUBaseId");
-						System.out.println("GU Base ID: " + guBaseId);
-						Vertex guBaseVertex = lGraph.getVertex(guBaseId);
-						if(guBaseVertex == null)
-						{
-							System.out.println("cannot find base GU vertex");
-						}
-						try{
-							//precomputing visitor
-							visitorPre.resetCounters();
-							GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
-							visitorPre.printCounters();
-						}catch(Exception ex)
-						{
-							System.out.println("Error in precomputing visitor.");
-							ex.printStackTrace();
-						}
+						System.out.println("cannot find base GU vertex");
 					}
-					//2.send display/rendering visitor
+					try{
+						//precomputing visitor
+						visitorPre.resetCounters();
+						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
+						visitorPre.printCounters();
+					}catch(Exception ex)
+					{
+						System.out.println("Error in precomputing visitor.");
+						ex.printStackTrace();
+					}
+					
+					//2. precompute plant scale LOD cache
+					GvVisitorLODPrecomputePlant visitorPrePlant = new GvVisitorLODPrecomputePlant(visitorPre.getCacheAxes());
+					GvGraphUtil.traverseTurtle(axisBaseVertex, visitorPrePlant);
+					
+					//3..send display/rendering visitor
 					try{
 						
 						//GU scale drawing
@@ -336,8 +346,16 @@ public class GvData extends GvThread {
 						
 						//Axis LOD drawing
 						//camera current
+						//System.out.println(this.lCamera.toString());
+						//GvVisitorLODTestAxisDynamic visitor = new GvVisitorLODTestAxisDynamic(visitorPre.getCache(),
+						//				visitorPre.getCacheAxes(),
+						//				lDrawGroup,
+						//				lCamera);
+						
+						//Plant+Axis LOD drawing
+						//camera current
 						System.out.println(this.lCamera.toString());
-						GvVisitorLODTestAxisDynamic visitor = new GvVisitorLODTestAxisDynamic(visitorPre.getCache(),
+						GvVisitorLODTestPlant visitor = new GvVisitorLODTestPlant(visitorPre.getCache(),
 										visitorPre.getCacheAxes(),
 										lDrawGroup,
 										lCamera);
