@@ -111,8 +111,8 @@ public class GvData extends GvThread {
 		
 		//FOR DEBUG - PATH
 		//Test geometry
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 		indices = geom.getIndices();
@@ -368,6 +368,7 @@ public class GvData extends GvThread {
 					}
 					catch(Exception ex)
 					{
+						ex.printStackTrace();
 						System.out.println("Error in display visitor.");
 					}
 				}

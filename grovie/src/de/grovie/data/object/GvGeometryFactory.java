@@ -11,7 +11,6 @@ public class GvGeometryFactory {
 		int sizeIndices = numLayers * ((numVerticesBase+1)*2); //each vertical layer of tube drawn as a triangle strip
 		
 		double detailRadians = detailDegrees/180.0f * Math.PI;
-		
 		float[] vertices = new float[sizeVertices];
 		float[] normals = new float[sizeVertices];
 		int[] indices = new int[sizeIndices];

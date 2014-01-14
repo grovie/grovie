@@ -119,7 +119,11 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			System.out.println("Error thres for plant: " + lErrorThres);
 			
 			countPlant++;
-			return true;
+			
+			if(lErrorThres<0)
+				return false;
+			else
+				return true;
 		}
 		else if(vertex.getProperty("Type").equals("Axis"))
 		{			
@@ -152,6 +156,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 				float[] finalMat = GvMatrix.convertRowMajorToColumnMajor(worldSpaceMat.getData());
 
 				float detailDegree = computeDetailDegree(radius);
+
 				GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  detailDegree, length);
 				
 				GvBufferSet bufferSet;
@@ -191,7 +196,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			float radius = ((Float)vertex.getProperty("Radius")).floatValue();
 			
 			float detailDegree = computeDetailDegree(radius);
-			
+
 			GvGeometryTex geomTube = GvGeometryFactory.getTubeTextured(radius, length,  detailDegree, length);
 			
 			GvBufferSet bufferSet;
@@ -224,7 +229,15 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 
 	private float computeDetailDegree(float radius) {
 		float numDivisions = (float) (Math.PI * radius / lErrorThresPixel);
-		return 180.0f/numDivisions;
+		float degreeDetail = 180.0f/numDivisions;
+		
+		//clamp
+		if(degreeDetail < 1.0f)
+			degreeDetail = 1.0f;
+		else if (degreeDetail > 90.0f)
+			degreeDetail = 90.0f;
+		
+		return degreeDetail;
 	}
 
 	private float computeErrorThres() {
