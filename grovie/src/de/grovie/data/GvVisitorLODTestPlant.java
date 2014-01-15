@@ -232,8 +232,8 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 		float degreeDetail = 180.0f/numDivisions;
 		
 		//clamp
-		if(degreeDetail < 1.0f)
-			degreeDetail = 1.0f;
+		if(degreeDetail < 30.0f)
+			degreeDetail = 30.0f;
 		else if (degreeDetail > 90.0f)
 			degreeDetail = 90.0f;
 		
