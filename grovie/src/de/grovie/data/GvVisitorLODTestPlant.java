@@ -136,8 +136,7 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			GvAxis axis = lCacheAxes.get(groImpNodeId);
 			
 			//check if error larger than threshold
-			float error = (float) Math.sqrt(axis.getError());
-			if(error > lErrorThres)
+			if(axis.getError() > lErrorThres)
 				return true;
 			
 			//check if bifurcation error (axis-axis bend) smaller than threshold

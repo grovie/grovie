@@ -60,6 +60,27 @@ public class GvVisitorLODPrecomputePlant extends GvVisitor {
 		
 		//push 
 		lPrevAxisStart.add(ptMiddle);
+		
+		//compare xy,zy and xz plane errors for axis-scale LOD
+		//individual plane curve areas have been computed in previous traversal
+		//perform comparison and sqrt to obtain geometric distance error estimate here.
+		float errorXY = axis.getErrorXY();
+		float errorXZ = axis.getErrorXZ();
+		float errorZY = axis.getErrorZY();
+		if(errorXY>=errorXZ)
+		{
+			if(errorXY>=errorZY)
+				axis.setError((float)(Math.sqrt(errorXY/2.0)));
+			else
+				axis.setError((float)(Math.sqrt(errorZY/2.0)));
+		}
+		else
+		{
+			if(errorXZ>=errorZY)
+				axis.setError((float)(Math.sqrt(errorXZ/2.0)));
+			else
+				axis.setError((float)(Math.sqrt(errorZY/2.0)));
+		}
 	}
 
 	@Override

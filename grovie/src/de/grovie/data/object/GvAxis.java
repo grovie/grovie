@@ -15,7 +15,11 @@ public class GvAxis {
 	private float lLength;
 	private float lRadius;
 	private float lError;
+	private float lErrorXY;
+	private float lErrorZY;
+	private float lErrorXZ;
 	private float lErrorBifuration;
+	private double[] lPtEnd; //world coordinates of end of axis
 	
 	public GvAxis(RealMatrix matrix)
 	{
@@ -24,6 +28,11 @@ public class GvAxis {
 		lRadius = -1;
 		lError = 0;
 		lErrorBifuration = 0;
+		double[][] matrixData = matrix.getData();
+		lPtEnd = new double[]{matrixData[0][3],matrixData[1][3],matrixData[2][3]};
+		lErrorXY=0;
+		lErrorZY=0;
+		lErrorXZ=0;
 	}
 	
 	public RealMatrix getMatrix() {
@@ -57,5 +66,39 @@ public class GvAxis {
 
 	public void setErrorBifuration(float errorBifuration) {
 		this.lErrorBifuration = errorBifuration;
+	}
+
+	public double[] getPtEnd() {
+		return lPtEnd;
+	}
+
+	public void setPtEnd(double x, double y, double z) {
+		this.lPtEnd[0]=x;
+		this.lPtEnd[1]=y;
+		this.lPtEnd[2]=z;
+	}
+
+	public float getErrorXY() {
+		return lErrorXY;
+	}
+
+	public void setErrorXY(float errorXY) {
+		this.lErrorXY = errorXY;
+	}
+
+	public float getErrorZY() {
+		return lErrorZY;
+	}
+
+	public void setErrorZY(float errorZY) {
+		this.lErrorZY = errorZY;
+	}
+
+	public float getErrorXZ() {
+		return lErrorXZ;
+	}
+
+	public void setErrorXZ(float errorXZ) {
+		this.lErrorXZ = errorXZ;
 	}
 }

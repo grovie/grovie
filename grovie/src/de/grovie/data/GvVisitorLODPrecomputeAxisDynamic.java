@@ -161,7 +161,8 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 				}
 				
 				//compute bend area between 2 GUs and add to accumlated error in axis
-				if(currType == GU)
+				//faulty approach
+				/*if(currType == GU)
 				{
 					float errorLocal = computeBendError(((Float)vertex.getProperty("Length")).floatValue());
 					if(errorLocal>0)
@@ -169,6 +170,12 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 						GvAxis axis = lCacheAxes.get(axisGroimpId);
 						axis.setError(axis.getError() + errorLocal);
 					}
+				}*/
+				
+				//compute contribution of new GU to area formed between axis and sequence of GUs
+				if(currType == GU)
+				{
+					computeBendError(lCacheAxes.get(axisGroimpId));
 				}
 			}
 		}
@@ -221,13 +228,95 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 	}
 	
 	/**
+	 * Computes the area correction of area between axis and refined GUs.
+	 * @param xStart
+	 * @param yStart
+	 * @param xOld
+	 * @param yOld
+	 * @param xNew
+	 * @param yNew
+	 * @return area correction
+	 */
+	private float computeErrorCorrection(double xStart, double yStart, double xOld, double yOld, double xNew, double yNew)
+	{
+		double areaFactorOld = xOld*yStart-yOld*xStart;
+		double areaFactorNew = (xOld*yNew-yOld*xNew)+(xNew*yStart-yNew*xStart);
+		return (float)(areaFactorNew-areaFactorOld);
+	}
+	
+	/**
+	 * Given twice area of polygon between GUs and axis is (x1y2-y1x2)+(x2y3-y2x3)+...+(xny1-ynx1).
+	 * This method substracts the previous (xny1-ynx1) and adds the new factors in.
+	 * The returned error correction is added to the axis area
+	 * @param gvAxis 
+	 * @param axisMatrix
+	 * @return
+	 */
+	private void computeBendError(GvAxis gvAxis)
+	{
+		//prev end point of axis
+		double[] axisPtEndPrev = gvAxis.getPtEnd();
+		
+		//new point of axis
+		double[][] axisPtEndNew = lStack.get(lStackSize).lMatrix.getData();
+		
+		//start point of axis
+		double[][] axisPtStart = gvAxis.getMatrix().getData();
+		
+		//if start point is the same as prev end point, this GU is first GU in axis, 
+		//hence area is 0 in all 3 planes.
+		//set end point to new end point
+		if((axisPtEndPrev[0] == axisPtStart[0][3]) &&
+				(axisPtEndPrev[1] == axisPtStart[1][3]) &&
+				(axisPtEndPrev[2] == axisPtStart[2][3])
+				)
+		{
+			gvAxis.setPtEnd(axisPtEndNew[0][3], axisPtEndNew[1][3], axisPtEndNew[2][3]);
+			return;
+		}
+			
+		double xStart,yStart,xOld,yOld,xNew,yNew;
+		
+		//xy plane curve area
+		xStart=axisPtStart[0][3];
+		yStart=axisPtStart[1][3];
+		xOld = axisPtEndPrev[0];
+		yOld = axisPtEndPrev[1];
+		xNew = axisPtEndNew[0][3];
+		yNew = axisPtEndNew[1][3];
+		
+		gvAxis.setErrorXY(gvAxis.getErrorXY()+computeErrorCorrection(xStart,yStart,xOld,yOld,xNew,yNew));
+		
+		//zy plane curve area
+		xStart=axisPtStart[2][3];
+		yStart=axisPtStart[1][3];
+		xOld = axisPtEndPrev[2];
+		yOld = axisPtEndPrev[1];
+		xNew = axisPtEndNew[2][3];
+		yNew = axisPtEndNew[1][3];
+		
+		gvAxis.setErrorZY(gvAxis.getErrorXY()+computeErrorCorrection(xStart,yStart,xOld,yOld,xNew,yNew));
+		
+		//xz plane curve area
+		xStart=axisPtStart[0][3];
+		yStart=axisPtStart[2][3];
+		xOld = axisPtEndPrev[0];
+		yOld = axisPtEndPrev[2];
+		xNew = axisPtEndNew[0][3];
+		yNew = axisPtEndNew[2][3];
+		
+		gvAxis.setErrorXZ(gvAxis.getErrorXY()+computeErrorCorrection(xStart,yStart,xOld,yOld,xNew,yNew));
+	}
+	
+	/**
 	 * Compute the error between 2 consecutive GUs as the area of the triangle
 	 * between them.
 	 * 
 	 * @param currGULength
 	 * @return error in terms of square metres.
 	 */
-	private float computeBendError(float currGULength) {
+	/*
+	private float computeBendErrorFaulty(float currGULength) {
 		if(lStack.size()>2)
 		{
 			float angleBetween = 0;
@@ -270,7 +359,7 @@ public class GvVisitorLODPrecomputeAxisDynamic extends GvVisitor {
 		}
 		
 		return 0;
-	}
+	}*/
 
 	/**
 	 * Get corresponding groimp node id for current database vertex.
