@@ -337,29 +337,42 @@ public class GvPassGL2 extends GvPass {
 			for(int k=0; k<vaoCount; ++k)
 			{
 				GvVertexArray vao = vaos.get(k);
-				
-				gl2.glPushMatrix();
-				gl2.glMultMatrixf(vao.getMatrix(),0);
-				
-				gl2.glBindVertexArray(vao.getId());
-				
-				gl2.glDrawElements(
-						lShaderPrimitiveWrapper.lGLPrimitive, // mode
-						vao.getSizeIndices()/4,    	// count
-						GL2.GL_UNSIGNED_INT,   		// type
-						vao.getIboOffset()          // element array buffer offset
-						);
-				
-				gl2.glBindVertexArray(0);
-				
-				gl2.glPopMatrix();
-				
-				lVertexCount += vao.getSizeVertices();
+				executeVAO(gl2,vao,vao.getMatrix());
+			}
+			
+			//Draw instanced geometry (re-using VAOs)
+			int instanceCount = bufferSet.getInstanceMatricesCount();
+			for(int i=0; i<instanceCount; ++i)
+			{
+				GvVertexArray vao = vaos.get(bufferSet.getInstanceSet(i));
+				executeVAO(gl2,vao,bufferSet.getInstanceMatrix(i));
 			}
 			
 			gl2.glUseProgram(0);
 		}
 	}
+	
+	private void executeVAO(GL2 gl2, GvVertexArray vao, float[] matrix)
+	{		
+		gl2.glPushMatrix();
+		gl2.glMultMatrixf(matrix,0);
+		
+		gl2.glBindVertexArray(vao.getId());
+		
+		gl2.glDrawElements(
+				lShaderPrimitiveWrapper.lGLPrimitive, // mode
+				vao.getSizeIndices()/4,    	// count
+				GL2.GL_UNSIGNED_INT,   		// type
+				vao.getIboOffset()          // element array buffer offset
+				);
+		
+		gl2.glBindVertexArray(0);
+		
+		gl2.glPopMatrix();
+		
+		lVertexCount += vao.getSizeVertices();
+	}
+	
 	
 	/**
 	 * Loops through draw groups categorized by material and primitive types. Render the
