@@ -29,6 +29,31 @@ public class GvVertexArray {
 		this.lId = id;
 	}
 	
+	public GvVertexArray(int id,
+			int vboIndex,
+			long vboOffset,
+			int iboIndex,
+			long iboOffset,
+			long sizeVertices,
+			long sizeNormals,
+			long sizeUv,
+			int sizeIndices,
+			float[] matrix
+			)
+	
+	{
+		this.lId = id;
+		setData(vboIndex,vboOffset,iboIndex,iboOffset,sizeVertices,
+				sizeNormals,sizeUv,sizeIndices,matrix);
+	}
+	
+	public GvVertexArray(int id, GvVertexArray vaoInstance, float[] matrix)
+	{
+		this.lId = id;
+		copyDataWithoutMatrix(vaoInstance);
+		setMatrix(matrix);
+	}
+	
 	public int getId() {
 		return lId;
 	}
@@ -108,5 +133,38 @@ public class GvVertexArray {
 	public void setMatrix(float[] matrix)
 	{
 		this.lMatrix = matrix;
+	}
+	
+	public void setData(int vboIndex,
+			long vboOffset,
+			int iboIndex,
+			long iboOffset,
+			long sizeVertices,
+			long sizeNormals,
+			long sizeUv,
+			int sizeIndices,
+			float[] matrix)
+	{
+		setVboIndex(vboIndex);
+		setVboOffset(vboOffset);
+		setIboIndex(iboIndex);
+		setIboOffset(iboOffset);
+		setSizeVertices(sizeVertices);
+		setSizeNormals(sizeNormals);
+		setSizeUv(sizeUv);
+		setSizeIndices(sizeIndices);
+		setMatrix(matrix);
+	}
+	
+	public void copyDataWithoutMatrix(GvVertexArray vao)
+	{
+		setVboIndex(vao.getVboIndex());
+		setVboOffset(vao.getVboOffset());
+		setIboIndex(vao.getIboIndex());
+		setIboOffset(vao.getIboOffset());//used in draw call
+		setSizeVertices(vao.getSizeVertices());
+		setSizeNormals(vao.getSizeNormals());
+		setSizeUv(vao.getSizeUv());
+		setSizeIndices(vao.getSizeIndices());
 	}
 }

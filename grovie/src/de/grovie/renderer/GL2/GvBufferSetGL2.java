@@ -23,34 +23,6 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	}
 
 	/**
-	 * Inserts geometry info (vertices, normals, uv-coords) into lists
-	 */
-	@Override 
-	protected void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords, float[] matrixTransform) 
-	{
-		insertIntoArrayBuffers(vertices, normals, matrixTransform);
-		lUv.add(uvcoords);
-	}
-
-	/**
-	 * Inserts geometry info (vertices, normals) into lists
-	 */
-	@Override
-	protected void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] matrixTransform) {
-		lVertices.add(vertices);
-		lNormals.add(normals);
-		lMatrices.add(matrixTransform);
-	}
-
-	/**
-	 * Inserts geometry info (indices) into lists
-	 */
-	@Override
-	protected void insertIntoElementBuffer(int[] indices) {
-		lIndices.add(indices);
-	}
-
-	/**
 	 * Update hardware buffers with geometry info from lists
 	 * @throws GvExRendererVertexArray 
 	 * @throws GvExRendererVertexBuffer 
@@ -59,7 +31,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 	@Override
 	public void update(Object libraryAPI, GvDevice device) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer 
-			{
+	{
 
 		GL2 gl2 = (GL2)libraryAPI;
 		GvDeviceGL2 devicegl2 = (GvDeviceGL2)device; 
@@ -81,16 +53,16 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			update(lVertices.get(i),
 					lNormals.get(i),
 					(lUv.size()==0)?null:lUv.get(i),
-							lIndices.get(i),
-							lMatrices.get(i),
-							gl2,
-							devicegl2);
+					lIndices.get(i),
+					lMatrices.get(i),
+					gl2,
+					devicegl2);
 		}
-			}
+	}
 
 	private void update(float[] vertices, float[] normals, float[] uv, int[] indices, float[] matrix, GL2 gl2, GvDeviceGL2 device) 
 			throws GvExRendererVertexBuffer, GvExRendererIndexBuffer
-			{
+	{
 
 		//ensure current vbo has sufficient memory for vertex,normal and uv list
 		GvVertexBuffer vbo = sizeCheckVertexBuffer(vertices,normals,uv, device,gl2);
@@ -131,19 +103,17 @@ public class GvBufferSetGL2 extends GvBufferSet {
 
 		//create container to remember index of vbo,ibo and offsets for 
 		//creation of VAO at renderer thread later
-		GvVertexArray vao = new GvVertexArray(-1);
-		vao.setVboIndex(vboIndex);	//used in VAO init
-		vao.setVboOffset(vboOffset);//used in VAO init
-		vao.setIboIndex(iboIndex);	//used in VAO init
-		vao.setIboOffset(iboOffset);//used in draw call
-		vao.setSizeVertices(vertices.length * 4);
-		vao.setSizeNormals(normals.length * 4);
-		if(uv!=null)
-			vao.setSizeUv(uv.length * 4);
-		else
-			vao.setSizeUv(0);
-		vao.setSizeIndices(indices.length * 4);
-		vao.setMatrix(matrix);
+		GvVertexArray vao = new GvVertexArray(-1,
+				vboIndex,
+				vboOffset,
+				iboIndex,
+				iboOffset,
+				vertices.length * 4,
+				normals.length * 4,
+				(uv==null)?0:(uv.length * 4),
+				indices.length * 4,
+				matrix
+				);
 
 		//create VAO object (only wrapper object at CPU side, not allocated at GPU yet)
 		lVertexArrays.add(vao);
@@ -152,11 +122,11 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		vbo.setSizeUsed(vbo.getSizeUsed()+vao.getSizeVertices()+vao.getSizeNormals()+vao.getSizeUv());
 		ibo.setSizeUsed(ibo.getSizeUsed()+vao.getSizeIndices());
 
-			}
+	}
 
 	private GvVertexBuffer sizeCheckVertexBuffer(float[] vertices, float[] normals, float[] uv, GvDevice device, GL2 gl2) 
 			throws GvExRendererVertexBuffer
-			{
+	{
 		long sizeRequired = vertices.length * 4 + 
 				normals.length * 4 + 
 				((uv==null)?0:uv.length * 4);
@@ -174,7 +144,7 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		}
 
 		return vbo;
-			}
+	}
 
 	private GvIndexBuffer sizeCheckIndexBuffer(int[] indices, GvDevice device, GL2 gl2) throws GvExRendererIndexBuffer 
 	{
@@ -209,6 +179,9 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		lUv.clear();
 		lIndices.clear();
 		lMatrices.clear();
+		
+		lInstanceMatrices.clear();
+		lInstanceSetIndices.clear();
 
 		//clear VBOs
 		for(int i=0; i<lVertexBuffers.size(); ++i)
@@ -236,6 +209,9 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		//NOTE: unable to delete them from foreign thread (VAOs are not shared across contexts)
 		//      therefore, obsolete VAOs are retained and only deleted when rendering thread
 		//      prepares this buffer set for rendering
+		//NOTE: Although this method is now invoked on rendering thread, the mechanism
+		//      to retain vao deletion for later is maintained for future possiblities
+		//      to clear VBOs on data thread and clear VAOs later on rendering thread.
 		ArrayList<GvVertexArray> temp = lVertexArraysToDelete;
 		lVertexArraysToDelete = lVertexArrays;
 		lVertexArrays = temp;
@@ -244,6 +220,9 @@ public class GvBufferSetGL2 extends GvBufferSet {
 		lVertexArrays.clear();
 	}
 
+	/**
+	 * This method releases obsolete VAOs and creates new VAOs in openGL.
+	 */
 	@Override
 	public void updateVAO(GvRenderer renderer) throws GvExRendererVertexArray {
 		GvIllustratorGL2 illustrator = (GvIllustratorGL2)renderer.getIllustrator();
@@ -264,25 +243,83 @@ public class GvBufferSetGL2 extends GvBufferSet {
 			GvVertexArray vao = lVertexArrays.get(j);
 			context.createVertexArray(vao); //create opengl id for VAO
 
-			//bind vao
-			gl2.glBindVertexArray(vao.getId());
-
-			//set VAO details
-			//set buffers to bind
-			gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, this.lVertexBuffers.get(vao.getVboIndex()).getId());
-			gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, this.lIndexBuffers.get(vao.getIboIndex()).getId());
-			//set client states
-			gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY); 
-			gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, vao.getVboOffset());
-			gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
-			gl2.glNormalPointer(GL2.GL_FLOAT, 0, vao.getVboOffset() + vao.getSizeVertices());
-			if(vao.getSizeUv() > 0)
-			{
-				gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY); 
-				gl2.glTexCoordPointer(2,GL2.GL_FLOAT, 0, vao.getVboOffset() + vao.getSizeVertices() + vao.getSizeNormals());
-			}
-
-			gl2.glBindVertexArray(0); // Disable VAO 
+			updateVAOState(gl2, 
+				vao.getId(), 
+				this.lVertexBuffers.get(vao.getVboIndex()).getId(),
+				this.lIndexBuffers.get(vao.getIboIndex()).getId(),
+				vao.getVboOffset(),
+				vao.getSizeVertices(),
+				vao.getSizeNormals(),
+				vao.getSizeUv()
+				);
 		}
+		
+		//create new VAOs for instanced geometry
+		for(int k=0; k<lInstanceMatrices.size();++k)
+		{
+			GvVertexArray vaoInst = new GvVertexArray(-1);
+			
+			//set alternative position and orientation for instanced geometry
+			vaoInst.setMatrix(lInstanceMatrices.get(k));
+			
+			//create openGL VAO id
+			context.createVertexArray(vaoInst); //create opengl id for VAO
+			
+			GvVertexArray vao = lVertexArrays.get(lInstanceSetIndices.get(k).intValue());
+			
+			updateVAOState(gl2, 
+					vaoInst.getId(), 
+					this.lVertexBuffers.get(vao.getVboIndex()).getId(),
+					this.lIndexBuffers.get(vao.getIboIndex()).getId(),
+					vao.getVboOffset(),
+					vao.getSizeVertices(),
+					vao.getSizeNormals(),
+					vao.getSizeUv()
+					);
+			
+			//add instanced VAO to list
+			lVertexArrays.add(vaoInst);
+		}
+	}
+	
+	/**
+	 * This method sets the OpenGL client state for a vertex array object.
+	 * @param gl2
+	 * @param vaoId
+	 * @param vboId
+	 * @param iboId
+	 * @param vboOffset
+	 * @param sizeVertices
+	 * @param sizeNormals
+	 * @param sizeUv
+	 */
+	private void updateVAOState(GL2 gl2, 
+			int vaoId, 
+			int vboId, 
+			int iboId, 
+			long vboOffset, 
+			long sizeVertices, 
+			long sizeNormals, 
+			long sizeUv)
+	{
+		//bind vao
+		gl2.glBindVertexArray(vaoId);
+
+		//set VAO details
+		//set buffers to bind
+		gl2.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboId);
+		gl2.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, iboId);
+		//set client states
+		gl2.glEnableClientState(GL2.GL_VERTEX_ARRAY); 
+		gl2.glVertexPointer(3, GL2.GL_FLOAT, 0, vboOffset);
+		gl2.glEnableClientState(GL2.GL_NORMAL_ARRAY); 
+		gl2.glNormalPointer(GL2.GL_FLOAT, 0, vboOffset + sizeVertices);
+		if(sizeUv > 0)
+		{
+			gl2.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY); 
+			gl2.glTexCoordPointer(2,GL2.GL_FLOAT, 0, vboOffset + sizeVertices +sizeNormals);
+		}
+
+		gl2.glBindVertexArray(0); // Disable VAO 
 	}
 }

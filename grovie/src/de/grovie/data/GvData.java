@@ -268,9 +268,15 @@ public class GvData extends GvThread {
 //			bufferSet = lDrawGroup.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 //			bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv(),transformIdentity);
 //	
-//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-//			bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(),transformIdentity);
-//			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			int instanceIndex = bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(),transformIdentity);
+			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			bufferSet.insertGeometry(instanceIndex,m2gl);
+			
+			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			bufferSet.insertGeometry(instanceIndex,m3gl);
+			
 //			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 //			bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
 //			

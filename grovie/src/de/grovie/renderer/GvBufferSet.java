@@ -16,8 +16,8 @@ import de.grovie.exception.GvExRendererVertexBuffer;
  */
 public abstract class GvBufferSet extends GvDrawGroup{
 	
-	public static long VBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file
-	public static long IBO_BLOCK_SIZE = 1048576; //TODO: put in resrc file
+	public static long VBO_BLOCK_SIZE = 1048576;
+	public static long IBO_BLOCK_SIZE = 1048576;
 	
 	//Wrappers for GPU objects (both server/client sides)
 	protected ArrayList<GvVertexBuffer> lVertexBuffers;
@@ -32,9 +32,13 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	protected ArrayList<float[]> lUv;
 	protected ArrayList<float[]> lMatrices;
 	
-	//Messages
+	//Geometry instanced - reuse of (vertex,normal,index & uv) set with different matrix
+	protected ArrayList<float[]> lInstanceMatrices;
+	protected ArrayList<Integer> lInstanceSetIndices;
 	
-	
+	/**
+	 * Default constructor
+	 */
 	public GvBufferSet()
 	{	
 		lVertexBuffers = new ArrayList<GvVertexBuffer>();
@@ -47,26 +51,62 @@ public abstract class GvBufferSet extends GvDrawGroup{
 		lIndices = new ArrayList<int[]>();
 		lUv = new ArrayList<float[]>();
 		lMatrices = new ArrayList<float[]>();
+		
+		lInstanceMatrices = new ArrayList<float[]>();
+		lInstanceSetIndices = new ArrayList<Integer>();
 	}
 	
-	public void insertGeometry(float[] vertices, float[] normals, int[] indices, float[] matrixTransform) 
+	/**
+	 * Adds a new set of geometry without texture coordinates into this buffer set.
+	 * @param vertices
+	 * @param normals
+	 * @param indices
+	 * @param matrixTransform
+	 * @throws GvExRendererVertexBuffer
+	 * @throws GvExRendererVertexArray
+	 * @throws GvExRendererIndexBuffer
+	 */
+	public int insertGeometry(float[] vertices, float[] normals, int[] indices, float[] matrixTransform) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
-		//insert in array buffers
-		insertIntoArrayBuffers(vertices, normals, matrixTransform);
-		
 		//insert in element buffer
 		insertIntoElementBuffer(indices);
+		
+		//insert in array buffers
+		return insertIntoArrayBuffers(vertices, normals, matrixTransform);
 	}
 	
-	public void insertGeometry(float[] vertices, float[] normals, int[] indices, float[] uvcoords, float[] matrixTransform) 
+	/**
+	 * Adds a new set of geometry with texture coordinates into this buffer set.
+	 * @param vertices
+	 * @param normals
+	 * @param indices
+	 * @param uvcoords
+	 * @param matrixTransform
+	 * @throws GvExRendererVertexBuffer
+	 * @throws GvExRendererVertexArray
+	 * @throws GvExRendererIndexBuffer
+	 */
+	public int insertGeometry(float[] vertices, float[] normals, int[] indices, float[] uvcoords, float[] matrixTransform) 
 			throws GvExRendererVertexBuffer, GvExRendererVertexArray, GvExRendererIndexBuffer
 	{
-		//insert in array buffers
-		insertIntoArrayBuffers(vertices, normals, uvcoords, matrixTransform);
-		
 		//insert in element buffer
 		insertIntoElementBuffer(indices);
+		
+		//insert in array buffers
+		return insertIntoArrayBuffers(vertices, normals, uvcoords, matrixTransform);
+	}
+	
+	/**
+	 * Adds a new set of instanced geometry into this buffer set.
+	 * i.e. Re-use of vertices already added into this buffer set.
+	 * @param setIndex referring to the set of vertices in the array of vertices in this buffer.
+	 * @param matrixTransform
+	 */
+	public void insertGeometry(int setIndex, float[] matrixTransform)
+	{
+		lInstanceMatrices.add(matrixTransform);
+		lInstanceSetIndices.add(new Integer(setIndex));
 	}
 	
 	public ArrayList<GvVertexArray> getVertexArrays()
@@ -75,25 +115,30 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	}
 	
 	/**
-	 * Called by data or updating thread to store CPU-side geometry data
-	 * @param vertices
-	 * @param normals
-	 * @param uvcoords
+	 * Inserts geometry info (vertices, normals, uv-coords) into lists
 	 */
-	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords, float[] matrixTransform);
-	
+	protected int insertIntoArrayBuffers(float[] vertices, float[] normals, float[] uvcoords, float[] matrixTransform) 
+	{
+		lUv.add(uvcoords);
+		return insertIntoArrayBuffers(vertices, normals, matrixTransform);
+	}
+
 	/**
-	 * Called by data or updating thread to store CPU-side geometry data
-	 * @param vertices
-	 * @param normals
+	 * Inserts geometry info (vertices, normals) into lists
 	 */
-	protected abstract void insertIntoArrayBuffers(float[] vertices, float[] normals, float[] matrixTransform);
-	
+	protected int insertIntoArrayBuffers(float[] vertices, float[] normals, float[] matrixTransform) {
+		lVertices.add(vertices);
+		lNormals.add(normals);
+		lMatrices.add(matrixTransform);
+		return lVertices.size()-1;
+	}
+
 	/**
-	 * Called by data or updating thread to store CPU-side geometry indices
-	 * @param indices
+	 * Inserts geometry info (indices) into lists
 	 */
-	protected abstract void insertIntoElementBuffer(int[] indices);
+	protected void insertIntoElementBuffer(int[] indices) {
+		lIndices.add(indices);
+	}
 	
 	/**
 	 * Called by data or updating thread to clear GPU-server-side buffer objects 
