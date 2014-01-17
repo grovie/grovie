@@ -253,33 +253,6 @@ public class GvBufferSetGL2 extends GvBufferSet {
 				vao.getSizeUv()
 				);
 		}
-		
-		//create new VAOs for instanced geometry
-		for(int k=0; k<lInstanceMatrices.size();++k)
-		{
-			GvVertexArray vaoInst = new GvVertexArray(-1);
-			
-			//set alternative position and orientation for instanced geometry
-			vaoInst.setMatrix(lInstanceMatrices.get(k));
-			
-			//create openGL VAO id
-			context.createVertexArray(vaoInst); //create opengl id for VAO
-			
-			GvVertexArray vao = lVertexArrays.get(lInstanceSetIndices.get(k).intValue());
-			
-			updateVAOState(gl2, 
-					vaoInst.getId(), 
-					this.lVertexBuffers.get(vao.getVboIndex()).getId(),
-					this.lIndexBuffers.get(vao.getIboIndex()).getId(),
-					vao.getVboOffset(),
-					vao.getSizeVertices(),
-					vao.getSizeNormals(),
-					vao.getSizeUv()
-					);
-			
-			//add instanced VAO to list
-			lVertexArrays.add(vaoInst);
-		}
 	}
 	
 	/**

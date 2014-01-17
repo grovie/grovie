@@ -111,8 +111,8 @@ public class GvData extends GvThread {
 		
 		//FOR DEBUG - PATH
 		//Test geometry
-		String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
-		//String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
+		//String path = "/Users/yongzhiong/GroViE/objimport_1_1_2/objimport/examples/loadobj/data/spheres.obj";
+		String path = "C:\\Users\\yong\\GroViE\\objimport\\examples\\loadobj\\data\\spheres.obj";
 		GvGeometry geom = new GvGeometry();
 		GvImporterObj.load(path, geom);
 		indices = geom.getIndices();
@@ -277,18 +277,18 @@ public class GvData extends GvThread {
 			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 			bufferSet.insertGeometry(instanceIndex,m3gl);
 			
-//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-//			bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
-//			
-//			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
-//			bufferSet.insertGeometry(geomTube2.getVertices(), geomTube2.getNormals(), geomTube2.getIndices(), geomTube2.getUv(),m3gl);
+			//bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			//bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
+			
+			//bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
+			//bufferSet.insertGeometry(geomTube2.getVertices(), geomTube2.getNormals(), geomTube2.getIndices(), geomTube2.getUv(),m3gl);
 //			
 //			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 //			bufferSet.insertGeometry(geomTube3.getVertices(), geomTube3.getNormals(), geomTube3.getIndices(), geomTube3.getUv(),transformIdentity);
 //			
 			//for demo
-			bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
-			bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices(),transformIdentity);
+			//bufferSet = lDrawGroup.getBufferSet(false, -1, 1, GvPrimitive.PRIMITIVE_POINT, true);
+			//bufferSet.insertGeometry(geomPoints.getVertices(), geomPoints.getNormals(), geomPoints.getIndices(),transformIdentity);
 			
 			
 			//END DEBUG

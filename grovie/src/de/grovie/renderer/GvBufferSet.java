@@ -162,5 +162,22 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	 */
 	@Override
 	public abstract void updateVAO(GvRenderer renderer) throws GvExRendererVertexArray ;
+
+	public int getInstanceMatricesCount() {
+		return lInstanceMatrices.size();
+	}
+
+	public int getInstanceSetIndicesCount() {
+		return lInstanceSetIndices.size();
+	}
 	
+	public float[] getInstanceMatrix(int index)
+	{
+		return lInstanceMatrices.get(index);
+	}
+	
+	public int getInstanceSet(int index)
+	{
+		return lInstanceSetIndices.get(index);
+	}
 }

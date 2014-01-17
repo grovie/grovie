@@ -47,13 +47,6 @@ public class GvVertexArray {
 				sizeNormals,sizeUv,sizeIndices,matrix);
 	}
 	
-	public GvVertexArray(int id, GvVertexArray vaoInstance, float[] matrix)
-	{
-		this.lId = id;
-		copyDataWithoutMatrix(vaoInstance);
-		setMatrix(matrix);
-	}
-	
 	public int getId() {
 		return lId;
 	}
@@ -154,17 +147,5 @@ public class GvVertexArray {
 		setSizeUv(sizeUv);
 		setSizeIndices(sizeIndices);
 		setMatrix(matrix);
-	}
-	
-	public void copyDataWithoutMatrix(GvVertexArray vao)
-	{
-		setVboIndex(vao.getVboIndex());
-		setVboOffset(vao.getVboOffset());
-		setIboIndex(vao.getIboIndex());
-		setIboOffset(vao.getIboOffset());//used in draw call
-		setSizeVertices(vao.getSizeVertices());
-		setSizeNormals(vao.getSizeNormals());
-		setSizeUv(vao.getSizeUv());
-		setSizeIndices(vao.getSizeIndices());
 	}
 }
