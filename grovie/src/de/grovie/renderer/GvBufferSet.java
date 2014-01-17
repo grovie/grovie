@@ -140,6 +140,24 @@ public abstract class GvBufferSet extends GvDrawGroup{
 		lIndices.add(indices);
 	}
 	
+	public int getInstanceMatricesCount() {
+		return lInstanceMatrices.size();
+	}
+
+	public int getInstanceSetIndicesCount() {
+		return lInstanceSetIndices.size();
+	}
+	
+	public float[] getInstanceMatrix(int index)
+	{
+		return lInstanceMatrices.get(index);
+	}
+	
+	public int getInstanceSet(int index)
+	{
+		return lInstanceSetIndices.get(index);
+	}
+	
 	/**
 	 * Called by data or updating thread to clear GPU-server-side buffer objects 
 	 * from another thread and context.
@@ -162,22 +180,4 @@ public abstract class GvBufferSet extends GvDrawGroup{
 	 */
 	@Override
 	public abstract void updateVAO(GvRenderer renderer) throws GvExRendererVertexArray ;
-
-	public int getInstanceMatricesCount() {
-		return lInstanceMatrices.size();
-	}
-
-	public int getInstanceSetIndicesCount() {
-		return lInstanceSetIndices.size();
-	}
-	
-	public float[] getInstanceMatrix(int index)
-	{
-		return lInstanceMatrices.get(index);
-	}
-	
-	public int getInstanceSet(int index)
-	{
-		return lInstanceSetIndices.get(index);
-	}
 }

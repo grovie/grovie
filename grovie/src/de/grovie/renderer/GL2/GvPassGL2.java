@@ -347,6 +347,8 @@ public class GvPassGL2 extends GvPass {
 				GvVertexArray vao = vaos.get(bufferSet.getInstanceSet(i));
 				executeVAO(gl2,vao,bufferSet.getInstanceMatrix(i));
 			}
+			
+			gl2.glUseProgram(0);
 		}
 	}
 	
