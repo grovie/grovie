@@ -119,7 +119,10 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			System.out.println("Error thres for plant: " + lErrorThres);
 			
 			countPlant++;
-			
+			//EGSGP s
+			//System.out.println("EGSGP error: " + lErrorThres);
+			//lErrorThres = 0.5f;
+			//EGSGP e
 			if(lErrorThres<0)
 				return false;
 			else
@@ -137,13 +140,19 @@ public class GvVisitorLODTestPlant  extends GvVisitorSelective {
 			
 			//check if error larger than threshold
 			if(axis.getError() > lErrorThres)
+			{
+				System.out.println("AXIS NEEDS GO DEEPER");
 				return true;
+			}
 			
 			//check if bifurcation error (axis-axis bend) smaller than threshold
 			//not necessary to draw axis if smaller than threshold
 			float errorBifur = (float) Math.sqrt(axis.getErrorBifuration());
 			if(errorBifur < lErrorThres)
+			{
+				System.out.println("AXIS BIFURCATE REMOVED");
 				return false;
+			}
 			
 			RealMatrix objSpaceMat = axis.getMatrix();
 			float length = axis.getLength();

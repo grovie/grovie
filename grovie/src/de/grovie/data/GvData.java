@@ -268,6 +268,8 @@ public class GvData extends GvThread {
 //			bufferSet = lDrawGroup.getBufferSet(true, 0, 0, GvPrimitive.PRIMITIVE_TRIANGLE, true);
 //			bufferSet.insertGeometry(geomBoxTex.getVertices(), geomBoxTex.getNormals(), geomBoxTex.getIndices(), geomBoxTex.getUv(),transformIdentity);
 //	
+			//Commented EGSGP paper 20140415
+			/*
 			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 			int instanceIndex = bufferSet.insertGeometry(geomTube.getVertices(), geomTube.getNormals(), geomTube.getIndices(), geomTube.getUv(),transformIdentity);
 			
@@ -276,6 +278,7 @@ public class GvData extends GvThread {
 			
 			bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 			bufferSet.insertGeometry(instanceIndex,m3gl);
+			*/
 			
 			//bufferSet = lDrawGroup.getBufferSet(true, 1, 0, GvPrimitive.PRIMITIVE_TRIANGLE_STRIP, true);
 			//bufferSet.insertGeometry(geomTube1.getVertices(), geomTube1.getNormals(), geomTube1.getIndices(), geomTube1.getUv(),m2gl);
@@ -320,6 +323,10 @@ public class GvData extends GvThread {
 					Iterable<Vertex> axisBaseIterable = GvGraphUtil.getVerticesParent(guBaseVertex, GvGraphUtil.REFINEMENT);
 					Vertex axisBaseVertex = axisBaseIterable.iterator().next();
 					
+					//EGSGP s
+					long startA=0;
+					double timeA=0;
+					//EGSGP e
 					if(guBaseVertex == null)
 					{
 						System.out.println("cannot find base GU vertex");
@@ -327,7 +334,13 @@ public class GvData extends GvThread {
 					try{
 						//precomputing visitor
 						visitorPre.resetCounters();
+						//EGSGP s
+						startA = System.nanoTime();
+						//EGSGP e
 						GvGraphUtil.traverseTurtle(guBaseVertex, visitorPre);
+						//EGSGP s
+						timeA = (System.nanoTime() - startA)/1000000.0;
+						//EGSGP e
 						visitorPre.printCounters();
 					}catch(Exception ex)
 					{
@@ -337,7 +350,15 @@ public class GvData extends GvThread {
 					
 					//2. precompute plant scale LOD cache
 					GvVisitorLODPrecomputePlant visitorPrePlant = new GvVisitorLODPrecomputePlant(visitorPre.getCacheAxes());
+					//EGSGP s
+					long startB = System.nanoTime();
+					//EGSGP e
 					GvGraphUtil.traverseTurtle(axisBaseVertex, visitorPrePlant);
+					//EGSGP s
+					double timeB = (System.nanoTime() - startB)/1000000.0;
+					double timeTotal = timeA + timeB;
+					System.out.println("Time EGSGP: " + timeTotal);
+					//EGSGP e
 					
 					//3..send display/rendering visitor
 					try{
